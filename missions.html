@@ -24,6 +24,7 @@
         <a href="index.html#product" class="nav-link">Product</a>
         <a href="index.html#how-it-works" class="nav-link">How It Works</a>
         <a href="demo.html" class="nav-link">Synthetic Demo</a>
+        <a href="research-operations-demo.html" class="nav-link">Ops Simulation</a>
         <a href="brief.html?id=MSN-2026-081&demo=true" class="nav-link">Research Brief</a>
         <a href="missions.html" class="nav-link active-nav-link">Research Missions</a>
       </div>
@@ -65,6 +66,31 @@
           <!-- LEFT: MULTI-STEP SCOPING WIZARD -->
           <div id="scopingFormCol">
             <div style="background:#fff; border:1px solid var(--border); border-radius:16px; padding:2.5rem; box-shadow:0 6px 30px rgba(0,0,0,0.02);">
+
+              <!-- SCOPING MODE SELECTOR (DEMO VS REAL) -->
+              <div style="background:#FAF5F0; border:1px solid var(--border); border-radius:10px; padding:1.1rem 1.25rem; margin-bottom:1.75rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                <div>
+                  <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-dark);">
+                    CHOOSE INQUIRY MODE:
+                  </div>
+                  <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.25rem;" id="modeDescriptionText">
+                    Start a genuine customer research inquiry, or load synthetic data for the Buildathon demonstration.
+                  </div>
+                </div>
+                <div style="display:flex; gap:0.6rem; align-items:center;">
+                  <button type="button" class="btn-cta-ghost" id="realModeBtn" onclick="switchToRealInquiry()" style="padding:0.5rem 1rem; font-size:0.8rem; background:#fff;">
+                    Start Real Inquiry
+                  </button>
+                  <button type="button" class="btn-cta-solid" id="demoModeBtn" onclick="activateDemoData()" style="padding:0.5rem 1rem; font-size:0.8rem; background:var(--accent);">
+                    ⚡ Use Demo Data (Jaipur Kirana)
+                  </button>
+                </div>
+              </div>
+
+              <!-- DEMO NOTICE BANNER (SHOWN WHEN DEMO ACTIVE) -->
+              <div id="demoNoticeBanner" style="display:none; background:#FFF3EB; border:1px solid rgba(234,88,12,0.35); border-radius:8px; padding:0.75rem 1rem; margin-bottom:1.5rem; font-family:'Space Grotesk',sans-serif; font-size:0.8rem; color:#C2410C;">
+                ⚡ <strong>Demo Mode Active:</strong> Canonical Jaipur Kirana sample values loaded. You remain on the current step. Click <strong>Continue</strong> to proceed manually at your own pace.
+              </div>
               
               <!-- STEP TRACKER -->
               <div class="scoping-steps-bar" role="tablist">
@@ -75,10 +101,10 @@
                   <span class="step-num">2</span> Objective
                 </div>
                 <div class="step-indicator" id="stepIndicator-3" onclick="jumpToStep(3)">
-                  <span class="step-num">3</span> Participants
+                  <span class="step-num">3</span> Requirements
                 </div>
                 <div class="step-indicator" id="stepIndicator-4" onclick="jumpToStep(4)">
-                  <span class="step-num">4</span> Scope & Review
+                  <span class="step-num">4</span> Commercial Review
                 </div>
               </div>
 
@@ -266,28 +292,53 @@
                     >
                   </div>
 
+                  <div class="form-group" style="margin-top:1.25rem;">
+                    <label class="form-label">Required Research Expertise Coverage</label>
+                    <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.4rem;">
+                      <span class="evidence-badge" style="background:rgba(234,88,12,0.1); color:var(--accent); font-weight:600; padding:0.35rem 0.65rem; border-radius:4px; font-size:0.75rem;">✓ Qualitative Interviewing</span>
+                      <span class="evidence-badge" style="background:rgba(234,88,12,0.1); color:var(--accent); font-weight:600; padding:0.35rem 0.65rem; border-radius:4px; font-size:0.75rem;">✓ Retail Operations Understanding</span>
+                      <span class="evidence-badge" style="background:rgba(234,88,12,0.1); color:var(--accent); font-weight:600; padding:0.35rem 0.65rem; border-radius:4px; font-size:0.75rem;">✓ Hindi/Hinglish Field Interviewing</span>
+                      <span class="evidence-badge" style="background:rgba(234,88,12,0.1); color:var(--accent); font-weight:600; padding:0.35rem 0.65rem; border-radius:4px; font-size:0.75rem;">✓ Field Observation</span>
+                      <span class="evidence-badge" style="background:rgba(234,88,12,0.1); color:var(--accent); font-weight:600; padding:0.35rem 0.65rem; border-radius:4px; font-size:0.75rem;">✓ Research Evidence Verification</span>
+                    </div>
+                  </div>
+
                   <div style="display:flex; justify-content:space-between; margin-top:1.5rem;">
                     <button type="button" class="btn-cta-ghost" onclick="nextStep(2)">← Back</button>
-                    <button type="button" class="btn-cta-solid" onclick="nextStep(4)">Continue to Scope & Review →</button>
+                    <button type="button" class="btn-cta-solid" onclick="nextStep(4)">Continue to Commercial Review →</button>
                   </div>
                 </div>
 
-                <!-- ============ STEP 4: REVIEW & CONFIRMATION ============ -->
+                <!-- ============ STEP 4: COMMERCIAL REVIEW & ADVANCE ============ -->
                 <div class="wizard-step" id="stepSection-4" style="display:none;">
                   <h3 style="font-family:'DM Serif Display',serif; font-size:1.8rem; margin-bottom:0.5rem;">
-                    Review & Request Submission
+                    Commercial Review & Scope Confirmation
                   </h3>
                   <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.5rem;">
-                    Verify your mission scoping parameters before local demonstration registration.
+                    Verify your mission scoping parameters and review the indicative commercial terms before advancing to operations.
                   </p>
 
                   <div style="background:var(--bg-light); border:1px solid var(--border); border-radius:10px; padding:1.5rem; margin-bottom:1.5rem; font-size:0.88rem; line-height:1.6;" id="reviewSummaryCard">
                     <!-- Populated dynamically via JS -->
                   </div>
 
+                  <!-- COMMERCIAL TERMS (DEMO & PILOT TRANSPARENCY) -->
+                  <div style="background:#FFF3EB; border:1px solid rgba(234,88,12,0.35); border-radius:10px; padding:1.25rem 1.5rem; margin-bottom:1.5rem;" id="commercialTermsCard">
+                    <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#C2410C; margin-bottom:0.4rem;">
+                      ILLUSTRATIVE COMMERCIAL TERMS — DEMO ONLY
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.5rem;">
+                      <span style="font-size:1.05rem; font-weight:700; color:var(--text-dark);">Experimental Pilot Scoping Fee</span>
+                      <span style="font-family:'DM Serif Display',serif; font-size:2rem; color:var(--accent);">₹49,000</span>
+                    </div>
+                    <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.5; margin:0;">
+                      * This pricing represents an unvalidated exploratory test offer for a 5-participant research scope. Real staffing, commercial margins, and delivery SLAs are not established. In demonstration mode, clicking "Simulate Advance Approval" advances the scenario locally in session storage without payment processing or financial charges.
+                    </p>
+                  </div>
+
                   <!-- REQUIREMENTS & DELIVERABLES -->
                   <div class="form-group">
-                    <label class="form-label">Deliverables Selected</label>
+                    <label class="form-label">Deliverables Included in Scope</label>
                     <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.85rem; color:var(--text-body);">
                       <label class="notify-row">
                         <input type="checkbox" checked disabled>
@@ -298,26 +349,31 @@
                         <span>Step-by-step Operational Workflow Friction Map</span>
                       </label>
                       <label class="notify-row">
-                        <input type="checkbox" id="delivTranscripts" checked>
+                        <input type="checkbox" id="delivTranscripts" checked disabled>
                         <span>5 Screened Operator Verbatim Transcripts (Anonymized Vernacular + English)</span>
                       </label>
                       <label class="notify-row">
-                        <input type="checkbox" id="delivWorkshop" checked>
+                        <input type="checkbox" id="delivWorkshop" checked disabled>
                         <span>60-Minute Post-Brief Findings Strategy Debrief</span>
                       </label>
                     </div>
                   </div>
 
-                  <div style="background:#FFFBEB; border:1px solid #F59E0B; border-radius:8px; padding:1rem; font-size:0.8rem; color:#92400E; margin-bottom:1.5rem; line-height:1.5;">
-                    <strong>Prototype Notice:</strong> Submitting this form records a synthetic mission request in your local browser session. No contractual commitment, payment processing, or guaranteed SLA is created.
-                  </div>
-
-                  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                  <!-- ACTIONS -->
+                  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-top:1.5rem;" id="step4ActionsRow">
                     <button type="button" class="btn-cta-ghost" onclick="nextStep(3)">← Back</button>
+                    
+                    <button type="button" class="btn-cta-solid" id="simulateAdvanceBtn" onclick="simulateAdvanceApproval()" style="display:none; background:var(--accent);">
+                      Simulate Advance Approval (₹49,000) →
+                    </button>
+
                     <button type="submit" class="btn-cta-solid" id="submitMissionBtn">
                       Submit Research Request (₹49,000 Pilot) →
                     </button>
                   </div>
+
+                  <!-- SIMULATED APPROVAL CONFIRMATION CONTAINER -->
+                  <div id="simulatedApprovalCard" style="display:none; margin-top:1.5rem;"></div>
                 </div>
 
               </form>
@@ -403,6 +459,147 @@
 
   <script>
     let currentStep = 1;
+    let isDemoMode = false;
+
+    function activateDemoData() {
+      isDemoMode = true;
+
+      // Update Mode Buttons UI
+      const btnDemo = document.getElementById('modeBtnDemo');
+      const btnReal = document.getElementById('modeBtnReal');
+      if (btnDemo) {
+        btnDemo.style.background = '#EA580C';
+        btnDemo.style.color = '#FFFFFF';
+        btnDemo.style.borderColor = '#EA580C';
+      }
+      if (btnReal) {
+        btnReal.style.background = 'transparent';
+        btnReal.style.color = 'var(--text-secondary)';
+        btnReal.style.borderColor = 'var(--border)';
+      }
+
+      // Step 1: Preload
+      document.getElementById('orgName').value = 'RetailFlow Intelligence Labs';
+      document.getElementById('contactPerson').value = 'Aditi Sharma';
+      document.getElementById('contactEmail').value = 'aditi.sharma@retailflow.test';
+      document.getElementById('userRole').value = 'VP of Product';
+
+      // Step 2: Preload
+      document.getElementById('decisionAtStake').value = 'Deciding whether to allocate capital toward a proposed $95,000 software investment (explicitly fictional scenario for demonstration) to engineer an automated WhatsApp UPI credit collection bot for neighborhood kirana stores, or reframe toward physical vernacular receipt-book ledger workflows.';
+      document.getElementById('problemToInvestigate').value = 'Why do Jaipur kirana retailers struggle to track customer credit, and would an automated WhatsApp collection bot reduce credit default without customer churn?';
+      document.getElementById('hypothesis').value = 'Kirana store owners lose 8-12% of revenue because they forget to collect customer udhaar, and will adopt automated WhatsApp payment reminders to collect dues faster.';
+      document.getElementById('falsificationCriteria').value = 'If retailers deliberately avoid automated digital reminders to preserve personal community trust and social relationships with neighbors, automated collection software will encounter severe resistance and rejection.';
+
+      // Step 3: Preload
+      document.getElementById('targetParticipantProfile').value = 'Independent neighborhood kirana store owners in Jaipur operating for >5 years with at least 50 regular credit customers.';
+      document.getElementById('sector').value = 'commerce';
+      document.getElementById('geography').value = 'Jaipur, Rajasthan (Raja Park, Mansarovar, Malviya Nagar, Sanganer, Vaishali Nagar)';
+      document.getElementById('operationalContext').value = 'High-density residential colonies; daily manual footfall; informal revolving credit extended to known resident families.';
+
+      // Show Demo Notice Banner
+      const demoBanner = document.getElementById('demoNoticeBanner');
+      if (demoBanner) demoBanner.style.display = 'block';
+
+      // Switch Step 4 Action Button to Simulate Advance Approval
+      const simBtn = document.getElementById('simulateAdvanceBtn');
+      const subBtn = document.getElementById('submitMissionBtn');
+      if (simBtn) simBtn.style.display = 'inline-block';
+      if (subBtn) subBtn.style.display = 'none';
+
+      clearErrors();
+      if (currentStep === 4) populateReviewSummary();
+
+      window.GriprUI.showToast('⚡ Demo scoping data loaded for Jaipur Kirana mission. Step through the wizard to review.', 'success');
+      // DO NOT auto-advance. Visitor manually clicks through steps.
+    }
+
+    function switchToRealInquiry() {
+      isDemoMode = false;
+
+      const btnDemo = document.getElementById('modeBtnDemo');
+      const btnReal = document.getElementById('modeBtnReal');
+      if (btnReal) {
+        btnReal.style.background = '#EA580C';
+        btnReal.style.color = '#FFFFFF';
+        btnReal.style.borderColor = '#EA580C';
+      }
+      if (btnDemo) {
+        btnDemo.style.background = 'transparent';
+        btnDemo.style.color = 'var(--text-secondary)';
+        btnDemo.style.borderColor = 'var(--border)';
+      }
+
+      // Reset fields
+      document.getElementById('orgName').value = '';
+      document.getElementById('contactPerson').value = '';
+      document.getElementById('contactEmail').value = '';
+      document.getElementById('decisionAtStake').value = '';
+      document.getElementById('problemToInvestigate').value = '';
+      document.getElementById('hypothesis').value = '';
+      document.getElementById('falsificationCriteria').value = '';
+      document.getElementById('targetParticipantProfile').value = '';
+      document.getElementById('operationalContext').value = '';
+      document.getElementById('geography').value = '';
+
+      const demoBanner = document.getElementById('demoNoticeBanner');
+      if (demoBanner) demoBanner.style.display = 'none';
+
+      const simBtn = document.getElementById('simulateAdvanceBtn');
+      const subBtn = document.getElementById('submitMissionBtn');
+      if (simBtn) simBtn.style.display = 'none';
+      if (subBtn) subBtn.style.display = 'inline-block';
+
+      clearErrors();
+      if (currentStep === 4) populateReviewSummary();
+
+      window.GriprUI.showToast('Switched to real scoping inquiry mode.', 'info');
+    }
+
+    function simulateAdvanceApproval() {
+      if (!validateStep(1) || !validateStep(2) || !validateStep(3)) return;
+
+      // Save approved simulation stage into sessionStorage via demoStorage
+      if (window.GRIPR_FIXTURES && window.GRIPR_FIXTURES.demoStorage) {
+        window.GRIPR_FIXTURES.demoStorage.saveState({
+          stage: 'scope_approved',
+          advanceApproved: true,
+          approvedAt: new Date().toISOString(),
+          missionId: 'MSN-2026-081',
+          clientOrg: document.getElementById('orgName').value.trim() || 'RetailFlow Intelligence Labs',
+          contactPerson: document.getElementById('contactPerson').value.trim() || 'Aditi Sharma',
+          contactEmail: document.getElementById('contactEmail').value.trim() || 'aditi.sharma@retailflow.test',
+          decisionAtStake: document.getElementById('decisionAtStake').value.trim(),
+          problemToInvestigate: document.getElementById('problemToInvestigate').value.trim(),
+          hypothesis: document.getElementById('hypothesis').value.trim(),
+          falsificationCriteria: document.getElementById('falsificationCriteria').value.trim()
+        });
+      }
+
+      // Render simulated approval card
+      const card = document.getElementById('simulatedApprovalCard');
+      const actionsRow = document.getElementById('step4ActionsRow');
+      if (actionsRow) actionsRow.style.display = 'none';
+
+      if (card) {
+        card.style.display = 'block';
+        card.innerHTML = `
+          <div style="background:#ECFDF5; border:1px solid #10B981; border-radius:10px; padding:1.75rem 1.5rem; text-align:center; animation:fadeIn 0.3s ease;">
+            <div style="font-size:2.2rem; margin-bottom:0.5rem;">✅</div>
+            <h4 style="font-family:'DM Serif Display',serif; font-size:1.6rem; color:#065F46; margin-bottom:0.5rem;">
+              Simulated Advance Scope Approved (₹49,000 Pilot)
+            </h4>
+            <p style="font-size:0.9rem; color:#047857; max-width:540px; margin:0 auto 1.5rem; line-height:1.6;">
+              Mission <strong>MSN-2026-081</strong> commercial parameters logged to session simulation. No payment was charged. You may now allocate research professionals and inspect field evidence.
+            </p>
+            <a href="research-operations-demo.html" class="btn-cta-solid" style="display:inline-block; background:var(--accent); text-decoration:none; font-size:0.95rem; padding:0.85rem 1.75rem;">
+              Continue to GRIPR Research Operations →
+            </a>
+          </div>
+        `;
+      }
+
+      window.GriprUI.showToast('Commercial terms simulated and approved! Advance to Research Operations.', 'success');
+    }
 
     function jumpToStep(target) {
       if (target < currentStep || validateStep(currentStep)) {
@@ -538,6 +735,11 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('demo') === 'true' || urlParams.get('scenario') === 'jaipur') {
+        activateDemoData();
+      }
+
       const form = document.getElementById('missionScopingForm');
       const submitBtn = document.getElementById('submitMissionBtn');
 

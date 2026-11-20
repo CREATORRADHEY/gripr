@@ -24,7 +24,8 @@
         <a href="index.html#product" class="nav-link">Product</a>
         <a href="index.html#how-it-works" class="nav-link">How It Works</a>
         <a href="demo.html" class="nav-link">Synthetic Demo</a>
-        <a href="brief.html?demo=true" class="nav-link active-nav-link">Research Brief</a>
+        <a href="research-operations-demo.html" class="nav-link">Ops Simulation</a>
+        <a href="brief.html?id=MSN-2026-081&demo=true" class="nav-link active-nav-link">Research Brief</a>
         <a href="missions.html" class="nav-link">Research Missions</a>
       </div>
 
@@ -120,8 +121,9 @@
         return;
       }
       const missionId = urlParams.get('id') || 'MSN-2026-081';
+      const isExplicitDemo = urlParams.get('demo') === 'true' || missionId === 'MSN-2026-081';
 
-      const res = await window.GriprAPI.getMissionBrief(missionId);
+      const res = await window.GriprAPI.getMissionBrief(missionId, { demo: isExplicitDemo });
       const container = document.getElementById('briefContent');
 
       if (!res.success || !res.brief) {

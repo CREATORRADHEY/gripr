@@ -369,12 +369,12 @@
      * In Live Mode:
      * - Returns real live data on 200 OK.
      * - Returns exact errors on 401, 403, 404, 500 without falling back to synthetic fixtures.
-     * - Synthetic briefs are ONLY returned when in explicit demo mode (e.g. options.demo === true, ?demo=true, or mode === 'demo').
+     * - Synthetic briefs are returned when in explicit demo mode (e.g. options.demo === true, ?demo=true, mode === 'demo', or for the canonical demo mission MSN-2026-081).
      * @param {string} missionId
      * @param {object} options
      */
     async getMissionBrief(missionId = 'MSN-2026-081', options = {}) {
-      const isExplicitDemo = options.demo === true || (typeof window !== 'undefined' && window.location.search.includes('demo=true'));
+      const isExplicitDemo = options.demo === true || (typeof window !== 'undefined' && (window.location.search.includes('demo=true') || (missionId || '').toUpperCase() === 'MSN-2026-081'));
       if (isExplicitDemo || this.getMode() === 'demo') {
         return this.getDemoBrief(missionId);
       }
@@ -731,6 +731,35 @@
         status: 'DRAFT — REQUIRES HUMAN REVIEW',
         message: 'Demo mode: Draft brief generated from synthetic evidence.'
       };
+    },
+
+    /**
+     * 12. Run Safe Live Gemini Analysis on Canonical Synthetic Demo Packet
+     * Communicates with dedicated server-side demo endpoint without exposing API keys.
+     */
+    async analyzeDemoLive(packetId = 'PKT-401') {
+      try {
+        const res = await fetch(`${BACKEND_URL}/demo/live-gemini-analysis`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ packetId })
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || !json.success) {
+          return {
+            success: false,
+            error: json.error || 'Live Gemini request could not be completed on server.',
+            suggestion: 'Use Precomputed Demo Analysis (Mode A) for full guided walkthrough.'
+          };
+        }
+        return json;
+      } catch (err) {
+        return {
+          success: false,
+          error: `Live Gemini endpoint unreachable (${err.message}).`,
+          suggestion: 'Ensure Fastify backend is running on http://127.0.0.1:3000, or use Precomputed Demo Analysis.'
+        };
+      }
     },
 
     /**

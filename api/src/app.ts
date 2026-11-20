@@ -40,6 +40,7 @@ import { researchRoutes } from './routes/research.js';
 import { evidenceRoutes } from './routes/evidence.js';
 import { briefRoutes } from './routes/briefs.js';
 import { operationsRoutes } from './routes/operations.js';
+import { demoRoutes } from './routes/demo.js';
 
 export interface AppOptions {
   logger?: boolean | object;
@@ -137,6 +138,7 @@ export function buildApp(options: AppOptions = {}): FastifyInstance {
       evidenceService,
       auditRepo
     });
+    await demoRoutes(api, { geminiService });
   }, { prefix: '/api' });
 
   return app;
