@@ -1,39 +1,46 @@
 # syntax=docker/dockerfile:1
-# GRIPR.STUDIO — Unified Frontend & Fastify Backend for Google Cloud Run (Buildathon Deployment)
+# GRIPR.STUDIO — Unified Frontend & Fastify Backend (Render Free Tier & Container Deployment)
 
 # ================= Stage 1: Build Backend =================
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy dependency manifests
-COPY api/package*.json api/tsconfig.json ./api/
+# Install reproducible pnpm matching repository lockfile
+RUN npm install -g pnpm@10.33.3
+
+# Copy package manifests and lockfile
+COPY api/package.json api/pnpm-lock.yaml api/tsconfig.json ./api/
 
 WORKDIR /app/api
-RUN npm ci
+RUN pnpm install --frozen-lockfile
 
 # Copy backend source code
 COPY api/src ./src
 
 # Build TypeScript to dist
-RUN npm run build
+RUN pnpm run build
 
 # ================= Stage 2: Production Runtime =================
 FROM node:22-alpine AS runner
 
 WORKDIR /app
 
-# Cloud Run injects PORT (defaults to 8080) and expects binding to 0.0.0.0
+# Render injects PORT (defaults to 10000 or custom) and expects 0.0.0.0
+# Default to DEMO_ONLY mode for safe free deployment without persistent cloud DB
 ENV NODE_ENV=production \
-    PORT=8080 \
+    PORT=10000 \
     HOST=0.0.0.0 \
     SERVE_STATIC=true \
-    PERSISTENCE_MODE=cloud_firestore
+    PERSISTENCE_MODE=demo_only \
+    DEMO_MODE=true
 
-# Install production dependencies only
-COPY api/package*.json ./api/
+# Install pnpm for reproducible production dependencies
+RUN npm install -g pnpm@10.33.3
+
+COPY api/package.json api/pnpm-lock.yaml ./api/
 WORKDIR /app/api
-RUN npm ci --omit=dev && npm cache clean --force
+RUN pnpm install --prod --frozen-lockfile && pnpm store prune
 
 # Copy compiled backend assets
 COPY --from=builder /app/api/dist ./dist
@@ -48,16 +55,16 @@ COPY index.html missions.html demo.html brief.html terms.html privacy.html thank
 COPY css ./public/css
 COPY js ./public/js
 COPY assets ./public/assets
-COPY "gripr business model.png" ./public/
+COPY ["gripr business model.png", "./public/"]
 
 # Run as non-root node user for container security
 RUN chown -R node:node /app
 USER node
 
 WORKDIR /app/api
-EXPOSE 8080
+EXPOSE 10000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:${PORT:-8080}/api/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:${PORT:-10000}/api/health || exit 1
 
 CMD ["node", "dist/server.js"]

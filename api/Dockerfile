@@ -1,16 +1,18 @@
 # syntax=docker/dockerfile:1
-# Multi-stage Dockerfile for GRIPR.STUDIO Backend on Google Cloud Run
+# GRIPR.STUDIO — Fastify Backend Container Build
 
 # ================= Stage 1: Build =================
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json tsconfig.json ./
-RUN npm ci
+RUN npm install -g pnpm@10.33.3
+
+COPY package.json pnpm-lock.yaml tsconfig.json ./
+RUN pnpm install --frozen-lockfile
 
 COPY src ./src
-RUN npm run build
+RUN pnpm run build
 
 # ================= Stage 2: Runtime =================
 FROM node:22-alpine AS runner
@@ -18,21 +20,25 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production \
-    PORT=8080 \
+    PORT=10000 \
     HOST=0.0.0.0 \
-    SERVE_STATIC=true
+    SERVE_STATIC=true \
+    PERSISTENCE_MODE=demo_only \
+    DEMO_MODE=true
 
-COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm install -g pnpm@10.33.3
+
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --prod --frozen-lockfile && pnpm store prune
 
 COPY --from=builder /app/dist ./dist
 
 RUN mkdir -p /app/data/firestore && chown -R node:node /app
 USER node
 
-EXPOSE 8080
+EXPOSE 10000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:${PORT:-8080}/api/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:${PORT:-10000}/api/health || exit 1
 
 CMD ["node", "dist/server.js"]

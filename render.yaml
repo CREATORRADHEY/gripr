@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: gripr-studio
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: HOST
+        value: "0.0.0.0"
+      - key: SERVE_STATIC
+        value: "true"
+      - key: PERSISTENCE_MODE
+        value: demo_only
+      - key: DEMO_MODE
+        value: "true"
+      - key: INTERNAL_AUTH_SECRET
+        generateValue: true
