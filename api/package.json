@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
+    "serve": "node ../scripts/serve.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:smoke": "tsx tests/live-smoke.smoke.ts"

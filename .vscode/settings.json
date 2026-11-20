@@ -1,0 +1,7 @@
+{
+  "liveServer.settings.ignoreFiles": [
+    "**/api/data/**",
+    "**/data/firestore/**",
+    "**/data/**"
+  ]
+}

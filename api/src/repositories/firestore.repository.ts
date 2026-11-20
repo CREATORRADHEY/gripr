@@ -99,6 +99,17 @@ export class FirestoreMissionInquiryRepository implements IMissionInquiryReposit
   constructor(private storage: FirestoreStorageEngine) {}
 
   async create(input: CreateMissionInquiryInput): Promise<MissionInquiry> {
+    // Prevent duplicate inquiry creation on retries within 15 seconds (Requirement 10)
+    const existing = (await this.findAll()).find(item =>
+      item.contactEmail === input.contactEmail &&
+      item.orgName === input.orgName &&
+      item.decisionAtStake === input.decisionAtStake &&
+      (Date.now() - new Date(item.createdAt).getTime()) < 15000
+    );
+    if (existing) {
+      return existing;
+    }
+
     const id = `INQ-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
     const inquiry: MissionInquiry = {
       ...input,

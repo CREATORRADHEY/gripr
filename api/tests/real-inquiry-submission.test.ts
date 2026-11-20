@@ -181,4 +181,97 @@ describe('Regression Tests: Real Mission Inquiry Submission Flow (Requirement G)
     // 6. jumpToStage(1) preserves currentScopingStep when on steps 1-3
     expect(html).toContain('if (currentScopingStep >= 1 && currentScopingStep <= 3)');
   });
+
+  // H: Live Server reload shield, native form submit suppression, and sessionStorage persistence
+  it('Requirement H: Live Server reload shield, native form suppression, and confirmation preservation', () => {
+    const html = fs.readFileSync(missionsHtmlPath, 'utf8');
+
+    // 1. Form specifies onsubmit="return false;" to block native browser navigation
+    expect(html).toContain('<form id="missionScopingForm" onsubmit="return false;" novalidate>');
+
+    // 2. Submit button is type="button" with onclick to eliminate native submit reload
+    expect(html).toContain('<button type="button" class="btn-cta-solid" id="submitRealMissionBtn" onclick="handleRealInquirySubmission()"');
+
+    // 3. Live Server WebSocket shield intercepts and suppresses auto-reload during confirmation
+    expect(html).toContain('installLiveReloadShield');
+    expect(html).toContain('ShieldedWebSocket');
+    expect(html).toContain('[GRIPR LiveServer Shield] Suppressed external live-reload to preserve inquiry confirmation.');
+
+    // 4. SessionStorage persists confirmed inquiry and restores it on load
+    expect(html).toContain("sessionStorage.setItem('gripr_confirmed_inquiry'");
+    expect(html).toContain("sessionStorage.getItem('gripr_confirmed_inquiry'");
+    expect(html).toContain('restoreConfirmedInquiryUI(data)');
+    expect(html).toContain("sessionStorage.removeItem('gripr_confirmed_inquiry')");
+  });
+
+  // I: Inconsistent sector & participant profile intake validation
+  it('Requirement I: Accepts divergent sector and participant profile combinations cleanly', async () => {
+    // E.g. Healthcare sector with logistics participant profile
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/mission-inquiries',
+      payload: {
+        orgName: 'MedPulse Diagnostics Ltd',
+        contactPerson: 'Dr. Radhika Sen',
+        contactEmail: 'radhika.sen@medpulse.test',
+        role: 'Chief Medical Officer',
+        sector: 'healthcare',
+        industry: 'Healthcare & Diagnostics',
+        decisionAtStake: 'Deciding whether to commission private temperature-controlled courier vans.',
+        hypothesis: 'Pathology sample spoilage occurs due to delayed cold-pack transit in ambient heat.',
+        falsificationCriteria: 'If sample hemolysis is caused by improper phlebotomy rather than transit.',
+        targetParticipantProfile: 'Cold-chain vaccine & pathology sample transit drivers in Rajasthan (>2 years).',
+        geography: 'Jaipur & Ajmer Districts',
+        constraints: 'Dry ice supply bottlenecks.',
+        consentContact: true,
+        consentPrivacy: true
+      }
+    });
+
+    expect(res.statusCode).toBe(201);
+    const body = res.json();
+    expect(body.success).toBe(true);
+    expect(body.inquiryId).toMatch(/^INQ-/);
+    expect(body.status).toBe('AWAITING_SCOPE_REVIEW');
+  });
+
+  // J: Deduplication prevents duplicate inquiry on fast retries
+  it('Requirement J: Duplicate submission within 15 seconds returns existing inquiry without duplicate ID', async () => {
+    const payload = {
+      orgName: 'Deduplication Test Labs',
+      contactPerson: 'Sameer Joshi',
+      contactEmail: 'sameer.joshi@dedup.test',
+      role: 'Operations Director',
+      sector: 'logistics',
+      industry: 'Logistics & Freight',
+      decisionAtStake: 'Deciding whether to automate dock check-in processes for regional haulers.',
+      hypothesis: 'Haulers will adopt QR dock check-in to avoid gate turnaround bottlenecks.',
+      falsificationCriteria: 'If delay is caused by weighbridge congestion rather than document check.',
+      targetParticipantProfile: 'Interstate dry-freight container drivers operating on NH-48 corridor.',
+      geography: 'Delhi-Mumbai Freight Corridor',
+      constraints: 'Peak night hours.',
+      consentContact: true,
+      consentPrivacy: true
+    };
+
+    const res1 = await app.inject({
+      method: 'POST',
+      url: '/api/mission-inquiries',
+      payload
+    });
+    expect(res1.statusCode).toBe(201);
+    const body1 = res1.json();
+
+    // Fast retry with exact same payload
+    const res2 = await app.inject({
+      method: 'POST',
+      url: '/api/mission-inquiries',
+      payload
+    });
+    expect(res2.statusCode).toBe(201);
+    const body2 = res2.json();
+
+    // Returns identical inquiry ID (deduplicated)
+    expect(body2.inquiryId).toBe(body1.inquiryId);
+  });
 });

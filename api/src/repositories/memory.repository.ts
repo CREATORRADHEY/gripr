@@ -71,6 +71,17 @@ export class MemoryMissionInquiryRepository implements IMissionInquiryRepository
   private inquiries: Map<string, MissionInquiry> = new Map();
 
   async create(input: CreateMissionInquiryInput): Promise<MissionInquiry> {
+    // Prevent duplicate inquiry creation on retries within 15 seconds (Requirement 10)
+    const existing = Array.from(this.inquiries.values()).find(item =>
+      item.contactEmail === input.contactEmail &&
+      item.orgName === input.orgName &&
+      item.decisionAtStake === input.decisionAtStake &&
+      (Date.now() - new Date(item.createdAt).getTime()) < 15000
+    );
+    if (existing) {
+      return existing;
+    }
+
     const id = `INQ-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
     const inquiry: MissionInquiry = {
       ...input,

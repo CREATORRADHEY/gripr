@@ -445,7 +445,7 @@
                 </div>
               </div>
 
-              <form id="missionScopingForm" novalidate>
+              <form id="missionScopingForm" onsubmit="return false;" novalidate>
 
                 <!-- ============ STEP 1: ORGANIZATION ============ -->
                 <div class="wizard-step" id="stepSection-1">
@@ -655,7 +655,7 @@
                       Simulate Advance Approval (₹49,000) →
                     </button>
 
-                    <button type="submit" class="btn-cta-solid" id="submitRealMissionBtn" style="display:none;">
+                    <button type="button" class="btn-cta-solid" id="submitRealMissionBtn" onclick="handleRealInquirySubmission()" style="display:none;">
                       Submit Real Research Request →
                     </button>
                   </div>
@@ -1150,6 +1150,45 @@
   <script src="js/nav.js"></script>
 
   <script>
+    // Live Server WebSocket reload shield (Development Stability Guard)
+    // Prevents Live Server's injected websocket from automatically reloading when backend writes persistence data
+    (function installLiveReloadShield() {
+      if (typeof window === 'undefined' || !window.WebSocket) return;
+      const OriginalWS = window.WebSocket;
+      function ShieldedWebSocket(url, protocols) {
+        const ws = protocols ? new OriginalWS(url, protocols) : new OriginalWS(url);
+        let userOnMessage = null;
+        Object.defineProperty(ws, 'onmessage', {
+          configurable: true,
+          enumerable: true,
+          get() {
+            return userOnMessage;
+          },
+          set(handler) {
+            userOnMessage = function (event) {
+              const realCard = document.getElementById('realInquirySuccessCard');
+              const isRealConfirmed = realCard && realCard.style.display !== 'none';
+              const isSubmitting = window.isSubmittingInquiry === true;
+
+              // If an inquiry has been confirmed or is in-flight, suppress the live-reload
+              if (event && event.data === 'reload' && (isRealConfirmed || isSubmitting)) {
+                console.info('[GRIPR LiveServer Shield] Suppressed external live-reload to preserve inquiry confirmation.');
+                return;
+              }
+
+              if (typeof handler === 'function') {
+                return handler.call(this, event);
+              }
+            };
+            ws.addEventListener('message', userOnMessage);
+          }
+        });
+        return ws;
+      }
+      ShieldedWebSocket.prototype = OriginalWS.prototype;
+      window.WebSocket = ShieldedWebSocket;
+    })();
+
     // State machine tracking
     let currentScopingStep = 1;
     let isDemoMode = false; // MUST default to false (Section 1)
@@ -1177,9 +1216,47 @@
         .replace(/'/g, '&#39;');
     }
 
+    function restoreConfirmedInquiryUI(data) {
+      isDemoMode = false;
+      showScopingStep(4);
+      syncMissionModeUI();
+
+      const actionsRow = document.getElementById('step4ActionsRow');
+      if (actionsRow) actionsRow.style.display = 'none';
+      const consentGroup = document.getElementById('consentControlsGroup');
+      if (consentGroup) consentGroup.style.display = 'none';
+
+      const confirmedId = document.getElementById('confirmedInquiryId');
+      if (confirmedId) confirmedId.textContent = data.inquiryId;
+      const confirmedPerson = document.getElementById('confirmedContactPerson');
+      if (confirmedPerson) confirmedPerson.textContent = data.contactPerson;
+      const confirmedOrg = document.getElementById('confirmedOrgName');
+      if (confirmedOrg) confirmedOrg.textContent = data.orgName;
+      const statusBadge = document.getElementById('realInquiryStatusBadge');
+      if (statusBadge) statusBadge.textContent = `STATUS: ${data.status || 'AWAITING_SCOPE_REVIEW'}`;
+
+      const realSuccessCard = document.getElementById('realInquirySuccessCard');
+      if (realSuccessCard) realSuccessCard.style.display = 'block';
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       initCandidates();
       initWorkstreams();
+
+      // Check if a confirmed inquiry exists from current session (Requirement 8 & 9)
+      if (window.sessionStorage) {
+        try {
+          const savedInquiry = window.sessionStorage.getItem('gripr_confirmed_inquiry');
+          if (savedInquiry) {
+            const data = JSON.parse(savedInquiry);
+            if (data && data.inquiryId) {
+              restoreConfirmedInquiryUI(data);
+              attachFormSubmitListener();
+              return;
+            }
+          }
+        } catch (e) {}
+      }
 
       // Check query params — handle ?demo=true as an invitation ONLY (Section 1)
       const urlParams = new URLSearchParams(window.location.search);
@@ -1461,6 +1538,9 @@
     }
 
     function resetToNewInquiry() {
+      if (window.sessionStorage) {
+        try { window.sessionStorage.removeItem('gripr_confirmed_inquiry'); } catch (e) {}
+      }
       isDemoMode = false;
       resetScopingFields();
       clearErrors();
@@ -1556,19 +1636,29 @@
       } else if (step === 2) {
         const decision = document.getElementById('decisionAtStake').value.trim();
         const problem = document.getElementById('problemToInvestigate').value.trim();
+        const hypothesis = document.getElementById('hypothesis').value.trim();
+        const falsification = document.getElementById('falsificationCriteria').value.trim();
 
         if (decision.length < 20) {
           setError('decisionAtStake', 'Please describe the decision at stake (minimum 20 characters).');
           valid = false;
         }
         if (problem.length < 10) {
-          setError('problemToInvestigate', 'Please describe the problem or workflow to investigate.');
+          setError('problemToInvestigate', 'Please describe the problem or workflow to investigate (minimum 10 characters).');
+          valid = false;
+        }
+        if (!isDemoMode && hypothesis.length < 15) {
+          setError('hypothesis', 'Hypothesis under test is required (minimum 15 characters).');
+          valid = false;
+        }
+        if (!isDemoMode && falsification.length < 15) {
+          setError('falsificationCriteria', 'Falsification criteria are required (minimum 15 characters).');
           valid = false;
         }
       } else if (step === 3) {
         const target = document.getElementById('targetParticipantProfile').value.trim();
-        if (target.length < 5) {
-          setError('targetParticipantProfile', 'Please describe the target participant profile.');
+        if (target.length < 10) {
+          setError('targetParticipantProfile', 'Please describe the target participant profile (minimum 10 characters).');
           valid = false;
         }
       } else if (step === 4) {
@@ -1710,18 +1800,26 @@
       }
       isSubmittingInquiry = true;
 
+      const sectorVal = document.getElementById('sector').value.trim();
+      let industryLabel = 'B2B Workflow';
+      if (sectorVal === 'logistics') industryLabel = 'Logistics & Freight';
+      else if (sectorVal === 'commerce') industryLabel = 'B2B Commerce & Vernacular Retail';
+      else if (sectorVal === 'agriculture') industryLabel = 'Agriculture & Agritech';
+      else if (sectorVal === 'healthcare') industryLabel = 'Healthcare & Diagnostics';
+      else if (sectorVal === 'other') industryLabel = 'Cross-Industry Workflow';
+
       const payload = {
         orgName: document.getElementById('orgName').value.trim(),
         contactPerson: document.getElementById('contactPerson').value.trim(),
         contactEmail: document.getElementById('contactEmail').value.trim(),
         role: document.getElementById('userRole').value.trim() || 'Product Leader',
-        sector: document.getElementById('sector').value.trim() || 'general',
+        sector: sectorVal || 'general',
         decisionAtStake: document.getElementById('decisionAtStake').value.trim(),
         problemToInvestigate: document.getElementById('problemToInvestigate').value.trim(),
         hypothesis: document.getElementById('hypothesis').value.trim(),
         falsificationCriteria: document.getElementById('falsificationCriteria').value.trim(),
         targetParticipantProfile: document.getElementById('targetParticipantProfile').value.trim(),
-        industry: document.getElementById('sector').value === 'logistics' ? 'Logistics & Freight' : 'B2B Workflow',
+        industry: industryLabel,
         geography: document.getElementById('geography').value.trim() || 'India (Regional clusters)',
         constraints: document.getElementById('operationalContext').value.trim() || 'None specified',
         consentContact: document.getElementById('consentContact') ? document.getElementById('consentContact').checked : false,
@@ -1757,12 +1855,12 @@
           return;
         }
 
-        // Genuine HTTP 201 Success (Requirement E)
+        // Genuine HTTP 201 Success (Requirement E & 8-10)
         isSubmittingInquiry = false;
         if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.style.opacity = '1';
-          submitBtn.innerHTML = origText;
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.5';
+          submitBtn.innerHTML = 'Submitted ✓';
         }
 
         document.getElementById('step4ActionsRow').style.display = 'none';
@@ -1775,6 +1873,20 @@
         document.getElementById('realInquiryStatusBadge').textContent = `STATUS: ${res.status || 'AWAITING_SCOPE_REVIEW'}`;
 
         document.getElementById('realInquirySuccessCard').style.display = 'block';
+
+        // Preserve confirmed inquiry in sessionStorage so accidental reload or navigation preserves it
+        if (window.sessionStorage) {
+          try {
+            window.sessionStorage.setItem('gripr_confirmed_inquiry', JSON.stringify({
+              inquiryId: res.inquiryId,
+              status: res.status || 'AWAITING_SCOPE_REVIEW',
+              contactPerson: payload.contactPerson,
+              orgName: payload.orgName,
+              timestamp: new Date().toISOString()
+            }));
+          } catch (e) {}
+        }
+
         window.GriprUI.showToast(`Inquiry ${res.inquiryId} submitted successfully. Status: ${res.status || 'AWAITING_SCOPE_REVIEW'}.`, 'success');
       } catch (err) {
         isSubmittingInquiry = false;
