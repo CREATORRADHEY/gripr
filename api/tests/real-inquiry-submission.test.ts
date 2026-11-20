@@ -152,4 +152,33 @@ describe('Regression Tests: Real Mission Inquiry Submission Flow (Requirement G)
     expect(html).toContain('Scope Subject to GRIPR Review:</strong> Formal qualitative evaluation');
     expect(html).toContain('No payment is charged upon inquiry submission.');
   });
+
+  // G: Form navigation integrity and premature completion prevention
+  it('Requirement G: Form navigation prevents premature completion, accidental resets, and invalid skips', () => {
+    const html = fs.readFileSync(missionsHtmlPath, 'utf8');
+
+    // 1. simulateAdvanceApprovalDirect has hard guard against running outside Step 4
+    expect(html).toContain('function simulateAdvanceApprovalDirect()');
+    expect(html).toContain('if (currentScopingStep !== 4)');
+
+    // 2. handleRealInquirySubmission has hard guard against running outside Step 4
+    expect(html).toContain('async function handleRealInquirySubmission()');
+    expect(html).toContain('if (currentScopingStep !== 4)');
+
+    // 3. attachFormSubmitListener intercepts Enter key to advance step instead of submitting prematurely
+    expect(html).toContain("form.addEventListener('keydown'");
+    expect(html).toContain("if (e.key === 'Enter')");
+    expect(html).toContain('nextScopingStep(currentScopingStep + 1);');
+
+    // 4. showScopingStep(4) ensures actions row is visible before approval
+    expect(html).toContain('if (maxUnlockedStage < 3 || !isAlreadyApproved)');
+    expect(html).toContain("if (row) row.style.display = 'flex';");
+
+    // 5. jumpToScopingStep validates intermediate steps sequentially
+    expect(html).toContain('for (let s = currentScopingStep; s < step; s++)');
+    expect(html).toContain('if (!validateScopingStep(s))');
+
+    // 6. jumpToStage(1) preserves currentScopingStep when on steps 1-3
+    expect(html).toContain('if (currentScopingStep >= 1 && currentScopingStep <= 3)');
+  });
 });

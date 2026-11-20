@@ -1206,6 +1206,14 @@
     function activateDemoModeExplicitly() {
       isDemoMode = true;
 
+      // Ensure success card from any prior run is hidden
+      const succ = document.getElementById('simulatedApprovalSuccessCard');
+      if (succ) succ.style.display = 'none';
+      const realSucc = document.getElementById('realInquirySuccessCard');
+      if (realSucc) realSucc.style.display = 'none';
+      const row = document.getElementById('step4ActionsRow');
+      if (row) row.style.display = 'flex';
+
       // Update toggle buttons UI
       const btnDemo = document.getElementById('btnUseDemoData');
       const btnReal = document.getElementById('btnCommissionReal');
@@ -1240,6 +1248,7 @@
     }
 
     function activateRealModeExplicitly() {
+      const wasInDemo = isDemoMode;
       isDemoMode = false;
 
       const btnDemo = document.getElementById('btnUseDemoData');
@@ -1267,11 +1276,13 @@
       // Hide operations workspace
       document.getElementById('operationsWorkspaceSection').style.display = 'none';
 
-      resetScopingFields();
-      clearErrors();
-      showScopingStep(1);
+      if (wasInDemo) {
+        resetScopingFields();
+        clearErrors();
+        showScopingStep(1);
+        window.GriprUI.showToast('Clean scoping form ready for your real research inquiry.', 'info');
+      }
       syncMissionModeUI();
-      window.GriprUI.showToast('Clean scoping form ready for your real research inquiry.', 'info');
     }
 
     // ----------------------------------------------------
@@ -1450,16 +1461,30 @@
     }
 
     function resetToNewInquiry() {
-      activateRealModeExplicitly();
+      isDemoMode = false;
+      resetScopingFields();
+      clearErrors();
+      showScopingStep(1);
+      syncMissionModeUI();
+      window.GriprUI.showToast('Clean scoping form ready for your real research inquiry.', 'info');
     }
 
     // ----------------------------------------------------
     // SCOPING WIZARD STEP NAVIGATION
     // ----------------------------------------------------
     function jumpToScopingStep(step) {
-      if (step < currentScopingStep || validateScopingStep(currentScopingStep)) {
+      if (step === currentScopingStep) return;
+      if (step < currentScopingStep) {
         showScopingStep(step);
+        return;
       }
+      for (let s = currentScopingStep; s < step; s++) {
+        if (!validateScopingStep(s)) {
+          showScopingStep(s);
+          return;
+        }
+      }
+      showScopingStep(step);
     }
 
     function nextScopingStep(step) {
@@ -1488,6 +1513,18 @@
         populateReviewSummary();
         if (maxUnlockedStage < 2) maxUnlockedStage = 2;
         updatePillState(2, 'active');
+
+        // Ensure actions row is shown on Step 4 unless an approval/submission card has actually been confirmed
+        const succ = document.getElementById('simulatedApprovalSuccessCard');
+        const realSucc = document.getElementById('realInquirySuccessCard');
+        const row = document.getElementById('step4ActionsRow');
+        const isAlreadyApproved = (succ && succ.style.display !== 'none') || (realSucc && realSucc.style.display !== 'none');
+        
+        if (maxUnlockedStage < 3 || !isAlreadyApproved) {
+          if (succ) succ.style.display = 'none';
+          if (realSucc) realSucc.style.display = 'none';
+          if (row) row.style.display = 'flex';
+        }
       } else {
         updatePillState(1, 'active');
       }
@@ -1616,8 +1653,30 @@
       const form = document.getElementById('missionScopingForm');
       if (!form) return;
 
+      // Prevent Enter key in inputs from prematurely submitting the form or jumping steps unexpectedly
+      form.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          if (e.target && e.target.tagName === 'TEXTAREA') return;
+
+          e.preventDefault();
+          if (currentScopingStep < 4) {
+            nextScopingStep(currentScopingStep + 1);
+          } else if (currentScopingStep === 4) {
+            if (isDemoMode) {
+              simulateAdvanceApprovalDirect();
+            } else {
+              handleRealInquirySubmission();
+            }
+          }
+        }
+      });
+
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (currentScopingStep !== 4) {
+          nextScopingStep(currentScopingStep + 1);
+          return;
+        }
         if (isDemoMode) {
           simulateAdvanceApprovalDirect();
           return;
@@ -1627,6 +1686,10 @@
     }
 
     async function handleRealInquirySubmission() {
+      if (currentScopingStep !== 4) {
+        showScopingStep(4);
+        return;
+      }
       if (isSubmittingInquiry) return;
 
       // Validate all wizard steps sequentially
@@ -1733,6 +1796,10 @@
     // SECTION 3: SIMULATED COMMERCIAL APPROVAL (NO AUTO-JUMP)
     // ----------------------------------------------------
     function simulateAdvanceApprovalDirect() {
+      if (currentScopingStep !== 4) {
+        showScopingStep(4);
+        return;
+      }
       if (!validateScopingStep(1) || !validateScopingStep(2) || !validateScopingStep(3)) return;
 
       if (window.GRIPR_FIXTURES && window.GRIPR_FIXTURES.demoStorage) {
@@ -2323,7 +2390,15 @@
 
       if (targetStage === 1 || targetStage === 2) {
         document.getElementById('scopingSectionWrapper').style.display = 'block';
-        showScopingStep(targetStage === 1 ? 1 : 4);
+        if (targetStage === 1) {
+          if (currentScopingStep >= 1 && currentScopingStep <= 3) {
+            showScopingStep(currentScopingStep);
+          } else {
+            showScopingStep(1);
+          }
+        } else if (targetStage === 2) {
+          showScopingStep(4);
+        }
       } else {
         const opsFrame = document.getElementById('operationsWorkspaceSection');
         if (opsFrame.style.display === 'none') {
@@ -2360,8 +2435,12 @@
       if (status === 'completed') {
         pill.classList.remove('active', 'locked');
         pill.classList.add('completed');
-        pill.querySelector('.master-step-num').textContent = '✓';
+        const numEl = pill.querySelector('.master-step-num');
+        if (numEl) numEl.textContent = '✓';
       } else if (status === 'active') {
+        document.querySelectorAll('.master-step-pill').forEach(p => {
+          if (p !== pill) p.classList.remove('active');
+        });
         pill.classList.remove('locked');
         pill.classList.add('active');
       }
