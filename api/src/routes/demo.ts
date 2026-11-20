@@ -66,6 +66,15 @@ export async function demoRoutes(
   const { geminiService } = options;
 
   fastify.post('/demo/live-gemini-analysis', {
+    schema: {
+      body: {
+        type: 'object',
+        properties: {
+          packetId: { type: 'string', maxLength: 32 }
+        },
+        additionalProperties: false
+      }
+    },
     config: {
       rateLimit: {
         max: 10,
@@ -128,7 +137,7 @@ export async function demoRoutes(
         locality: packet.locality,
         modelUsed: result.modelUsed,
         latencyMs,
-        tokenEstimate: result.tokenEstimate || 1950,
+        tokenEstimate: result.tokenEstimate || null,
         extraction: ext,
         quotationValidation: quotationChecks,
         disclaimer: 'SYNTHETIC DEMONSTRATION INTELLIGENCE · PROCESSED VIA GEMINI AI'
