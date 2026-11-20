@@ -82,20 +82,8 @@ function build() {
     }
   }
 
-  // 4. Generate Cloudflare Pages _redirects file
-  const redirectsContent = [
-    '/missions                  /missions.html                  200',
-    '/demo                      /demo.html                      200',
-    '/brief                     /brief.html                     200',
-    '/terms                     /terms.html                     200',
-    '/privacy                   /privacy.html                   200',
-    '/thankyou                  /thankyou.html                  200',
-    '/research-operations-demo  /research-operations-demo.html  200',
-    '/ops                       /ops.html                       200',
-    '/participate               /participate.html               200',
-    '/admin                     /admin.html                     200'
-  ].join('\n');
-  fs.writeFileSync(path.join(OUT_DIR, '_redirects'), redirectsContent + '\n', 'utf8');
+  // 4. Cloudflare Pages natively supports Pretty URLs (e.g. /missions automatically maps to /missions.html).
+  // No conflicting _redirects rewrite needed.
 
   // 5. Generate Cloudflare Pages _headers file for security
   const headersContent = [

@@ -18,7 +18,7 @@
 
 (function () {
   // Configurable backend URL resolution (Cloudflare Pages, Railway, Local)
-  const DEFAULT_RAILWAY_URL = 'https://gripr-production.up.railway.app/api';
+  const DEFAULT_RAILWAY_URL = 'https://gripr-backend-production.up.railway.app/api';
 
   function resolveBackendUrl() {
     // 1. Explicit global override in window (e.g. from config script or presenter injection)

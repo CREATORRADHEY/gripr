@@ -197,12 +197,12 @@ describe('GRIPR.STUDIO — Cloud Run Deployment Readiness & Security Audit', () 
         method: 'OPTIONS',
         url: '/api/health',
         headers: {
-          'Origin': 'https://gripr-production.up.railway.app',
+          'Origin': 'https://gripr-backend-production.up.railway.app',
           'Access-Control-Request-Method': 'GET'
         }
       });
       expect(railwayRes.statusCode).toBe(204);
-      expect(railwayRes.headers['access-control-allow-origin']).toBe('https://gripr-production.up.railway.app');
+      expect(railwayRes.headers['access-control-allow-origin']).toBe('https://gripr-backend-production.up.railway.app');
     });
 
     it('19. CORS origin policy rejects untrusted external origins', async () => {
@@ -227,7 +227,6 @@ describe('GRIPR.STUDIO — Cloud Run Deployment Readiness & Security Audit', () 
         }
         expect(files).toContain('index.html');
         expect(files).toContain('missions.html');
-        expect(files).toContain('_redirects');
         expect(files).toContain('_headers');
       }
     });
