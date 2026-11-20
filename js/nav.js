@@ -123,5 +123,18 @@
         navWrapper.classList.toggle('scrolled', window.scrollY > 15);
       }
     }, { passive: true });
+
+    // 4. Reveal all fade-in elements immediately & on scroll
+    document.querySelectorAll('.fade-in').forEach(el => el.classList.add('visible'));
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.05, rootMargin: '0px 0px 50px 0px' });
+      document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    }
   });
 })();

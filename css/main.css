@@ -684,10 +684,25 @@ footer .footer-location { color: var(--text-light-muted); font-weight: 500; }
 
 /* ============ ANIMATIONS ============ */
 .fade-in {
-  opacity: 0; transform: translateY(25px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
-.fade-in.visible { opacity: 1; transform: translateY(0); }
+.fade-in.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Ensure Hero elements are never hidden */
+.hero .fade-in,
+.hero h1,
+.hero-desc,
+.live-bar,
+.hero-dual-cta,
+.form-trust {
+  opacity: 1 !important;
+  transform: none !important;
+}
 
 /* ============ RESPONSIVE ============ */
 
