@@ -109,6 +109,8 @@
 
   let currentMode = localStorage.getItem(STORAGE_KEY_MODE) || 'auto';
   let backendHealthy = false;
+  let backendPersistenceEngine = 'UNKNOWN';
+  let backendIsCloudFirestore = false;
 
   // Auto-detect backend health
   async function probeBackendHealth() {
@@ -119,23 +121,39 @@
       const res = await fetch(`${BACKEND_URL}/health`, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (res.ok) {
+        const json = await res.json().catch(() => ({}));
         backendHealthy = true;
+        backendPersistenceEngine = (json && json.persistence && json.persistence.engine) ? json.persistence.engine : 'UNKNOWN';
+        backendIsCloudFirestore = (json && json.persistence && json.persistence.isCloudFirestore === true);
         if (currentMode === 'auto') {
           currentMode = 'live';
         }
       } else {
         backendHealthy = false;
+        backendPersistenceEngine = 'DEMO_ONLY';
+        backendIsCloudFirestore = false;
         if (currentMode === 'auto') {
           currentMode = 'demo';
         }
       }
     } catch (err) {
       backendHealthy = false;
+      backendPersistenceEngine = 'DEMO_ONLY';
+      backendIsCloudFirestore = false;
       if (currentMode === 'auto') {
         currentMode = 'demo';
       }
     }
     updateModePillUI();
+    if (typeof window !== 'undefined' && typeof window.onGriprBackendStatusUpdated === 'function') {
+      try {
+        window.onGriprBackendStatusUpdated({
+          healthy: backendHealthy,
+          persistenceEngine: backendPersistenceEngine,
+          isCloudFirestore: backendIsCloudFirestore
+        });
+      } catch (_) {}
+    }
   }
 
   // Create UI indicator for live vs demo mode
@@ -221,6 +239,20 @@
       localStorage.removeItem('gripr_api_base_url');
       BACKEND_URL = resolveBackendUrl();
       probeBackendHealth();
+    },
+
+    /**
+     * Get active persistence engine reported by backend
+     */
+    getPersistenceEngine() {
+      return backendPersistenceEngine;
+    },
+
+    /**
+     * Real inquiries require a verified production Cloud Firestore database
+     */
+    isRealInquirySupported() {
+      return backendIsCloudFirestore === true;
     },
 
     /**

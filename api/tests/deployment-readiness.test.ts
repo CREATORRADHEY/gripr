@@ -181,7 +181,7 @@ describe('GRIPR.STUDIO — Cloud Run Deployment Readiness & Security Audit', () 
       expect(typeof json.persistence.isCloudFirestore).toBe('boolean');
     });
 
-    it('18. CORS origin policy accepts Cloudflare Pages and Railway origins', async () => {
+    it('18. CORS origin policy accepts Cloudflare Pages and preview origins', async () => {
       const cfRes = await app.inject({
         method: 'OPTIONS',
         url: '/api/health',
@@ -193,16 +193,16 @@ describe('GRIPR.STUDIO — Cloud Run Deployment Readiness & Security Audit', () 
       expect(cfRes.statusCode).toBe(204);
       expect(cfRes.headers['access-control-allow-origin']).toBe('https://gripr-studio.pages.dev');
 
-      const railwayRes = await app.inject({
+      const previewRes = await app.inject({
         method: 'OPTIONS',
         url: '/api/health',
         headers: {
-          'Origin': 'https://gripr-backend-production.up.railway.app',
+          'Origin': 'https://preview-123.gripr-studio.pages.dev',
           'Access-Control-Request-Method': 'GET'
         }
       });
-      expect(railwayRes.statusCode).toBe(204);
-      expect(railwayRes.headers['access-control-allow-origin']).toBe('https://gripr-backend-production.up.railway.app');
+      expect(previewRes.statusCode).toBe(204);
+      expect(previewRes.headers['access-control-allow-origin']).toBe('https://preview-123.gripr-studio.pages.dev');
     });
 
     it('19. CORS origin policy rejects untrusted external origins', async () => {

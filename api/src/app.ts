@@ -80,28 +80,22 @@ export function buildApp(options: AppOptions = {}): FastifyInstance {
   // Security & utility plugins
   app.register(sensible);
 
-  // CORS (Support split hosting across Cloudflare Pages, Railway, Render, and Local Dev)
+  // CORS (Strict production policy: exact deployed Cloudflare Pages origin; loopback dev-only)
   app.register(cors, {
     origin: (origin, cb) => {
       if (!origin) return cb(null, true);
-      // Loopback origins for development / testing
-      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      // Localhost / loopback origins strictly permitted in development or test environments (Requirement 3)
+      if (env.isDev || env.isTest) {
+        if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+          return cb(null, true);
+        }
+      }
+      // Exact deployed Cloudflare Pages origin (Requirement 3)
+      if (origin === 'https://gripr-studio.pages.dev' || /^https:\/\/[a-z0-9-]+\.gripr-studio\.pages\.dev$/i.test(origin)) {
         return cb(null, true);
       }
-      // Explicitly allowed origins from environment
-      if (env.ALLOWED_ORIGINS.includes(origin) || env.ALLOWED_ORIGINS.includes('*')) {
-        return cb(null, true);
-      }
-      // Cloudflare Pages deployments (*.pages.dev / custom domain patterns)
-      if (/^https:\/\/[a-z0-9_-]+\.pages\.dev$/i.test(origin)) {
-        return cb(null, true);
-      }
-      // Railway service domains (*.railway.app / *.up.railway.app)
-      if (/^https:\/\/[a-z0-9_.-]+\.railway\.app$/i.test(origin)) {
-        return cb(null, true);
-      }
-      // Render service domains (*.onrender.com)
-      if (/^https:\/\/[a-z0-9_.-]+\.onrender\.com$/i.test(origin)) {
+      // Explicitly allowed origins from environment (operator override)
+      if (env.ALLOWED_ORIGINS.includes(origin)) {
         return cb(null, true);
       }
       return cb(new Error('CORS origin not allowed by policy'), false);

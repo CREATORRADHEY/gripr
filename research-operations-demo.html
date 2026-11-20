@@ -1072,8 +1072,8 @@
       if (liveResult && liveResult.success && (liveResult.extraction || liveResult.analysis)) {
         const ext = liveResult.extraction || {};
         const model = liveResult.modelUsed || liveResult.meta?.model || 'gemini-3.5-flash-lite';
-        const latencyMs = liveResult.latencyMs || liveResult.meta?.latencyMs || 10500;
-        const totalTokens = liveResult.tokenEstimate || liveResult.meta?.totalTokens || 2079;
+        const latencyMs = liveResult.latencyMs ? `${liveResult.latencyMs}ms` : 'Not available';
+        const totalTokens = liveResult.tokenEstimate ? `${liveResult.tokenEstimate} tokens` : 'Not available';
 
         const actor = ext.affectedParticipant?.content || liveResult.analysis?.actor || 'Kirana store owner (Jaipur)';
         const workflow = ext.operationalWorkflow?.content || liveResult.analysis?.workflow || 'Customer credit tracking';

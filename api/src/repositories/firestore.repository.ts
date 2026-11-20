@@ -196,8 +196,17 @@ export class CloudFirestoreMissionInquiryRepository implements IMissionInquiryRe
       updatedAt: new Date().toISOString()
     };
 
-    await this.firestore.collection('mission_inquiries').doc(id).set(inquiry);
-    return inquiry;
+    try {
+      await this.firestore.collection('mission_inquiries').doc(id).set(inquiry);
+      return inquiry;
+    } catch (err: any) {
+      const error: any = new Error(
+        `Cloud Firestore persistence error: ${err?.message || 'Database write error'}. Ensure verified Google Cloud Firestore credentials are attached.`
+      );
+      error.statusCode = 503;
+      error.code = 'FIRESTORE_UNAVAILABLE';
+      throw error;
+    }
   }
 
   async findById(id: string): Promise<MissionInquiry | null> {

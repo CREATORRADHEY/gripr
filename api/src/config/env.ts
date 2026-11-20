@@ -18,7 +18,7 @@ const EnvSchema = z.object({
   DEMO_MODE: z.enum(['true', 'false']).transform(v => v === 'true').default('false'),
   RATE_LIMIT_MAX: z.coerce.number().default(120),
   PERSISTENCE_MODE: z.enum(['cloud_firestore', 'local_file', 'demo_only', 'memory']).default(
-    process.env.NODE_ENV === 'production' ? 'cloud_firestore' : 'local_file'
+    process.env.NODE_ENV === 'production' ? 'demo_only' : 'local_file'
   ),
   SERVE_STATIC: z.enum(['true', 'false']).transform(v => v === 'true').default('true'),
 }).superRefine((data, ctx) => {
@@ -28,6 +28,13 @@ const EnvSchema = z.object({
         code: z.ZodIssueCode.custom,
         path: ['INTERNAL_AUTH_SECRET'],
         message: 'INTERNAL_AUTH_SECRET is mandatory in production and must not use known development default secrets.'
+      });
+    }
+    if (data.PERSISTENCE_MODE === 'local_file') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['PERSISTENCE_MODE'],
+        message: 'LOCAL_FILE_STORAGE is prohibited in production. Only cloud_firestore or demo_only are permitted.'
       });
     }
   }

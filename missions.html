@@ -377,6 +377,17 @@
         </div>
       </div>
 
+      <!-- DEMO_ONLY MODE NOTICE (WHEN REAL INQUIRY INTAKE IS DISABLED BEFORE PERSONAL DATA COLLECTION) -->
+      <div id="demoOnlyNotice" style="display:none; background:#FFFBEB; border:1px solid #F59E0B; border-radius:10px; padding:1.1rem 1.35rem; margin-bottom:1.75rem;">
+        <div style="display:flex; align-items:flex-start; gap:0.75rem;">
+          <span style="font-size:1.3rem; line-height:1;">ℹ️</span>
+          <div style="font-size:0.86rem; color:#92400E; line-height:1.5;">
+            <strong style="color:#B45309;">DEMO_ONLY MODE ACTIVE:</strong>
+            Real inquiry intake is disabled in this deployment instance because production Cloud Firestore is not connected. Personal contact data collection is paused to prevent data loss. Please click <strong>"⚡ Use Demo Data (Jaipur Kirana)"</strong> above to experience the complete 6-stage evidence intelligence pipeline.
+          </div>
+        </div>
+      </div>
+
       <!-- INVITATION NOTICE (IF VISITOR FOLLOWED A DEMO LINK, DOES NOT AUTO-PREFILL) -->
       <div id="demoInvitationBanner" style="display:none; background:#FFFBEB; border:1px solid #FDE68A; border-radius:10px; padding:0.9rem 1.25rem; margin-bottom:1.75rem; font-family:'Space Grotesk',sans-serif; font-size:0.85rem; color:#92400E;">
         💡 <strong>Demo Invitation:</strong> You followed a demonstration link. Click <strong>"Use Demo Data"</strong> above to load the synthetic Jaipur Kirana scenario into the form, or proceed with a real inquiry below.
@@ -1247,6 +1258,16 @@
       initCandidates();
       initWorkstreams();
 
+      // Backend status hook for DEMO_ONLY awareness
+      window.onGriprBackendStatusUpdated = function(status) {
+        if (status && !status.isCloudFirestore) {
+          const demoNotice = document.getElementById('demoOnlyNotice');
+          if (demoNotice && !isDemoMode) {
+            demoNotice.style.display = 'block';
+          }
+        }
+      };
+
       // Check if a confirmed inquiry exists from current session (Requirement 8 & 9)
       if (window.sessionStorage) {
         try {
@@ -1329,6 +1350,18 @@
     }
 
     function activateRealModeExplicitly() {
+      // Requirement 1: In DEMO_ONLY mode, disable real inquiry entry before personal data collection
+      if (window.GriprAPI && !window.GriprAPI.isRealInquirySupported()) {
+        const demoNotice = document.getElementById('demoOnlyNotice');
+        if (demoNotice) {
+          demoNotice.style.display = 'block';
+          demoNotice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        window.GriprUI.showToast('Real inquiry entry is disabled in DEMO_ONLY mode. Personal data collection is paused. Loaded Jaipur Kirana demo.', 'info');
+        activateDemoModeExplicitly();
+        return;
+      }
+
       const wasInDemo = isDemoMode;
       isDemoMode = false;
 
@@ -1785,6 +1818,19 @@
         return;
       }
       if (isSubmittingInquiry) return;
+
+      // Requirement 1: Guard against real submission if in DEMO_ONLY mode
+      if (window.GriprAPI && !window.GriprAPI.isRealInquirySupported()) {
+        const errMsg = 'Real mission inquiry intake is disabled in DEMO_ONLY mode. Production database credentials are not attached to this deployment instance. Please use the interactive Jaipur Kirana demonstration.';
+        const errAlert = document.getElementById('submissionErrorAlert');
+        if (errAlert) {
+          document.getElementById('submissionErrorAlertTitle').textContent = 'DEMO_ONLY Mode Active';
+          document.getElementById('submissionErrorAlertMsg').textContent = errMsg;
+          errAlert.style.display = 'block';
+        }
+        window.GriprUI.showToast(errMsg, 'error');
+        return;
+      }
 
       // Validate all wizard steps sequentially
       if (!validateScopingStep(1)) { showScopingStep(1); return; }
