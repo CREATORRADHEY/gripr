@@ -17,7 +17,8 @@
  */
 
 (function () {
-  // Configurable backend URL resolution (Cloudflare Pages, Railway, Local)
+  // Configurable backend URL resolution (Cloudflare Pages, Google Cloud Run, Railway Fallback, Local)
+  const DEFAULT_CLOUD_RUN_URL = 'https://gripr-backend-611571278421.asia-south1.run.app/api';
   const DEFAULT_RAILWAY_URL = 'https://gripr-backend-production.up.railway.app/api';
 
   function resolveBackendUrl() {
@@ -47,7 +48,7 @@
     if (typeof window !== 'undefined' && window.location) {
       const host = window.location.hostname;
       if (host.endsWith('.pages.dev') || host.endsWith('.cloudflarepages.com')) {
-        return DEFAULT_RAILWAY_URL;
+        return DEFAULT_CLOUD_RUN_URL;
       }
     }
 
