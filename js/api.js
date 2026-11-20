@@ -217,56 +217,69 @@
      * Calls POST /api/mission-inquiries
      * @param {Object} data
      */
-    async submitMissionInquiry(data) {
-      if (this.getMode() === 'live') {
+    async submitMissionInquiry(data = {}) {
+      const isExplicitDemo = data.isDemo === true;
+
+      // Real Inquiry: Always dispatch to live backend API, never silent demo fallback (Requirement B & E)
+      if (!isExplicitDemo) {
         try {
           const res = await fetch(`${BACKEND_URL}/mission-inquiries`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              orgName: data.orgName,
-              contactPerson: data.contactPerson || data.contactName,
-              contactEmail: data.contactEmail,
-              role: data.role || 'Product Lead',
-              sector: data.sector || 'general',
-              decisionAtStake: data.decisionAtStake,
-              hypothesis: data.hypothesis || 'Preliminary hypothesis under evaluation',
-              falsificationCriteria: data.falsificationCriteria || 'To be refined during scoping alignment',
-              targetParticipantProfile: data.targetParticipantProfile || data.problemToInvestigate,
-              industry: data.industry || 'B2B Workflow',
-              geography: data.geography || 'India (Regional clusters)',
-              constraints: data.constraints || 'None specified',
-              consentContact: true,
-              consentPrivacy: true
+              orgName: (data.orgName || '').trim(),
+              contactPerson: (data.contactPerson || data.contactName || '').trim(),
+              contactEmail: (data.contactEmail || '').trim(),
+              role: (data.role || 'Product Leader').trim(),
+              sector: (data.sector || 'general').trim(),
+              decisionAtStake: (data.decisionAtStake || '').trim(),
+              hypothesis: (data.hypothesis && data.hypothesis.trim().length >= 15)
+                ? data.hypothesis.trim()
+                : 'Hypothesis under qualitative field evaluation and falsification testing',
+              falsificationCriteria: (data.falsificationCriteria && data.falsificationCriteria.trim().length >= 15)
+                ? data.falsificationCriteria.trim()
+                : 'Evidence demonstrating that current assumptions fail in field operation',
+              targetParticipantProfile: (data.targetParticipantProfile || data.problemToInvestigate || '').trim(),
+              industry: (data.industry || (data.sector === 'logistics' ? 'Logistics & Freight' : 'B2B Workflow')).trim(),
+              geography: (data.geography || 'India (Regional clusters)').trim(),
+              constraints: (data.constraints || 'None specified').trim(),
+              consentContact: data.consentContact === true,
+              consentPrivacy: data.consentPrivacy === true
             })
           });
 
-          const json = await res.json();
+          const json = await res.json().catch(() => ({}));
           if (!res.ok) {
             const errMap = {};
             if (json.error && Array.isArray(json.error.details)) {
               json.error.details.forEach(d => { errMap[d.field] = d.message; });
             } else {
-              errMap.general = json.error ? json.error.message : 'Server rejected mission scoping submission.';
+              errMap.general = json.error ? (json.error.message || json.error) : `Server rejected mission scoping submission (Status ${res.status}).`;
             }
-            return { success: false, errors: errMap };
+            return { success: false, status: res.status, errors: errMap };
           }
 
           return {
             success: true,
             inquiryId: json.inquiryId,
-            status: json.status || 'RECEIVED',
-            message: json.message || 'Scoping inquiry received. A research lead will review scope parameters within 1 business day.'
+            status: json.status || 'AWAITING_SCOPE_REVIEW',
+            message: json.message || 'Scoping inquiry received. A research lead will review scope parameters within 1 business day.',
+            pricingNotice: json.pricingNotice,
+            disclaimer: json.disclaimer
           };
         } catch (err) {
           return {
             success: false,
-            errors: { general: `Backend connection error: ${err.message}. Ensure Fastify API is running on ${BACKEND_URL}.` }
+            networkError: true,
+            status: 0,
+            errors: {
+              general: `Backend connection error: ${err.message}. Ensure Fastify API is running on ${BACKEND_URL}. Real inquiries require a live connection.`
+            }
           };
         }
       }
 
-      // DEMO MODE FALLBACK
+      // EXPLICIT DEMO INQUIRY SIMULATION (Only if data.isDemo === true)
       await delay(180);
       const errors = {};
       if (!data.orgName || data.orgName.trim().length < 2) errors.orgName = 'Organization / Company name is required.';
@@ -285,7 +298,7 @@
       return {
         success: true,
         inquiryId: inquiryId,
-        status: 'RECEIVED',
+        status: 'AWAITING_SCOPE_REVIEW',
         message: 'Demo inquiry recorded locally. Our research team will review scoping parameters.'
       };
     },

@@ -603,17 +603,49 @@
                   </div>
 
                   <!-- COMMERCIAL TERMS CARD -->
-                  <div style="background:#FFF3EB; border:1px solid rgba(234,88,12,0.35); border-radius:10px; padding:1.25rem 1.5rem; margin-bottom:1.25rem;">
-                    <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#C2410C; margin-bottom:0.35rem;">
+                  <div style="background:#FFF3EB; border:1px solid rgba(234,88,12,0.35); border-radius:10px; padding:1.25rem 1.5rem; margin-bottom:1.25rem;" id="commercialTermsCard">
+                    <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#C2410C; margin-bottom:0.35rem;" id="commercialTermsBadge">
                       ILLUSTRATIVE COMMERCIAL TERMS — DEMO SIMULATION
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.35rem;">
-                      <span style="font-size:1.05rem; font-weight:700; color:var(--text-dark);">Experimental Pilot Scoping Fee</span>
-                      <span style="font-family:'DM Serif Display',serif; font-size:2rem; color:var(--accent);">₹49,000</span>
+                      <span style="font-size:1.05rem; font-weight:700; color:var(--text-dark);" id="commercialTermsTitle">Experimental Pilot Scoping Fee</span>
+                      <span style="font-family:'DM Serif Display',serif; font-size:2rem; color:var(--accent);" id="commercialTermsPrice">₹49,000</span>
                     </div>
-                    <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.5; margin:0;">
+                    <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.5; margin:0;" id="commercialTermsNotice">
                       * This represents an unvalidated exploratory test offer for a 5-participant research scope. In demo simulation mode, clicking "Simulate Advance Approval" advances the scenario in session simulation without payment processing or financial charges.
                     </p>
+                  </div>
+
+                  <!-- EXPLICIT PRIVACY & SCOPING CONSENT (Visible in Real Mode, Requirement D) -->
+                  <div id="consentControlsGroup" style="background:#FFFFFF; border:1px solid var(--border); border-radius:10px; padding:1.25rem 1.5rem; margin-bottom:1.25rem;">
+                    <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dark); margin-bottom:0.75rem;">
+                      RESEARCH INQUIRY CONSENT & SCOPING AUTHORIZATION *
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.85rem;">
+                      <div class="form-group" id="group-consentContact" style="margin-bottom:0;">
+                        <label style="display:flex; align-items:flex-start; gap:0.65rem; font-size:0.88rem; color:var(--text-body); cursor:pointer;">
+                          <input type="checkbox" id="consentContact" name="consentContact" style="margin-top:0.2rem; width:1.15rem; height:1.15rem; accent-color:var(--accent);">
+                          <span>I consent to GRIPR research operations contacting me regarding study scoping parameters, practitioner profile feasibility, and schedule alignment. *</span>
+                        </label>
+                        <span class="form-error-text" id="consentContactError" style="display:none; margin-left:1.8rem; margin-top:0.25rem;"></span>
+                      </div>
+
+                      <div class="form-group" id="group-consentPrivacy" style="margin-bottom:0;">
+                        <label style="display:flex; align-items:flex-start; gap:0.65rem; font-size:0.88rem; color:var(--text-body); cursor:pointer;">
+                          <input type="checkbox" id="consentPrivacy" name="consentPrivacy" style="margin-top:0.2rem; width:1.15rem; height:1.15rem; accent-color:var(--accent);">
+                          <span>I understand and agree that submitting this scoping inquiry initiates feasibility assessment only, with no financial charges, guaranteed outcome, or binding mission commitment until formally confirmed. *</span>
+                        </label>
+                        <span class="form-error-text" id="consentPrivacyError" style="display:none; margin-left:1.8rem; margin-top:0.25rem;"></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- SUBMISSION ERROR ALERT -->
+                  <div id="submissionErrorAlert" style="display:none; background:#FEF2F2; border:1px solid #F87171; border-radius:8px; padding:1rem 1.25rem; margin-bottom:1.25rem; font-size:0.88rem; color:#991B1B;">
+                    <div style="display:flex; align-items:center; gap:0.5rem; font-weight:700;">
+                      <span>⚠️</span> <span id="submissionErrorAlertTitle">Submission Error</span>
+                    </div>
+                    <div id="submissionErrorAlertMsg" style="margin-top:0.35rem; line-height:1.5;"></div>
                   </div>
 
                   <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-top:1.5rem;" id="step4ActionsRow">
@@ -626,6 +658,32 @@
                     <button type="submit" class="btn-cta-solid" id="submitRealMissionBtn" style="display:none;">
                       Submit Real Research Request →
                     </button>
+                  </div>
+
+                  <!-- REAL INQUIRY CONFIRMATION CARD (HTTP 201 SUCCESS, Requirement E) -->
+                  <div id="realInquirySuccessCard" style="display:none; margin-top:1.5rem;">
+                    <div style="background:#ECFDF5; border:2px solid #10B981; border-radius:12px; padding:2rem 1.75rem; text-align:center;">
+                      <div style="font-size:2.5rem; margin-bottom:0.5rem;">📨</div>
+                      <span class="evidence-badge badge-verified" id="realInquiryStatusBadge" style="margin-bottom:0.5rem; display:inline-block; background:#065F46; color:#ECFDF5;">STATUS: AWAITING_SCOPE_REVIEW</span>
+                      <h4 style="font-family:'DM Serif Display',serif; font-size:1.8rem; color:#065F46; margin:0.25rem 0 0.5rem;">
+                        Research Inquiry Submitted Successfully
+                      </h4>
+                      <div style="font-family:'Space Grotesk',sans-serif; font-size:1.05rem; font-weight:700; color:var(--accent); margin-bottom:0.75rem;">
+                        Inquiry Reference: <span id="confirmedInquiryId">INQ-XXXX</span>
+                      </div>
+                      <p style="font-size:0.92rem; color:#047857; max-width:620px; margin:0 auto 1rem; line-height:1.6;" id="realInquiryOrgSummary">
+                        Thank you, <strong id="confirmedContactPerson">Contact</strong>. Your scoping inquiry for <strong id="confirmedOrgName">Organization</strong> has been recorded in the GRIPR research intake queue.
+                      </p>
+                      <div style="font-size:0.84rem; color:#065F46; background:rgba(16,185,129,0.15); padding:0.85rem 1.25rem; border-radius:8px; display:inline-block; margin-bottom:1.5rem; text-align:left; max-width:620px; line-height:1.5;">
+                        <strong>⚠️ Important Notice Regarding Scoping:</strong><br>
+                        This is a formal research inquiry awaiting scoping review, <strong>not a paid or approved mission</strong>. Our qualitative research leads will evaluate participant cohort availability, cluster feasibility, and methodology fit within 1 business day. <strong>No payment has been processed and no binding contract is active.</strong>
+                      </div>
+                      <div>
+                        <button type="button" class="btn-cta-solid" onclick="resetToNewInquiry()" style="background:#059669; font-size:0.9rem; padding:0.75rem 1.75rem;">
+                          Submit Another Scoping Inquiry →
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
                   <!-- CONFIRMATION CARD (NO AUTO-ADVANCE) -->
@@ -658,25 +716,25 @@
           <!-- RIGHT: MISSION SCOPE SIDEBAR -->
           <div class="mission-sidebar" id="sidebarSpecificationCard">
             <div class="mission-card-package">
-              <div class="section-label"><span class="dot"></span> PILOT MISSION SPECIFICATION</div>
-              <h3 style="font-family:'DM Serif Display',serif; font-size:1.8rem; margin:0.25rem 0;">GRIPR Mission</h3>
-              <div class="mission-price">₹49,000</div>
-              <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.25rem;">
+              <div class="section-label" id="sidebarSectionLabel"><span class="dot"></span> PILOT MISSION SPECIFICATION</div>
+              <h3 style="font-family:'DM Serif Display',serif; font-size:1.8rem; margin:0.25rem 0;" id="sidebarTitle">GRIPR Mission</h3>
+              <div class="mission-price" id="sidebarPrice">₹49,000</div>
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.25rem;" id="sidebarPriceSubtitle">
                 EXPERIMENTAL PILOT PRICE · 5 PARTICIPANTS
               </div>
 
-              <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dark); margin-bottom:0.75rem;">
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dark); margin-bottom:0.75rem;" id="sidebarFeaturesHeader">
                 WHAT THIS MISSION INCLUDES:
               </div>
 
-              <ul class="mission-feature-list">
+              <ul class="mission-feature-list" id="sidebarFeaturesList">
                 <li><span class="check">✓</span> <span><strong>5 Synthetic Operator Profiles:</strong> Mapped domain tenure in target cluster.</span></li>
                 <li><span class="check">✓</span> <span><strong>Executive Decision Brief:</strong> Explicit <em>Reject/Reframe</em> recommendation.</span></li>
                 <li><span class="check">✓</span> <span><strong>Contradiction Audit:</strong> Where field truth breaks software assumptions.</span></li>
                 <li><span class="check">✓</span> <span><strong>Verbatim Source Quotes:</strong> Translated and verified transcripts.</span></li>
               </ul>
 
-              <div style="background:var(--bg-light); border-radius:8px; padding:1.25rem; font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-top:1.5rem;">
+              <div style="background:var(--bg-light); border-radius:8px; padding:1.25rem; font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-top:1.5rem;" id="sidebarProtocolBox">
                 <strong>Ethical Research Protocol:</strong><br>
                 Field practitioners participate voluntarily under formal informed consent and receive direct honorariums for their time.
               </div>
@@ -1098,6 +1156,7 @@
     let maxUnlockedStage = 1; // Strict prerequisite state machine (Section 2)
     let selectedResearchers = [];
     let geminiEngine = 'live'; // 'live' or 'precomputed'
+    let isSubmittingInquiry = false;
 
     const REQUIRED_SKILLS = [
       'qualitative_interviewing',
@@ -1134,8 +1193,11 @@
       }
 
       // Ensure form starts completely clean and on Step 1 (Section 1)
+      isDemoMode = false;
       resetScopingFields();
       showScopingStep(1);
+      syncMissionModeUI();
+      attachFormSubmitListener();
     });
 
     // ----------------------------------------------------
@@ -1147,12 +1209,16 @@
       // Update toggle buttons UI
       const btnDemo = document.getElementById('btnUseDemoData');
       const btnReal = document.getElementById('btnCommissionReal');
-      btnDemo.className = 'btn-cta-solid';
-      btnDemo.style.background = 'var(--accent)';
-      btnDemo.style.color = '#fff';
-      btnReal.className = 'btn-cta-ghost';
-      btnReal.style.background = '#fff';
-      btnReal.style.color = 'var(--text-secondary)';
+      if (btnDemo) {
+        btnDemo.className = 'btn-cta-solid';
+        btnDemo.style.background = 'var(--accent)';
+        btnDemo.style.color = '#fff';
+      }
+      if (btnReal) {
+        btnReal.className = 'btn-cta-ghost';
+        btnReal.style.background = '#fff';
+        btnReal.style.color = 'var(--text-secondary)';
+      }
 
       // Show demo banner & stepper
       document.getElementById('demoMasterNotice').style.display = 'block';
@@ -1169,6 +1235,7 @@
 
       // Stay on the current wizard step (do not auto-advance or submit)
       clearErrors();
+      syncMissionModeUI();
       window.GriprUI.showToast('Demo data loaded for Jaipur Kirana mission. Proceed step-by-step.', 'success');
     }
 
@@ -1177,12 +1244,16 @@
 
       const btnDemo = document.getElementById('btnUseDemoData');
       const btnReal = document.getElementById('btnCommissionReal');
-      btnReal.className = 'btn-cta-solid';
-      btnReal.style.background = 'var(--accent)';
-      btnReal.style.color = '#fff';
-      btnDemo.className = 'btn-cta-ghost';
-      btnDemo.style.background = '#fff';
-      btnDemo.style.color = 'var(--text-secondary)';
+      if (btnReal) {
+        btnReal.className = 'btn-cta-solid';
+        btnReal.style.background = 'var(--accent)';
+        btnReal.style.color = '#fff';
+      }
+      if (btnDemo) {
+        btnDemo.className = 'btn-cta-ghost';
+        btnDemo.style.background = '#fff';
+        btnDemo.style.color = 'var(--text-secondary)';
+      }
 
       document.getElementById('demoMasterNotice').style.display = 'none';
       const inviteBanner = document.getElementById('demoInvitationBanner');
@@ -1199,7 +1270,134 @@
       resetScopingFields();
       clearErrors();
       showScopingStep(1);
+      syncMissionModeUI();
       window.GriprUI.showToast('Clean scoping form ready for your real research inquiry.', 'info');
+    }
+
+    // ----------------------------------------------------
+    // UNIFIED MODE SYNCHRONIZATION (Requirement A)
+    // ----------------------------------------------------
+    function syncMissionModeUI() {
+      const btnDemo = document.getElementById('btnUseDemoData');
+      const btnReal = document.getElementById('btnCommissionReal');
+      const masterStepper = document.getElementById('masterStepperBar');
+      const demoNotice = document.getElementById('demoMasterNotice');
+      const inviteBanner = document.getElementById('demoInvitationBanner');
+      const simBtn = document.getElementById('simulateAdvanceBtn');
+      const realBtn = document.getElementById('submitRealMissionBtn');
+      const statusLabel = document.getElementById('activeModeStatusLabel');
+      const opsWorkspace = document.getElementById('operationsWorkspaceSection');
+      const consentGroup = document.getElementById('consentControlsGroup');
+
+      if (isDemoMode) {
+        if (btnDemo) {
+          btnDemo.className = 'btn-cta-solid';
+          btnDemo.style.background = 'var(--accent)';
+          btnDemo.style.color = '#fff';
+        }
+        if (btnReal) {
+          btnReal.className = 'btn-cta-ghost';
+          btnReal.style.background = '#fff';
+          btnReal.style.color = 'var(--text-secondary)';
+        }
+        if (demoNotice) demoNotice.style.display = 'block';
+        if (inviteBanner) inviteBanner.style.display = 'none';
+        if (masterStepper) masterStepper.style.display = 'flex';
+        if (simBtn) simBtn.style.display = 'inline-block';
+        if (realBtn) realBtn.style.display = 'none';
+        if (statusLabel) statusLabel.textContent = '⚡ Demo Mode Active';
+        if (consentGroup) consentGroup.style.display = 'none';
+
+        updateCommercialReviewTerms(true);
+        updateSidebarContent(true);
+      } else {
+        if (btnReal) {
+          btnReal.className = 'btn-cta-solid';
+          btnReal.style.background = 'var(--accent)';
+          btnReal.style.color = '#fff';
+        }
+        if (btnDemo) {
+          btnDemo.className = 'btn-cta-ghost';
+          btnDemo.style.background = '#fff';
+          btnDemo.style.color = 'var(--text-secondary)';
+        }
+        if (demoNotice) demoNotice.style.display = 'none';
+        if (inviteBanner) inviteBanner.style.display = 'none';
+        if (masterStepper) masterStepper.style.display = 'none';
+        if (simBtn) simBtn.style.display = 'none';
+        if (realBtn) realBtn.style.display = 'inline-block';
+        if (statusLabel) statusLabel.textContent = '● Real Inquiry Mode';
+        if (opsWorkspace) opsWorkspace.style.display = 'none';
+        if (consentGroup) consentGroup.style.display = 'block';
+
+        updateCommercialReviewTerms(false);
+        updateSidebarContent(false);
+      }
+    }
+
+    function updateCommercialReviewTerms(isDemo) {
+      const badge = document.getElementById('commercialTermsBadge');
+      const title = document.getElementById('commercialTermsTitle');
+      const price = document.getElementById('commercialTermsPrice');
+      const notice = document.getElementById('commercialTermsNotice');
+      if (!badge || !title || !price || !notice) return;
+
+      if (isDemo) {
+        badge.textContent = 'ILLUSTRATIVE COMMERCIAL TERMS — DEMO SIMULATION';
+        title.textContent = 'Experimental Pilot Scoping Fee';
+        price.textContent = '₹49,000';
+        notice.textContent = '* This represents an unvalidated exploratory test offer for a 5-participant research scope. In demo simulation mode, clicking "Simulate Advance Approval" advances the scenario in session simulation without payment processing or financial charges.';
+      } else {
+        badge.textContent = 'INDICATIVE COMMERCIAL TERMS — FORMAL INQUIRY';
+        title.textContent = 'Experimental Indicative Scope Fee';
+        price.textContent = '₹49,000';
+        notice.textContent = '* This represents an experimental indicative price for a 5-participant qualitative research scope. No payment is charged upon inquiry submission. A GRIPR research lead will review participant feasibility and align scoping parameters before any commercial commitment.';
+      }
+    }
+
+    function updateSidebarContent(isDemo) {
+      const label = document.getElementById('sidebarSectionLabel');
+      const title = document.getElementById('sidebarTitle');
+      const price = document.getElementById('sidebarPrice');
+      const sub = document.getElementById('sidebarPriceSubtitle');
+      const header = document.getElementById('sidebarFeaturesHeader');
+      const list = document.getElementById('sidebarFeaturesList');
+      const proto = document.getElementById('sidebarProtocolBox');
+      if (!label || !title || !price || !sub || !header || !list || !proto) return;
+
+      if (isDemo) {
+        label.innerHTML = '<span class="dot"></span> PILOT MISSION SPECIFICATION';
+        title.textContent = 'GRIPR Mission';
+        price.textContent = '₹49,000';
+        sub.textContent = 'EXPERIMENTAL PILOT PRICE · 5 PARTICIPANTS';
+        header.textContent = 'WHAT THIS MISSION INCLUDES:';
+        list.innerHTML = `
+          <li><span class="check">✓</span> <span><strong>5 Synthetic Operator Profiles:</strong> Mapped domain tenure in target cluster.</span></li>
+          <li><span class="check">✓</span> <span><strong>Executive Decision Brief:</strong> Explicit <em>Reject/Reframe</em> recommendation.</span></li>
+          <li><span class="check">✓</span> <span><strong>Contradiction Audit:</strong> Where field truth breaks software assumptions.</span></li>
+          <li><span class="check">✓</span> <span><strong>Verbatim Source Quotes:</strong> Translated and verified transcripts.</span></li>
+        `;
+        proto.innerHTML = `
+          <strong>Ethical Research Protocol:</strong><br>
+          Field practitioners participate voluntarily under formal informed consent and receive direct honorariums for their time.
+        `;
+      } else {
+        label.innerHTML = '<span class="dot"></span> REAL MISSION INQUIRY';
+        title.textContent = 'Qualitative Scoping';
+        price.textContent = '₹49,000';
+        sub.textContent = 'EXPERIMENTAL INDICATIVE SCOPE · SUBJECT TO REVIEW';
+        header.textContent = 'WHAT THIS SCOPING COVERS:';
+        list.innerHTML = `
+          <li><span class="check">✓</span> <span><strong>Proposed Qualitative Scope:</strong> Targeted fieldwork with verified industry practitioners.</span></li>
+          <li><span class="check">✓</span> <span><strong>Feasibility Assessment:</strong> Participant availability and regional cluster validation.</span></li>
+          <li><span class="check">✓</span> <span><strong>Evidence-Backed Synthesis:</strong> Firsthand transcripts, contradiction mapping, and decision intelligence.</span></li>
+          <li><span class="check">✓</span> <span><strong>Scope Subject to GRIPR Review:</strong> Formal qualitative evaluation before project commitment.</span></li>
+        `;
+        proto.innerHTML = `
+          <strong>Commercial Scoping Notice:</strong><br>
+          No payment is collected at this stage. Submitting an inquiry does not constitute a confirmed contract or guaranteed delivery outcome. Formal scoping review is required.
+        `;
+      }
     }
 
     function populateDemoScopingFields() {
@@ -1233,12 +1431,26 @@
       document.getElementById('operationalContext').value = '';
       document.getElementById('geography').value = '';
 
+      const consentContact = document.getElementById('consentContact');
+      if (consentContact) consentContact.checked = false;
+      const consentPrivacy = document.getElementById('consentPrivacy');
+      if (consentPrivacy) consentPrivacy.checked = false;
+
       const succ = document.getElementById('simulatedApprovalSuccessCard');
       if (succ) succ.style.display = 'none';
+      const realSucc = document.getElementById('realInquirySuccessCard');
+      if (realSucc) realSucc.style.display = 'none';
+      const errAlert = document.getElementById('submissionErrorAlert');
+      if (errAlert) errAlert.style.display = 'none';
+
       const row = document.getElementById('step4ActionsRow');
       if (row) row.style.display = 'flex';
-      const simBtn = document.getElementById('simulateAdvanceBtn');
-      if (simBtn) simBtn.style.display = isDemoMode ? 'inline-block' : 'none';
+
+      syncMissionModeUI();
+    }
+
+    function resetToNewInquiry() {
+      activateRealModeExplicitly();
     }
 
     // ----------------------------------------------------
@@ -1293,11 +1505,11 @@
         const email = document.getElementById('contactEmail').value.trim();
 
         if (org.length < 2) {
-          setError('orgName', 'Please provide your organization name.');
+          setError('orgName', 'Please provide your organization name (minimum 2 characters).');
           valid = false;
         }
         if (person.length < 2) {
-          setError('contactPerson', 'Please provide your full name.');
+          setError('contactPerson', 'Please provide your full name (minimum 2 characters).');
           valid = false;
         }
         if (!email || !email.includes('@')) {
@@ -1312,7 +1524,7 @@
           setError('decisionAtStake', 'Please describe the decision at stake (minimum 20 characters).');
           valid = false;
         }
-        if (problem.length < 20) {
+        if (problem.length < 10) {
           setError('problemToInvestigate', 'Please describe the problem or workflow to investigate.');
           valid = false;
         }
@@ -1321,6 +1533,20 @@
         if (target.length < 5) {
           setError('targetParticipantProfile', 'Please describe the target participant profile.');
           valid = false;
+        }
+      } else if (step === 4) {
+        if (!isDemoMode) {
+          const consentContact = document.getElementById('consentContact');
+          const consentPrivacy = document.getElementById('consentPrivacy');
+
+          if (!consentContact || !consentContact.checked) {
+            setError('consentContact', 'Consent to be contacted regarding research scoping is required.');
+            valid = false;
+          }
+          if (!consentPrivacy || !consentPrivacy.checked) {
+            setError('consentPrivacy', 'Privacy and scoping terms consent is required.');
+            valid = false;
+          }
         }
       }
 
@@ -1348,14 +1574,19 @@
     // Safe review summary construction with XSS escaping (Section 7)
     function populateReviewSummary() {
       const card = document.getElementById('reviewSummaryCard');
-      const org = escapeHtml(document.getElementById('orgName').value.trim() || 'RetailFlow Intelligence Labs');
-      const person = escapeHtml(document.getElementById('contactPerson').value.trim() || 'Aditi Sharma');
-      const email = escapeHtml(document.getElementById('contactEmail').value.trim() || 'aditi.sharma@retailflow.test');
+      if (!card) return;
+
+      const org = escapeHtml(document.getElementById('orgName').value.trim() || (isDemoMode ? 'RetailFlow Intelligence Labs' : '—'));
+      const person = escapeHtml(document.getElementById('contactPerson').value.trim() || (isDemoMode ? 'Aditi Sharma' : '—'));
+      const email = escapeHtml(document.getElementById('contactEmail').value.trim() || (isDemoMode ? 'aditi.sharma@retailflow.test' : '—'));
       const role = escapeHtml(document.getElementById('userRole').value);
-      const decision = escapeHtml(document.getElementById('decisionAtStake').value.trim());
-      const problem = escapeHtml(document.getElementById('problemToInvestigate').value.trim());
-      const hypothesis = escapeHtml(document.getElementById('hypothesis').value.trim() || 'None provided');
-      const falsification = escapeHtml(document.getElementById('falsificationCriteria').value.trim() || 'To be refined with research lead');
+      const decision = escapeHtml(document.getElementById('decisionAtStake').value.trim() || '—');
+      const problem = escapeHtml(document.getElementById('problemToInvestigate').value.trim() || '—');
+      const hypothesis = escapeHtml(document.getElementById('hypothesis').value.trim() || (isDemoMode ? 'Kirana store owners lose 8-12%...' : 'None provided'));
+      const falsification = escapeHtml(document.getElementById('falsificationCriteria').value.trim() || (isDemoMode ? 'If retailers deliberately avoid...' : 'To be refined with research lead'));
+      const target = escapeHtml(document.getElementById('targetParticipantProfile').value.trim() || (isDemoMode ? 'Synthetic demonstration profiles: Independent neighborhood kirana store owners...' : '—'));
+      const sector = escapeHtml(document.getElementById('sector').value || 'general');
+      const geography = escapeHtml(document.getElementById('geography').value.trim() || (isDemoMode ? 'Jaipur, Rajasthan' : 'India (Regional clusters)'));
 
       card.innerHTML = `
         <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:0.5rem;">
@@ -1368,11 +1599,134 @@
         <div style="margin-top:0.4rem;">
           <strong>Problem / Workflow:</strong><br>${problem}
         </div>
+        <div style="margin-top:0.4rem;">
+          <strong>Target Profile:</strong> ${target} · <strong>Sector:</strong> ${sector} · <strong>Geography:</strong> ${geography}
+        </div>
         <div style="margin-top:0.4rem; font-size:0.82rem; color:var(--text-secondary);">
           <strong>Current Hypothesis:</strong> ${hypothesis}<br>
           <strong>Falsification Condition:</strong> ${falsification}
         </div>
       `;
+    }
+
+    // ----------------------------------------------------
+    // REAL INQUIRY SUBMISSION (Requirement B & E)
+    // ----------------------------------------------------
+    function attachFormSubmitListener() {
+      const form = document.getElementById('missionScopingForm');
+      if (!form) return;
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (isDemoMode) {
+          simulateAdvanceApprovalDirect();
+          return;
+        }
+        await handleRealInquirySubmission();
+      });
+    }
+
+    async function handleRealInquirySubmission() {
+      if (isSubmittingInquiry) return;
+
+      // Validate all wizard steps sequentially
+      if (!validateScopingStep(1)) { showScopingStep(1); return; }
+      if (!validateScopingStep(2)) { showScopingStep(2); return; }
+      if (!validateScopingStep(3)) { showScopingStep(3); return; }
+      if (!validateScopingStep(4)) { showScopingStep(4); return; }
+
+      const errAlert = document.getElementById('submissionErrorAlert');
+      if (errAlert) errAlert.style.display = 'none';
+
+      const submitBtn = document.getElementById('submitRealMissionBtn');
+      const origText = submitBtn ? submitBtn.innerHTML : 'Submit Real Research Request →';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.7';
+        submitBtn.innerHTML = 'Submitting Request...';
+      }
+      isSubmittingInquiry = true;
+
+      const payload = {
+        orgName: document.getElementById('orgName').value.trim(),
+        contactPerson: document.getElementById('contactPerson').value.trim(),
+        contactEmail: document.getElementById('contactEmail').value.trim(),
+        role: document.getElementById('userRole').value.trim() || 'Product Leader',
+        sector: document.getElementById('sector').value.trim() || 'general',
+        decisionAtStake: document.getElementById('decisionAtStake').value.trim(),
+        problemToInvestigate: document.getElementById('problemToInvestigate').value.trim(),
+        hypothesis: document.getElementById('hypothesis').value.trim(),
+        falsificationCriteria: document.getElementById('falsificationCriteria').value.trim(),
+        targetParticipantProfile: document.getElementById('targetParticipantProfile').value.trim(),
+        industry: document.getElementById('sector').value === 'logistics' ? 'Logistics & Freight' : 'B2B Workflow',
+        geography: document.getElementById('geography').value.trim() || 'India (Regional clusters)',
+        constraints: document.getElementById('operationalContext').value.trim() || 'None specified',
+        consentContact: document.getElementById('consentContact') ? document.getElementById('consentContact').checked : false,
+        consentPrivacy: document.getElementById('consentPrivacy') ? document.getElementById('consentPrivacy').checked : false,
+        isDemo: false
+      };
+
+      try {
+        const res = await window.GriprAPI.submitMissionInquiry(payload);
+
+        if (!res.success) {
+          isSubmittingInquiry = false;
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            submitBtn.innerHTML = origText;
+          }
+
+          let errMsg = 'Failed to submit inquiry.';
+          if (res.errors) {
+            if (res.errors.general) errMsg = res.errors.general;
+            else {
+              const firstKey = Object.keys(res.errors)[0];
+              errMsg = `${firstKey}: ${res.errors[firstKey]}`;
+            }
+          }
+          if (errAlert) {
+            document.getElementById('submissionErrorAlertTitle').textContent = res.networkError ? 'Connection Error' : 'Validation Error';
+            document.getElementById('submissionErrorAlertMsg').textContent = errMsg;
+            errAlert.style.display = 'block';
+          }
+          window.GriprUI.showToast(errMsg, 'error');
+          return;
+        }
+
+        // Genuine HTTP 201 Success (Requirement E)
+        isSubmittingInquiry = false;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.innerHTML = origText;
+        }
+
+        document.getElementById('step4ActionsRow').style.display = 'none';
+        const consentGroup = document.getElementById('consentControlsGroup');
+        if (consentGroup) consentGroup.style.display = 'none';
+
+        document.getElementById('confirmedInquiryId').textContent = res.inquiryId;
+        document.getElementById('confirmedContactPerson').textContent = payload.contactPerson;
+        document.getElementById('confirmedOrgName').textContent = payload.orgName;
+        document.getElementById('realInquiryStatusBadge').textContent = `STATUS: ${res.status || 'AWAITING_SCOPE_REVIEW'}`;
+
+        document.getElementById('realInquirySuccessCard').style.display = 'block';
+        window.GriprUI.showToast(`Inquiry ${res.inquiryId} submitted successfully. Status: ${res.status || 'AWAITING_SCOPE_REVIEW'}.`, 'success');
+      } catch (err) {
+        isSubmittingInquiry = false;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.innerHTML = origText;
+        }
+        if (errAlert) {
+          document.getElementById('submissionErrorAlertTitle').textContent = 'Unexpected Error';
+          document.getElementById('submissionErrorAlertMsg').textContent = err.message || 'An unexpected error occurred during submission.';
+          errAlert.style.display = 'block';
+        }
+        window.GriprUI.showToast(err.message || 'An unexpected error occurred.', 'error');
+      }
     }
 
     // ----------------------------------------------------
