@@ -1,0 +1,14 @@
+
+flowchart TB
+    A["Frontend Submission"] --> B["Backend API"]
+    B --> C["Validate Input + Consent"]
+    C --> D["Repository Interface"]
+    C --> E["Gemini Extraction"]
+    E --> F["Schema + Evidence Validation"]
+    F --> G["Candidate Match Analysis"]
+    G --> H["Human Review State"]
+    H --> I["Frontend Evidence View"]
+    D -.-> J["Temporary Development Adapter"]
+    classDef engine fill:#eaf0ff,stroke:#467ad3,color:#151515
+    class B,E,F,G engine
+  

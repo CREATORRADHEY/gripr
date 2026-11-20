@@ -1,0 +1,19 @@
+
+flowchart TB
+    A["Frontend"] --> B["Backend API"]
+    B --> C["Authentication + Authorization"]
+    C --> D[("Firestore")]
+    B --> E["Gemini Processing"]
+    E --> F["Evidence Validation"]
+    F --> D
+    D --> G["Problem Case Explorer"]
+    D --> H["Mission Records"]
+    D --> I["Consent / Audit Records"]
+    J["Automated Tests"] --> B
+    K["Monitoring + Deployment Verification"] --> B
+    classDef security fill:#edf8ef,stroke:#3c996e,color:#161616
+    class C,D,I,J,K security
+  
+
+
+  

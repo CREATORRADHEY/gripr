@@ -1,0 +1,16 @@
+
+flowchart TB
+    A["GRIPR Homepage"] --> B{"User intent"}
+    B -->|Contributor| C["Report Problem"]
+    B -->|Builder| D["Explore Problems"]
+    B -->|Company| E["Create Mission"]
+    C --> F["Review + Consent"]
+    F --> G["Submission Status"]
+    D --> H["Problem Case File"]
+    H --> I["Inspect Evidence"]
+    I --> J["Request Investigation"]
+    E --> K["Mission Scope Review"]
+    L["Admin Workspace"] --> M["Review Reports and Matches"]
+    classDef focus fill:#fff0df,stroke:#e85a24,color:#161616
+    class C,H,E,L focus
+  

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit a Problem — GRIPR</title>
+  <!-- Redirect to the new submit page -->
+  <meta http-equiv="refresh" content="0; url=submit.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .q-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem; background:var(--bg-light); position: relative; }
+    .q-box { width:100%; max-width:520px; text-align:center; }
+    .q-box h1 { font-family:'DM Serif Display',serif; font-size:2.5rem; font-weight:400; margin-bottom:0.75rem; color: var(--text-dark); }
+    .q-box .sub { font-size:1.05rem; color:var(--text-secondary); margin-bottom:2.5rem; }
+    .q-label { font-family:'Space Grotesk',sans-serif; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--accent); margin-bottom:1.5rem; }
+    .q-opts { display:flex; flex-direction:column; gap:0.75rem; }
+    .q-btn { background:var(--bg-white); border:1px solid var(--border); padding:1.25rem 1.5rem; border-radius:12px; font-family:'Space Grotesk',sans-serif; font-size:1.05rem; color:var(--text-dark); cursor:pointer; display:flex; align-items:center; gap:1rem; text-align:left; transition:all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+    .q-btn:hover { border-color:var(--accent); transform:translateX(8px); box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: #fffaf7; }
+    .q-btn span { font-size:1.3rem; }
+    
+    .btn-back { position: absolute; top: 2rem; left: 2rem; display: flex; align-items: center; gap: 0.5rem; font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; z-index: 10; }
+    .btn-back:hover { color: var(--accent); }
+
+    @media (max-width:480px) { .q-box h1 { font-size:2rem; } .q-btn { font-size:0.95rem; padding:1rem 1.25rem; } .btn-back { top: 1rem; left: 1rem; } }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="btn-back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    Back to Home
+  </a>
+  <div class="q-wrap">
+    <div class="q-box">
+      <div class="q-label">You're in ✅</div>
+      <h1>One quick question.</h1>
+      <p class="sub">This helps us send you the most relevant problems. 👇</p>
+      <div class="q-opts">
+        <button class="q-btn" onclick="selectOption('DEV')"><span>🛠️</span> I'm a developer / builder</button>
+        <button class="q-btn" onclick="selectOption('SEEK')"><span>💡</span> I'm looking for startup ideas</button>
+        <button class="q-btn" onclick="selectOption('EXP')"><span>👀</span> Just exploring for now</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJiG9VIuSmvUnNwEyKKeBJ2nA5LHvA0wdZDp-GiucRndrMyV-O8RfuqQ3eH9jwWy-0rg/exec';
+
+    function selectOption(type){
+      const email = localStorage.getItem('gripr_user_email');
+      localStorage.setItem('gripr_type', type);
+      
+      if (email) {
+        fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `email=${encodeURIComponent(email)}&choice=${encodeURIComponent(type)}`
+        });
+      }
+
+      window.location.href = 'thankyou.html?type=' + type;
+    }
+  </script>
+</body>
+</html>

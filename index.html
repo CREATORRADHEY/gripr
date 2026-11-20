@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GRIPR — A multilingual live feed of problems worth building for.</title>
+  <meta name="description" content="Discover real vernacular frustrations, unmet demand, and overlooked inefficiencies across India. A curated signal feed for builders.">
+  <meta property="og:title" content="GRIPR — Problems worth building for.">
+  <meta property="og:description" content="A multilingual live feed of real human frustrations. Manually curated for builders who want to find what's actually broken.">
+  <meta property="og:image" content="assets/og-image.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <div class="nav-wrapper">
+    <nav>
+      <div class="nav-logo">GRIPR</div>
+      <div class="nav-links">
+        <a href="feed.html" class="nav-link">Signal Feed</a>
+        <a href="submit.html" class="nav-link">Submit a Problem</a>
+      </div>
+      <a href="#waitlist" class="btn-nav">Join Waitlist</a>
+    </nav>
+  </div>
+
+  <main>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero container">
+      <div class="live-bar fade-in">
+        <span class="live-dot"></span>
+        MULTILINGUAL LIVE SIGNAL FEED · CURATED BY HAND
+      </div>
+
+      <h1 class="fade-in" id="heroTitle" style="transition: opacity 0.8s ease-in-out;">
+        Discover problems
+        <span class="accent-italic">people actually want solved.</span>
+      </h1>
+
+      <p class="hero-desc fade-in">
+        A multilingual live feed of real vernacular frustrations, unmet demand, and overlooked
+        inefficiencies across India. For builders who want to find what's
+        broken before anyone else does.
+      </p>
+
+      <div class="hero-dual-cta fade-in">
+        <a href="feed.html" class="btn-cta-solid">Explore the Signal Feed →</a>
+        <a href="submit.html" class="btn-cta-ghost">Submit a Problem</a>
+      </div>
+
+      <div class="form-trust fade-in">
+        <span>Curated by hand</span>
+        <span>·</span>
+        <span>Free for builders</span>
+        <span>·</span>
+        <span>Growing weekly</span>
+      </div>
+    </section>
+
+    <!-- ============ SIGNAL PREVIEW ============ -->
+    <section class="section-light">
+      <div class="container">
+        <div class="section-label fade-in">
+          <span class="dot"></span>
+          THIS WEEK'S SIGNALS
+        </div>
+        <h2 class="section-title-serif fade-in">
+          This is what's<br>actually broken.
+        </h2>
+        <p class="section-sub fade-in">
+          Not ideas. Not opinions. Real problems people face daily —
+          specific, recurring, overlooked.
+        </p>
+
+        <div class="problems-grid" id="previewGrid">
+
+          <div class="problem-card fade-in">
+            <div class="problem-header">
+              <span class="problem-id">SIG-019</span>
+              <span class="tag" style="background:rgba(234,88,12,0.08); color:var(--accent); border-color:transparent;">Agriculture</span>
+            </div>
+            <div class="reported-by">Spotted across: <strong>Farms, Rural MP</strong></div>
+            <p class="problem-quote">"Gaon mein fertilizer rates ka koi live system nahi hai. Dealership wale apni marzi ka rate lagate hain jab demand high hoti hai."</p>
+            <div class="problem-footer">
+              <div class="tag-group">
+                <span class="tag">Rural MP</span>
+                <span class="tag" style="background:#f3f4f6; color:#4b5563;">Hinglish</span>
+              </div>
+              <a href="feed.html" class="see-feed-link">See on feed →</a>
+            </div>
+          </div>
+
+          <div class="problem-card fade-in">
+            <div class="problem-header">
+              <span class="problem-id">SIG-021</span>
+              <span class="tag" style="background:rgba(234,88,12,0.08); color:var(--accent); border-color:transparent;">Logistics</span>
+            </div>
+            <div class="reported-by">Spotted across: <strong>Transport, Tamil Nadu</strong></div>
+            <p class="problem-quote">"லோக்கல் டிரான்ஸ்போர்ட் advance payment இல்லாமல் கிடைக்காது. (Local transport isn't available without full advance payment). Trust is zero."</p>
+            <div class="problem-footer">
+              <div class="tag-group">
+                <span class="tag">Tamil Nadu</span>
+                <span class="tag" style="background:#f3f4f6; color:#4b5563;">தமிழ்</span>
+              </div>
+              <a href="feed.html" class="see-feed-link">See on feed →</a>
+            </div>
+          </div>
+
+          <div class="problem-card fade-in">
+            <div class="problem-header">
+              <span class="problem-id">SIG-010</span>
+              <span class="tag" style="background:rgba(234,88,12,0.08); color:var(--accent); border-color:transparent;">Commerce</span>
+            </div>
+            <div class="reported-by">Spotted across: <strong>Street Vendors, Pan India</strong></div>
+            <p class="problem-quote">"Street food vendors can't accept digital payments reliably. Most UPI apps crash on low-end phones with poor connectivity."</p>
+            <div class="problem-footer">
+              <div class="tag-group"><span class="tag">Pan India</span></div>
+              <a href="feed.html" class="see-feed-link">See on feed →</a>
+            </div>
+          </div>
+
+          <div class="problem-card fade-in">
+            <div class="problem-header">
+              <span class="problem-id">SIG-004</span>
+              <span class="tag" style="background:rgba(234,88,12,0.08); color:var(--accent); border-color:transparent;">Commerce</span>
+            </div>
+            <div class="reported-by">Spotted across: <strong>Kirana Owners, Pan India</strong></div>
+            <p class="problem-quote">"Kirana store owners have no simple way to track which supplier owes them credit. It's all in a notebook."</p>
+            <div class="problem-footer">
+              <div class="tag-group"><span class="tag">Pan India</span></div>
+              <a href="feed.html" class="see-feed-link">See on feed →</a>
+            </div>
+          </div>
+
+          <div class="problem-card fade-in">
+            <div class="problem-header">
+              <span class="problem-id">SIG-009</span>
+              <span class="tag" style="background:rgba(234,88,12,0.08); color:var(--accent); border-color:transparent;">Compliance</span>
+            </div>
+            <div class="reported-by">Spotted across: <strong>Farmers, Rural India</strong></div>
+            <p class="problem-quote">"Government subsidy applications require multiple physical visits to offices 40–60 km away. Most farmers give up."</p>
+            <div class="problem-footer">
+              <div class="tag-group"><span class="tag">Rural India</span></div>
+              <a href="feed.html" class="see-feed-link">See on feed →</a>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="see-all-wrap fade-in">
+          <a href="feed.html" class="btn-see-all">See all signals on the feed →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ WHY GRIPR ============ -->
+    <section class="section-dark">
+      <div class="container">
+        <div class="why-gripr fade-in">
+          <div class="section-label" style="color:rgba(255,255,255,0.35);">
+            <span class="dot" style="background:var(--accent);"></span>
+            WHY GRIPR EXISTS
+          </div>
+          <blockquote class="why-quote">
+            "AI made building easy.<br>
+            Finding <em>meaningful problems</em> became the hard part."
+          </blockquote>
+          <p class="why-body">
+            Builders today scroll Reddit endlessly, chase Twitter trends, and copy
+            existing startups — because real unmet demand is invisible. GRIPR makes
+            it visible. A live feed of human frustrations: specific, recurring, build-worthy.
+          </p>
+        </div>
+
+        <div class="how-grid" style="margin-top:4rem;">
+          <div class="how-card fade-in">
+            <div class="how-step">01</div>
+            <div class="how-icon">👋</div>
+            <h3>People share frustrations</h3>
+            <p>Anyone submits what feels broken — in under 60 seconds. No login. No social pressure. Pure signal.</p>
+          </div>
+          <div class="how-card fade-in">
+            <div class="how-step">02</div>
+            <div class="how-icon">✦</div>
+            <h3>We curate by hand</h3>
+            <p>Every submission is reviewed manually. Only specific, recurring, build-worthy problems make the feed. Taste over automation.</p>
+          </div>
+          <div class="how-card fade-in">
+            <div class="how-step">03</div>
+            <div class="how-icon">💡</div>
+            <h3>Builders discover signals</h3>
+            <p>The feed updates weekly. Follow a category. Spot patterns. Find the problem worth building for before anyone else.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ WAITLIST ============ -->
+    <section class="section-light" id="waitlist">
+      <div class="container">
+        <div class="early-access-split">
+          <div class="ea-left fade-in">
+            <div class="section-label"><span class="dot"></span> JOIN THE WAITLIST</div>
+            <h2>Get new signals<br>delivered weekly.</h2>
+            <span class="accent-italic">Free for builders.</span>
+            <p>Every week, we publish the strongest new signals from the feed directly to your inbox. Specific problems. Recurring patterns. Overlooked demand.</p>
+            <ul class="ea-features">
+              <li>📡 Weekly signal digest — real problems, no noise</li>
+              <li>🔍 Category filters — only what's relevant to you</li>
+              <li>✦ Hand-curated — every signal reviewed manually</li>
+              <li>🇮🇳 India-native — Tier-1, Tier-2, and rural demand</li>
+            </ul>
+          </div>
+
+          <div class="ea-form-card fade-in">
+            <h3>Join the builder waitlist</h3>
+            <p class="form-sub">We'll send you the first digest when it's ready.</p>
+            <form id="heroForm">
+              <input type="email" name="email" id="heroEmail" required placeholder="your@email.com" style="width:100%; padding:0.9rem 1rem; font-family:'DM Sans',sans-serif; font-size:0.9rem; border:1px solid var(--border); border-radius:8px; background:var(--bg-white); color:var(--text-dark); margin-bottom:0.75rem;">
+              <button type="submit" class="btn-cta-full" id="heroBtn">Get Weekly Signals →</button>
+            </form>
+            <div class="ea-form-trust">
+              <span>✓ Free</span>
+              <span>✓ No spam</span>
+              <span>✓ Unsubscribe anytime</span>
+            </div>
+
+            <div style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid var(--border);">
+              <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:0.75rem;">
+                Have a frustration to share instead?
+              </p>
+              <a href="submit.html" style="font-family:'Space Grotesk',sans-serif; font-size:0.85rem; font-weight:600; color:var(--accent);">
+                Submit a problem →
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FINAL CTA ============ -->
+    <section class="section-dark">
+      <div class="container final-cta">
+        <div class="section-label fade-in" style="color:rgba(255,255,255,0.35); justify-content:center;">
+          <span class="dot" style="background:var(--accent);"></span> THE SIGNAL IS LIVE
+        </div>
+        <h2 class="fade-in" style="color:var(--text-light);">Stop guessing what to build.</h2>
+        <span class="accent-italic fade-in">Start with what's actually broken.</span>
+        <p class="fade-in">
+          Every problem on the feed is real. Specific. Recurring.
+          Observed from real people in real situations. The demand is already there —
+          someone just needs to build for it.
+        </p>
+        <a href="feed.html" class="btn-cta-round fade-in" id="ctaBtn">Explore the Signal Feed ↗</a>
+        <p class="final-trust fade-in">Manually curated. Updated weekly. Free for builders.</p>
+      </div>
+
+      <!-- FOOTER -->
+      <footer class="container">
+        <div class="footer-left">
+          <div class="footer-logo">GRIPR</div>
+          <div class="footer-tagline">A multilingual live feed of problems worth building for.</div>
+          <p class="copyright">© 2026 GRIPR. Built in Jaipur, Rajasthan 🇮🇳</p>
+        </div>
+        <div class="footer-right">
+          <div class="footer-links">
+            <a href="feed.html">Signal Feed</a>
+            <a href="submit.html">Submit</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
+          </div>
+          <div class="footer-location">India-native. Builder-first.</div>
+        </div>
+      </footer>
+    </section>
+
+  </main>
+
+  <script src="js/main.js"></script>
+  <!-- Data for rotation -->
+  <script src="js/feed.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. HERO ROTATION (Editorial fade)
+      const heroLines = [
+        `Discover problems\n<span class="accent-italic">people actually want solved.</span>`,
+        `The internet's hidden problems,\n<span class="accent-italic">surfaced.</span>`,
+        `Startups are built in English.\n<span class="accent-italic">Problems live in vernacular.</span>`,
+        `AI made building easy.\n<span class="accent-italic">Finding reality became hard.</span>`,
+        `A live feed of overlooked inefficiencies\n<span class="accent-italic">across India.</span>`,
+        `The invisible internet of\n<span class="accent-italic">operational frustration.</span>`,
+        `See what breaks before\n<span class="accent-italic">everyone else notices.</span>`,
+        `Real frustrations.\n<span class="accent-italic">Real workflows. Real demand.</span>`,
+        `Most opportunities never reach\n<span class="accent-italic">the English internet.</span>`,
+        `Curated signals from the\n<span class="accent-italic">ground reality economy.</span>`
+      ];
+      
+      const heroTitle = document.getElementById("heroTitle");
+      let currentLineIdx = 0;
+      
+      setInterval(() => {
+        heroTitle.style.opacity = 0;
+        setTimeout(() => {
+          currentLineIdx = (currentLineIdx + 1) % heroLines.length;
+          heroTitle.innerHTML = heroLines[currentLineIdx];
+          heroTitle.style.opacity = 1;
+        }, 800); // Wait for fade out
+      }, 7000); // Rotate every 7 seconds
+
+      // 2. SIGNAL FEED ROTATION (Subtle shuffling)
+      const previewGrid = document.getElementById("previewGrid");
+      if(previewGrid && typeof signals !== 'undefined') {
+        // We'll randomly select 4 signals to show, slightly weighted towards newer ones
+        function getRandomSignals(count) {
+          const shuffled = [...signals].sort(() => 0.5 - Math.random());
+          return shuffled.slice(0, count);
+        }
+
+        function renderPreviewCards(cards) {
+          previewGrid.innerHTML = cards.map((s, i) => `
+            <div class="problem-card" style="opacity:0; transition: opacity 0.8s ease-in-out; animation-delay:${i * 0.1}s">
+              <div class="problem-header">
+                <span class="problem-id">${s.id}</span>
+                <span class="tag" style="background:rgba(234,88,12,0.08); color:var(--accent); border-color:transparent;">${s.category}</span>
+              </div>
+              <div class="reported-by">Spotted across: <strong>${s.region}</strong></div>
+              <p class="problem-quote">"${s.quote}"</p>
+              <div class="problem-footer">
+                <div class="tag-group">
+                  <span class="tag">${s.region}</span>
+                  ${s.language ? `<span class="tag" style="background:#f3f4f6; color:#4b5563;">${s.language}</span>` : ''}
+                </div>
+                <a href="feed.html" class="see-feed-link">See on feed →</a>
+              </div>
+            </div>
+          `).join('');
+
+          // Fade them in
+          setTimeout(() => {
+            const renderedCards = previewGrid.querySelectorAll('.problem-card');
+            renderedCards.forEach(card => card.style.opacity = 1);
+          }, 50);
+        }
+
+        // Initial 18-second interval
+        setInterval(() => {
+          // Fade out existing
+          const currentCards = previewGrid.querySelectorAll('.problem-card');
+          currentCards.forEach(card => card.style.opacity = 0);
+          
+          setTimeout(() => {
+            renderPreviewCards(getRandomSignals(4));
+          }, 800);
+        }, 18000);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit a Problem — GRIPR</title>
+  <meta name="description" content="Share something that feels broken. What frustrates you that nobody has fixed yet?">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/feed.css">
+</head>
+<body class="submit-page">
+
+  <!-- NAV -->
+  <div class="nav-wrapper">
+    <nav>
+      <a href="index.html" class="nav-logo">GRIPR</a>
+      <div class="nav-links">
+        <a href="feed.html" class="nav-link">Signal Feed</a>
+        <a href="submit.html" class="nav-link active-nav-link">Submit a Problem</a>
+      </div>
+      <a href="index.html#waitlist" class="btn-nav">Join Waitlist</a>
+    </nav>
+  </div>
+
+  <main>
+    <!-- HERO -->
+    <section class="submit-hero">
+      <div class="container">
+        <div class="submit-prompt-wrapper">
+          <div class="submit-prompt-label">
+            <span class="dot"></span>
+            SHARE SOMETHING BROKEN
+          </div>
+          <div id="promptText">What repeatedly frustrates you?</div>
+        </div>
+        <p class="submit-desc">
+          Not a survey. Not a feedback form. Just tell us what feels broken —
+          and we'll make sure builders see it.
+        </p>
+      </div>
+    </section>
+
+    <!-- FORM BODY -->
+    <section class="submit-body">
+      <div class="container">
+        <div class="submit-layout">
+
+          <!-- LEFT: FORM -->
+          <div class="submit-form-col">
+            <form id="submitForm" novalidate>
+
+              <div class="form-group">
+                <label class="form-label" for="frustration">The frustration *</label>
+                <textarea
+                  class="submit-textarea"
+                  id="frustration"
+                  name="frustration"
+                  placeholder="Describe what's broken. Be specific — the more concrete, the more useful."
+                  rows="7"
+                  maxlength="1000"
+                  required
+                ></textarea>
+                <div class="char-row" style="justify-content: space-between;">
+                  <span style="color:var(--accent);">Submit in English, Hindi, Hinglish, Tamil, Bengali, Marathi… any language.</span>
+                  <span><span id="charCount">0</span>/1000</span>
+                </div>
+              </div>
+
+              <div class="two-col">
+                <div class="form-group">
+                  <label class="form-label" for="category">Category (optional)</label>
+                  <div class="select-wrapper">
+                    <select class="submit-select" id="category" name="category">
+                      <option value="">Select one...</option>
+                      <option value="healthcare">Healthcare</option>
+                      <option value="education">Education</option>
+                      <option value="logistics">Logistics</option>
+                      <option value="agriculture">Agriculture</option>
+                      <option value="finance">Finance</option>
+                      <option value="commerce">Local Commerce</option>
+                      <option value="compliance">Compliance</option>
+                      <option value="employment">Employment</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="city">City / Region (optional)</label>
+                  <input
+                    class="submit-input"
+                    type="text"
+                    id="city"
+                    name="city"
+                    placeholder="e.g. Jaipur, Delhi, Rural MP"
+                    maxlength="60"
+                  >
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="notify-row">
+                  <input type="checkbox" id="notifyCheck" name="notify">
+                  <span class="notify-label">Notify me if someone builds a solution for this</span>
+                </label>
+                <div id="emailRow">
+                  <input
+                    class="submit-input"
+                    type="email"
+                    id="notifyEmail"
+                    name="email"
+                    placeholder="your@email.com"
+                    style="margin-top:0.75rem;"
+                  >
+                </div>
+              </div>
+
+              <button class="btn-submit" id="submitBtn" type="submit" disabled>
+                Submit your signal →
+              </button>
+
+              <p style="font-size:0.72rem; color:var(--text-muted); margin-top:0.75rem; font-family:'Space Grotesk',sans-serif;">
+                Anonymous by default. We review every submission manually before publishing.
+              </p>
+
+            </form>
+          </div>
+
+          <!-- RIGHT: SIDEBAR -->
+          <div class="submit-sidebar">
+            <div class="submit-sidebar-note">
+              <div class="sidebar-label">What makes a good signal</div>
+              <div class="sidebar-title">Specific beats general. Real beats theoretical.</div>
+              <ul class="sidebar-list">
+                <li>Describe something you personally experienced or witnessed</li>
+                <li>Name the workflow, not just the emotion ("appointment booking" not "healthcare is bad")</li>
+                <li>Include who faces it — farmer, student, shop owner, patient</li>
+                <li>You don't need a solution — just the problem</li>
+              </ul>
+            </div>
+
+            <div class="example-signals">
+              <div class="sidebar-label">Examples from the feed</div>
+              <div class="example-quote">
+                "Small clinics still manage appointments through WhatsApp groups. Patients miss slots. Doctors lose time."
+              </div>
+              <div class="example-quote">
+                "Cold storage trucks refuse agricultural loads from individual farmers who can't fill a whole truck."
+              </div>
+              <div class="example-quote">
+                "Freelancers in Tier-2 cities have no way to prove their work history to new clients."
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="container">
+    <div class="footer-left">
+      <div class="footer-logo" style="color:var(--text-dark);">GRIPR</div>
+      <div class="footer-tagline" style="color:var(--text-secondary);">A live feed of problems worth building for.</div>
+      <p class="copyright" style="color:var(--text-muted);">© 2025 GRIPR. Built in Jaipur, Rajasthan 🇮🇳</p>
+    </div>
+    <div class="footer-right">
+      <div class="footer-links">
+        <a href="index.html" style="color:var(--text-secondary);">Home</a>
+        <a href="feed.html" style="color:var(--text-secondary);">Signal Feed</a>
+        <a href="privacy.html" style="color:var(--text-secondary);">Privacy</a>
+        <a href="terms.html" style="color:var(--text-secondary);">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/submit.js"></script>
+</body>
+</html>
