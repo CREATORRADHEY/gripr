@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { FastifyInstance } from 'fastify';
+import { FirebaseAuthService } from '../src/services/auth.service.js';
 
 describe('E. Security, Privacy & Authorization Boundaries', () => {
   let app: FastifyInstance;
@@ -31,12 +32,32 @@ describe('E. Security, Privacy & Authorization Boundaries', () => {
     }
   });
 
-  it('allows access to /api/operations/queue when valid x-gripr-auth secret is supplied', async () => {
+  it('strictly rejects access to /api/operations/queue when previously hardcoded static secret x-gripr-auth is supplied', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/api/operations/queue',
       headers: {
         'x-gripr-auth': 'gripr_dev_ops_secret_2026'
+      }
+    });
+
+    // Static header secrets are no longer accepted anywhere
+    expect(res.statusCode).toBe(401);
+    const body = res.json();
+    expect(body.success).toBe(false);
+    expect(body.error.code).toBe('UNAUTHORIZED');
+  });
+
+  it('allows access to /api/operations/queue when valid signed test token is supplied', async () => {
+    const testToken = FirebaseAuthService.createTestToken({
+      uid: 'researcher-lead-1',
+      role: 'RESEARCHER'
+    });
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/operations/queue',
+      headers: {
+        authorization: `Bearer ${testToken}`
       }
     });
 

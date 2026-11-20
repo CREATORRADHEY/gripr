@@ -13,12 +13,7 @@ declare module 'fastify' {
  * Never trusts client headers or unverified query params.
  */
 export async function authenticate(request: FastifyRequest, reply: FastifyReply): Promise<AuthUser | undefined> {
-  let authHeader = request.headers.authorization;
-
-  // Support test header in test environment only
-  if (!authHeader && request.headers['x-gripr-auth']) {
-    authHeader = `Bearer ${request.headers['x-gripr-auth']}`;
-  }
+  const authHeader = request.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     reply.status(401).send({

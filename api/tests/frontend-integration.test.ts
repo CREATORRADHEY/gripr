@@ -1,13 +1,19 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { FastifyInstance } from 'fastify';
+import { FirebaseAuthService } from '../src/services/auth.service.js';
 
 describe('F. Frontend Integration & End-to-End Workflow Contract', () => {
   let app: FastifyInstance;
+  let researcherToken: string;
 
   beforeAll(async () => {
     app = buildApp({ logger: false });
     await app.ready();
+    researcherToken = FirebaseAuthService.createTestToken({
+      uid: 'researcher-lead-1',
+      role: 'RESEARCHER'
+    });
   });
 
   afterAll(async () => {
@@ -67,7 +73,7 @@ describe('F. Frontend Integration & End-to-End Workflow Contract', () => {
       method: 'POST',
       url: '/api/research/responses/SES-401/analyze',
       headers: {
-        'x-gripr-auth': 'gripr_dev_ops_secret_2026'
+        authorization: `Bearer ${researcherToken}`
       }
     });
 
@@ -84,7 +90,7 @@ describe('F. Frontend Integration & End-to-End Workflow Contract', () => {
       method: 'POST',
       url: '/api/research/missions/MSN-2026-081/cross-analysis',
       headers: {
-        'x-gripr-auth': 'gripr_dev_ops_secret_2026'
+        authorization: `Bearer ${researcherToken}`
       }
     });
 
@@ -100,7 +106,7 @@ describe('F. Frontend Integration & End-to-End Workflow Contract', () => {
       method: 'POST',
       url: '/api/missions/MSN-2026-081/brief/generate',
       headers: {
-        'x-gripr-auth': 'gripr_dev_ops_secret_2026'
+        authorization: `Bearer ${researcherToken}`
       }
     });
 
@@ -116,7 +122,7 @@ describe('F. Frontend Integration & End-to-End Workflow Contract', () => {
       method: 'GET',
       url: '/api/research/responses/NON-EXISTENT-SESSION/analysis',
       headers: {
-        'x-gripr-auth': 'gripr_dev_ops_secret_2026'
+        authorization: `Bearer ${researcherToken}`
       }
     });
 

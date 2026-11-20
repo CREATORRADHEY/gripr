@@ -62,7 +62,7 @@ export function getFirebaseAdminApp(): App {
 }
 
 export class FirebaseAuthService {
-  private static tokenSecret = env.INTERNAL_AUTH_SECRET || 'gripr_secure_jwt_secret_2026';
+  private static tokenSecret = env.INTERNAL_AUTH_SECRET || '';
 
   /**
    * UNIT TEST ONLY FIXTURE
@@ -117,15 +117,6 @@ export class FirebaseAuthService {
     const cleanToken = tokenString.startsWith('Bearer ')
       ? tokenString.slice(7).trim()
       : tokenString.trim();
-
-    // Support isolated test reviewer tokens strictly inside unit-test environment
-    if (env.isTest && (cleanToken === env.INTERNAL_AUTH_SECRET || cleanToken === 'reviewer-test')) {
-      return {
-        uid: 'dev-test-reviewer',
-        email: 'reviewer@gripr.test',
-        role: 'RESEARCHER'
-      };
-    }
 
     const parts = cleanToken.split('.');
     if (parts.length !== 3) {

@@ -84,37 +84,64 @@ export async function demoRoutes(
       }
     }
   }, async (request, reply) => {
-    // Restrict live Gemini demo endpoint to genuinely local development environment or authenticated presenter access (Requirement 6)
-    const remoteIp = (request.headers['x-forwarded-for'] as string) || request.ip;
-    const isLoopbackIp = remoteIp === '127.0.0.1' || remoteIp === '::1' || remoteIp === 'localhost' || request.hostname?.includes('127.0.0.1') || request.hostname?.includes('localhost');
-    const isSimulatedPublic = !!request.headers['x-simulated-public-client'];
-    const isLocalDev = (env.isDev || env.isTest) && isLoopbackIp && !isSimulatedPublic;
+    // 1. Determine if this request qualifies for unauthenticated local demo execution (Requirement 4)
+    // ONLY allowed when:
+    // a) NODE_ENV is strictly 'development'
+    const currentEnv = (env.isTest && process.env.TEST_ENV_OVERRIDE) ? process.env.TEST_ENV_OVERRIDE : env.NODE_ENV;
+    const isDevelopment = currentEnv === 'development';
 
-    let hasPresenterAuth = false;
-    const authHeader = request.headers.authorization || (request.headers['x-gripr-auth'] ? `Bearer ${request.headers['x-gripr-auth']}` : null);
-    if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+    // b) Server is explicitly bound to loopback
+    const isServerBoundToLoopback = env.HOST === '127.0.0.1' || env.HOST === '::1' || env.HOST === 'localhost';
+    const socketLocalAddress = request.raw?.socket?.localAddress;
+    const isSocketBoundToLoopback = !socketLocalAddress || socketLocalAddress === '127.0.0.1' || socketLocalAddress === '::1' || socketLocalAddress === '::ffff:127.0.0.1';
+
+    // c) Actual network peer is loopback (kernel socket level, NEVER client headers)
+    const peerAddress = request.raw?.socket?.remoteAddress;
+    const isPeerLoopback = peerAddress === '127.0.0.1' || peerAddress === '::1' || peerAddress === '::ffff:127.0.0.1';
+
+    // d) No untrusted proxy headers affect this decision (Requirement 4)
+    const hasProxyHeaders = !!(
+      request.headers['x-forwarded-for'] ||
+      request.headers['x-forwarded-host'] ||
+      request.headers['x-forwarded-proto'] ||
+      request.headers['forwarded']
+    );
+
+    const isIsolatedLocalDev = isDevelopment && isServerBoundToLoopback && isSocketBoundToLoopback && isPeerLoopback && !hasProxyHeaders;
+
+    if (!isIsolatedLocalDev) {
+      // Outside isolated local mode, require a Firebase Admin SDK-verified ID token with ADMIN or RESEARCHER authorization (Requirement 5)
+      const authHeader = request.headers.authorization;
+      if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
+        return reply.status(401).send({
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'Authentication required. A verified Firebase ID token with ADMIN or RESEARCHER authorization is required.'
+          }
+        });
+      }
+
       try {
         const user = await FirebaseAuthService.verifyToken(authHeader);
-        if (user.role === 'ADMIN' || user.role === 'RESEARCHER') {
-          hasPresenterAuth = true;
+        if (user.role !== 'ADMIN' && user.role !== 'RESEARCHER') {
+          return reply.status(403).send({
+            success: false,
+            error: {
+              code: 'FORBIDDEN',
+              message: 'Access denied. ADMIN or RESEARCHER authorization is required.'
+            }
+          });
         }
-      } catch {
-        // invalid token
+      } catch (authErr: any) {
+        return reply.status(401).send({
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: `Firebase token verification failed: ${authErr.message || 'Invalid token'}`
+          }
+        });
       }
-    }
-    const presenterSecret = request.headers['x-gripr-presenter-key'] || request.headers['x-gripr-demo-key'];
-    if (presenterSecret && (presenterSecret === env.INTERNAL_AUTH_SECRET || presenterSecret === 'gripr_dev_ops_secret_2026')) {
-      hasPresenterAuth = true;
-    }
-
-    if (!isLocalDev && !hasPresenterAuth) {
-      return reply.status(403).send({
-        success: false,
-        error: {
-          code: 'FORBIDDEN',
-          message: 'Live Gemini demo endpoint is restricted to genuinely local development environments or authenticated presenter access.'
-        }
-      });
     }
 
     const body = (request.body as { packetId?: string }) || {};

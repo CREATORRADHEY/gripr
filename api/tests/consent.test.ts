@@ -1,13 +1,19 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { FastifyInstance } from 'fastify';
+import { FirebaseAuthService } from '../src/services/auth.service.js';
 
 describe('TEST GROUP D: Consent Architecture & Privacy Isolation', () => {
   let app: FastifyInstance;
+  let testToken: string;
 
   beforeAll(async () => {
     app = buildApp({ useMemoryRepo: true, logger: false });
     await app.ready();
+    testToken = FirebaseAuthService.createTestToken({
+      uid: 'reviewer-test-user',
+      role: 'RESEARCHER'
+    });
   });
 
   afterAll(async () => {
@@ -57,7 +63,7 @@ describe('TEST GROUP D: Consent Architecture & Privacy Isolation', () => {
       method: 'GET',
       url: '/api/missions/MSN-2026-081/brief',
       headers: {
-        authorization: 'Bearer reviewer-test'
+        authorization: `Bearer ${testToken}`
       }
     });
 
