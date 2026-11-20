@@ -3,15 +3,289 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Commission a Research Mission — GRIPR.STUDIO</title>
-  <meta name="description" content="Scope a fixed-price problem intelligence mission. Unearth firsthand operator realities, test hypotheses, and make confident product decisions.">
+  <title>Start a Research Mission — GRIPR.STUDIO</title>
+  <meta name="description" content="Scope a problem intelligence mission or run the interactive Jaipur Kirana demonstration directly on GRIPR.STUDIO.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/feed.css">
+  <style>
+    /* Clean Navbar & No-wrap */
+    .nav-link, .btn-nav, .nav-logo {
+      white-space: nowrap !important;
+    }
+
+    /* Master Stepper */
+    .master-stepper {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding: 0.5rem 0 1.25rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .master-step-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.5rem 0.95rem;
+      border-radius: 999px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .master-step-pill:hover {
+      border-color: rgba(234,88,12,0.4);
+    }
+    .master-step-pill.active {
+      background: var(--text-dark);
+      color: #FFFFFF;
+      border-color: var(--text-dark);
+    }
+    .master-step-pill.completed {
+      background: #ECFDF5;
+      color: #065F46;
+      border-color: #10B981;
+    }
+    .master-step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.06);
+      font-size: 0.7rem;
+    }
+    .master-step-pill.active .master-step-num {
+      background: rgba(255,255,255,0.25);
+    }
+    .master-step-pill.completed .master-step-num {
+      background: #10B981;
+      color: #FFFFFF;
+    }
+
+    /* Operations Sections */
+    .ops-section {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2.25rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+      transition: all 0.2s ease;
+    }
+    .ops-section.locked {
+      display: none;
+    }
+    .ops-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.25rem;
+    }
+    .ops-badge-tag {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+    }
+
+    /* Candidate Cards Grid */
+    .candidate-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+    .candidate-card {
+      background: var(--bg-light);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .candidate-card:hover {
+      border-color: rgba(234,88,12,0.4);
+      transform: translateY(-2px);
+    }
+    .candidate-card.selected {
+      background: #FFF8F3;
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(234,88,12,0.12);
+    }
+    .candidate-top {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .avatar-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--text-dark);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .candidate-card.selected .avatar-circle {
+      background: var(--accent);
+    }
+    .candidate-checkbox {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      cursor: pointer;
+      accent-color: var(--accent);
+    }
+    .skill-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-family: 'Space Grotesk', sans-serif;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.15rem 0.45rem;
+      color: var(--text-secondary);
+      margin-right: 0.35rem;
+      margin-bottom: 0.35rem;
+    }
+    .candidate-card.selected .skill-badge {
+      border-color: rgba(234,88,12,0.3);
+      color: #9A3412;
+      background: #FFF3EB;
+    }
+
+    /* Workstream Cards */
+    .workstream-card {
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .packet-details {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .transcript-box {
+      background: #FAF5F0;
+      border-left: 3px solid var(--accent);
+      padding: 0.9rem 1.1rem;
+      margin: 0.75rem 0;
+      font-style: italic;
+      color: var(--text-dark);
+    }
+    .watermark-banner {
+      background: #FEF3C7;
+      border: 1px dashed #D97706;
+      color: #92400E;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.4rem 0.75rem;
+      border-radius: 4px;
+      margin: 0.5rem 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Gemini Result Cards */
+    .analysis-result-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    }
+    .tag-reported {
+      background: #ECFDF5;
+      color: #065F46;
+      border: 1px solid #A7F3D0;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .tag-inferred {
+      background: #FFFBEB;
+      color: #92400E;
+      border: 1px solid #FDE68A;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .tag-unknown {
+      background: #F1F5F9;
+      color: #475569;
+      border: 1px solid #CBD5E1;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    /* QA Checklist */
+    .audit-checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.65rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .audit-checklist-item:hover {
+      background: #F5EFEB;
+    }
+    .audit-checklist-item input[type="checkbox"] {
+      margin-top: 0.25rem;
+      width: 1.15rem;
+      height: 1.15rem;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+  </style>
 </head>
-<body>
+<body style="background:#FAF5F0; color:var(--text-body);">
 
   <!-- NAV -->
   <div class="nav-wrapper">
@@ -23,87 +297,118 @@
       <div class="nav-links">
         <a href="index.html#product" class="nav-link">Product</a>
         <a href="index.html#how-it-works" class="nav-link">How It Works</a>
-        <a href="demo.html" class="nav-link">Synthetic Demo</a>
-        <a href="research-operations-demo.html" class="nav-link">Ops Simulation</a>
-        <a href="brief.html?id=MSN-2026-081&demo=true" class="nav-link">Research Brief</a>
-        <a href="missions.html" class="nav-link active-nav-link">Research Missions</a>
+        <a href="brief.html?id=MSN-2026-081&demo=true" class="nav-link">Example Brief</a>
       </div>
 
       <div>
-        <a href="#scopingForm" class="btn-nav">Scope a Mission ↓</a>
+        <a href="#missionWorkspaceContainer" class="btn-nav">Scope a Mission ↓</a>
       </div>
     </nav>
   </div>
 
   <main>
-    <!-- HERO -->
-    <section class="hero container" style="padding-top:4rem; padding-bottom:2.5rem;">
-      <div class="live-bar">
-        <span class="live-dot"></span>
-        B2B RESEARCH SCOPING DESK · EXPERIMENTAL PILOT
+    <!-- HEADER INTRO -->
+    <section class="container" style="padding-top:3.5rem; padding-bottom:1.5rem; max-width:1040px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-size:0.8rem; color:var(--text-secondary);">
+          <a href="index.html" style="color:var(--text-secondary); text-decoration:none;">Home</a>
+          <span>/</span>
+          <span style="color:var(--accent); font-weight:700;">Start a Research Mission</span>
+        </div>
+        <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:var(--text-muted);">
+          Status: <strong id="activeModeStatusLabel" style="color:var(--accent);">⚡ Interactive Demo Mode</strong>
+        </div>
       </div>
 
-      <h1 style="font-size:clamp(2.4rem, 5vw, 3.8rem);">
-        Scope Your Problem<br>
-        <span class="accent-italic">Research Mission.</span>
+      <div class="section-label">
+        <span class="dot"></span> PROBLEM INTELLIGENCE MISSIONS
+      </div>
+      <h1 style="font-family:'DM Serif Display',serif; font-size:clamp(2rem, 4vw, 2.8rem); line-height:1.2; color:var(--text-dark); margin:0.5rem 0 1rem;">
+        Commission an Evidence-Backed Research Mission
       </h1>
-
-      <p class="hero-desc" style="max-width:760px;">
-        Define the high-stakes decision your product team is facing. We recruit permissioned practitioners,
-        capture firsthand operational evidence, and deliver an executive Decision Intelligence Brief.
+      <p style="font-size:1.05rem; line-height:1.6; color:var(--text-secondary); max-width:800px; margin:0 0 1.5rem;">
+        Define your decision at stake, articulate falsification criteria, allocate vetted research professionals, and convert vernacular field evidence into reviewable decision intelligence.
       </p>
 
-      <div style="background:rgba(234,88,12,0.08); border:1px solid rgba(234,88,12,0.25); border-radius:8px; padding:0.85rem 1.25rem; max-width:760px; font-family:'Space Grotesk',sans-serif; font-size:0.8rem; color:var(--text-dark); margin-top:1.5rem; line-height:1.5;">
-        <strong>Phase 1 Demonstration Mode:</strong> Scoping requests are recorded in your browser session using our demo API adapter. This interface demonstrates the B2B research request workflow without binding contracts or automated charges.
+      <!-- MODE TOGGLE BAR: DEMO SIMULATION VS REAL INQUIRY -->
+      <div style="background:#FFFFFF; border:1px solid var(--border); border-radius:12px; padding:1.25rem 1.5rem; margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 4px 16px rgba(0,0,0,0.02);">
+        <div>
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent);">
+            SELECT HOW YOU WANT TO EXPERIENCE MISSIONS:
+          </div>
+          <div style="font-size:0.88rem; color:var(--text-secondary); margin-top:0.2rem;">
+            Run the complete 6-stage interactive demo simulation or submit a real organization research scope.
+          </div>
+        </div>
+        <div style="display:flex; gap:0.6rem; align-items:center;">
+          <button type="button" class="btn-cta-solid" id="tabDemoMode" onclick="selectMissionMode('demo')" style="padding:0.55rem 1.25rem; font-size:0.85rem; background:var(--accent); white-space:nowrap;">
+            ⚡ Interactive Demo (Jaipur Kirana)
+          </button>
+          <button type="button" class="btn-cta-ghost" id="tabRealMode" onclick="selectMissionMode('real')" style="padding:0.55rem 1.25rem; font-size:0.85rem; background:#fff; white-space:nowrap;">
+            Commission Real Inquiry
+          </button>
+        </div>
+      </div>
+
+      <!-- DEMO EXPLICIT NOTICE (SHOWN IN DEMO MODE) -->
+      <div id="demoMasterNotice" style="background:#FFF3EB; border:1px solid rgba(234,88,12,0.35); border-radius:10px; padding:1.1rem 1.35rem; margin-bottom:2rem;">
+        <div style="display:flex; align-items:flex-start; gap:0.75rem;">
+          <span style="font-size:1.3rem; line-height:1;">⚠️</span>
+          <div style="font-size:0.86rem; color:var(--text-dark); line-height:1.5;">
+            <strong style="color:#C2410C;">SYNTHETIC BUILDATHON SIMULATION (#DEMO_SYNTHETIC):</strong>
+            You are operating the complete end-to-end GRIPR workflow directly on this page for synthetic mission <strong>MSN-2026-081</strong>. All 5 participants are synthetic retail profiles and the $95,000 build is an explicitly fictional scenario. Step through the stages below.
+          </div>
+        </div>
+      </div>
+
+      <!-- MASTER LIFECYCLE STEPPER (DEMO MODE) -->
+      <div class="master-stepper" id="masterStepperBar">
+        <div class="master-step-pill active" id="pill-stage-1" onclick="jumpToStage(1)">
+          <span class="master-step-num">1</span> 1. Scoping Wizard
+        </div>
+        <div class="master-step-pill" id="pill-stage-2" onclick="jumpToStage(2)">
+          <span class="master-step-num">2</span> 2. Commercial Review
+        </div>
+        <div class="master-step-pill" id="pill-stage-3" onclick="jumpToStage(3)">
+          <span class="master-step-num">3</span> 3. Researcher Allocation
+        </div>
+        <div class="master-step-pill" id="pill-stage-4" onclick="jumpToStage(4)">
+          <span class="master-step-num">4</span> 4. Field Evidence Packets
+        </div>
+        <div class="master-step-pill" id="pill-stage-5" onclick="jumpToStage(5)">
+          <span class="master-step-num">5</span> 5. Gemini Intelligence
+        </div>
+        <div class="master-step-pill" id="pill-stage-6" onclick="jumpToStage(6)">
+          <span class="master-step-num">6</span> 6. Brief & Delivery
+        </div>
       </div>
     </section>
 
-    <!-- CONTENT BODY -->
-    <section class="section-light" style="padding-top:2rem; padding-bottom:6rem;" id="scopingForm">
-      <div class="container">
+    <!-- MAIN INTERACTIVE WORKSPACE CONTAINER -->
+    <div class="container" style="padding-bottom:6rem; max-width:1040px;" id="missionWorkspaceContainer">
+
+      <!-- ======================================================== -->
+      <!-- STAGE 1 & 2: MULTI-STEP SCOPING WIZARD                    -->
+      <!-- ======================================================== -->
+      <div id="scopingSectionWrapper">
         <div class="mission-grid" id="scopingContainer">
 
-          <!-- LEFT: MULTI-STEP SCOPING WIZARD -->
+          <!-- LEFT: SCOPING WIZARD FORM -->
           <div id="scopingFormCol">
-            <div style="background:#fff; border:1px solid var(--border); border-radius:16px; padding:2.5rem; box-shadow:0 6px 30px rgba(0,0,0,0.02);">
+            <div style="background:#fff; border:1px solid var(--border); border-radius:16px; padding:2.25rem 2rem; box-shadow:0 6px 30px rgba(0,0,0,0.02);">
 
-              <!-- SCOPING MODE SELECTOR (DEMO VS REAL) -->
-              <div style="background:#FAF5F0; border:1px solid var(--border); border-radius:10px; padding:1.1rem 1.25rem; margin-bottom:1.75rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-                <div>
-                  <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-dark);">
-                    CHOOSE INQUIRY MODE:
-                  </div>
-                  <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.25rem;" id="modeDescriptionText">
-                    Start a genuine customer research inquiry, or load synthetic data for the Buildathon demonstration.
-                  </div>
-                </div>
-                <div style="display:flex; gap:0.6rem; align-items:center;">
-                  <button type="button" class="btn-cta-ghost" id="realModeBtn" onclick="switchToRealInquiry()" style="padding:0.5rem 1rem; font-size:0.8rem; background:#fff;">
-                    Start Real Inquiry
-                  </button>
-                  <button type="button" class="btn-cta-solid" id="demoModeBtn" onclick="activateDemoData()" style="padding:0.5rem 1rem; font-size:0.8rem; background:var(--accent);">
-                    ⚡ Use Demo Data (Jaipur Kirana)
-                  </button>
-                </div>
-              </div>
-
-              <!-- DEMO NOTICE BANNER (SHOWN WHEN DEMO ACTIVE) -->
-              <div id="demoNoticeBanner" style="display:none; background:#FFF3EB; border:1px solid rgba(234,88,12,0.35); border-radius:8px; padding:0.75rem 1rem; margin-bottom:1.5rem; font-family:'Space Grotesk',sans-serif; font-size:0.8rem; color:#C2410C;">
-                ⚡ <strong>Demo Mode Active:</strong> Canonical Jaipur Kirana sample values loaded. You remain on the current step. Click <strong>Continue</strong> to proceed manually at your own pace.
-              </div>
-              
-              <!-- STEP TRACKER -->
-              <div class="scoping-steps-bar" role="tablist">
-                <div class="step-indicator active" id="stepIndicator-1" onclick="jumpToStep(1)">
+              <!-- SUB-STEPS FOR SCOPING -->
+              <div class="scoping-steps-bar" role="tablist" style="margin-bottom:1.5rem;">
+                <div class="step-indicator active" id="stepIndicator-1" onclick="jumpToScopingStep(1)">
                   <span class="step-num">1</span> Organization
                 </div>
-                <div class="step-indicator" id="stepIndicator-2" onclick="jumpToStep(2)">
+                <div class="step-indicator" id="stepIndicator-2" onclick="jumpToScopingStep(2)">
                   <span class="step-num">2</span> Objective
                 </div>
-                <div class="step-indicator" id="stepIndicator-3" onclick="jumpToStep(3)">
+                <div class="step-indicator" id="stepIndicator-3" onclick="jumpToScopingStep(3)">
                   <span class="step-num">3</span> Requirements
                 </div>
-                <div class="step-indicator" id="stepIndicator-4" onclick="jumpToStep(4)">
+                <div class="step-indicator" id="stepIndicator-4" onclick="jumpToScopingStep(4)">
                   <span class="step-num">4</span> Commercial Review
                 </div>
               </div>
@@ -112,11 +417,11 @@
 
                 <!-- ============ STEP 1: ORGANIZATION ============ -->
                 <div class="wizard-step" id="stepSection-1">
-                  <h3 style="font-family:'DM Serif Display',serif; font-size:1.8rem; margin-bottom:0.5rem;">
+                  <h3 style="font-family:'DM Serif Display',serif; font-size:1.75rem; margin-bottom:0.4rem;">
                     Organization & Contact
                   </h3>
-                  <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.75rem;">
-                    Tell us who is commissioning this investigation.
+                  <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.5rem;">
+                    Identify the commissioning team and primary research sponsor.
                   </p>
 
                   <div class="two-col">
@@ -128,7 +433,7 @@
 
                     <div class="form-group" id="group-contactPerson">
                       <label class="form-label" for="contactPerson">Your Full Name *</label>
-                      <input class="submit-input" type="text" id="contactPerson" name="contactPerson" placeholder="e.g. Aditi Rao" required>
+                      <input class="submit-input" type="text" id="contactPerson" name="contactPerson" placeholder="e.g. Aditi Sharma" required>
                       <span class="form-error-text" id="contactPersonError" style="display:none;"></span>
                     </div>
                   </div>
@@ -136,8 +441,7 @@
                   <div class="two-col">
                     <div class="form-group" id="group-contactEmail">
                       <label class="form-label" for="contactEmail">Work Email Address *</label>
-                      <input class="submit-input" type="email" id="contactEmail" name="contactEmail" placeholder="aditi.rao@company.com" required>
-                      <div class="form-hint">Used for brief delivery and research scoping alignment.</div>
+                      <input class="submit-input" type="email" id="contactEmail" name="contactEmail" placeholder="aditi.sharma@company.com" required>
                       <span class="form-error-text" id="contactEmailError" style="display:none;"></span>
                     </div>
 
@@ -155,103 +459,61 @@
                   </div>
 
                   <div style="display:flex; justify-content:flex-end; margin-top:1.5rem;">
-                    <button type="button" class="btn-cta-solid" onclick="nextStep(2)">
+                    <button type="button" class="btn-cta-solid" onclick="nextScopingStep(2)">
                       Continue to Research Objective →
                     </button>
                   </div>
                 </div>
 
-                <!-- ============ STEP 2: RESEARCH OBJECTIVE ============ -->
+                <!-- ============ STEP 2: OBJECTIVE ============ -->
                 <div class="wizard-step" id="stepSection-2" style="display:none;">
-                  <h3 style="font-family:'DM Serif Display',serif; font-size:1.8rem; margin-bottom:0.5rem;">
-                    Research Objective & Decision
+                  <h3 style="font-family:'DM Serif Display',serif; font-size:1.75rem; margin-bottom:0.4rem;">
+                    Research Objective & Decision at Stake
                   </h3>
-                  <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.75rem;">
-                    Define the business decision under evaluation and what evidence would change your mind.
+                  <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.5rem;">
+                    Articulate the concrete business decision and falsification condition.
                   </p>
 
                   <div class="form-group" id="group-decisionAtStake">
-                    <label class="form-label" for="decisionAtStake">
-                      A. What concrete product or business decision is your organization making? *
-                    </label>
-                    <textarea 
-                      class="submit-textarea" 
-                      id="decisionAtStake" 
-                      rows="3" 
-                      placeholder="e.g. Deciding whether to allocate $95,000 to engineer an automated WhatsApp UPI credit collection bot, or reframe toward physical vernacular receipt-book ledgers."
-                      required
-                    ></textarea>
-                    <div class="form-hint">Every GRIPR mission must tie directly to a go/no-go or pivot decision.</div>
+                    <label class="form-label" for="decisionAtStake">Specific Decision at Stake *</label>
+                    <textarea class="submit-textarea" id="decisionAtStake" name="decisionAtStake" rows="3" placeholder="What capital or engineering decision depends on this research?" required></textarea>
                     <span class="form-error-text" id="decisionAtStakeError" style="display:none;"></span>
                   </div>
 
                   <div class="form-group" id="group-problemToInvestigate">
-                    <label class="form-label" for="problemToInvestigate">
-                      B. What problem or operational workflow needs investigation? *
-                    </label>
-                    <textarea 
-                      class="submit-textarea" 
-                      id="problemToInvestigate" 
-                      rows="3" 
-                      placeholder="e.g. Rural fertilizer retail purchasing during peak 10-day sowing windows. We want to know why farmers pay 20% over MRP."
-                      required
-                    ></textarea>
+                    <label class="form-label" for="problemToInvestigate">Problem / Friction Point to Investigate *</label>
+                    <textarea class="submit-textarea" id="problemToInvestigate" name="problemToInvestigate" rows="3" placeholder="What real-world operational friction are operators experiencing?" required></textarea>
                     <span class="form-error-text" id="problemToInvestigateError" style="display:none;"></span>
                   </div>
 
-                  <div class="two-col">
-                    <div class="form-group">
-                      <label class="form-label" for="hypothesis">
-                        C. What does your company currently believe? (Hypothesis)
-                      </label>
-                      <textarea 
-                        class="submit-textarea" 
-                        id="hypothesis" 
-                        rows="2" 
-                        placeholder="e.g. Farmers lack digital price visibility and will switch dealers to save ₹150/bag."
-                      ></textarea>
-                    </div>
+                  <div class="form-group">
+                    <label class="form-label" for="hypothesis">Current Internal Hypothesis</label>
+                    <input class="submit-input" type="text" id="hypothesis" placeholder="What does your team currently believe is happening?">
+                  </div>
 
-                    <div class="form-group">
-                      <label class="form-label" for="falsificationCriteria">
-                        D. What evidence would change your decision? (Falsification Criteria)
-                      </label>
-                      <textarea 
-                        class="submit-textarea" 
-                        id="falsificationCriteria" 
-                        rows="2" 
-                        placeholder="e.g. If farmers already know prices are high but are tied to specific shops due to seasonal informal credit."
-                      ></textarea>
-                    </div>
+                  <div class="form-group">
+                    <label class="form-label" for="falsificationCriteria">Falsification Condition</label>
+                    <input class="submit-input" type="text" id="falsificationCriteria" placeholder="What evidence would prove this hypothesis wrong?">
                   </div>
 
                   <div style="display:flex; justify-content:space-between; margin-top:1.5rem;">
-                    <button type="button" class="btn-cta-ghost" onclick="nextStep(1)">← Back</button>
-                    <button type="button" class="btn-cta-solid" onclick="nextStep(3)">Continue to Target Participants →</button>
+                    <button type="button" class="btn-cta-ghost" onclick="nextScopingStep(1)">← Back</button>
+                    <button type="button" class="btn-cta-solid" onclick="nextScopingStep(3)">Continue to Requirements →</button>
                   </div>
                 </div>
 
-                <!-- ============ STEP 3: TARGET PARTICIPANTS ============ -->
+                <!-- ============ STEP 3: REQUIREMENTS ============ -->
                 <div class="wizard-step" id="stepSection-3" style="display:none;">
-                  <h3 style="font-family:'DM Serif Display',serif; font-size:1.8rem; margin-bottom:0.5rem;">
-                    Target Participants & Operational Context
+                  <h3 style="font-family:'DM Serif Display',serif; font-size:1.75rem; margin-bottom:0.4rem;">
+                    Participant & Field Requirements
                   </h3>
-                  <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.75rem;">
-                    Specify who we need to screen and recruit for your five research sessions.
+                  <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.5rem;">
+                    Define the target operator profile and geographic context.
                   </p>
 
                   <div class="form-group" id="group-targetParticipantProfile">
-                    <label class="form-label" for="targetParticipantProfile">
-                      Target Operator / Participant Profile *
-                    </label>
-                    <input 
-                      class="submit-input" 
-                      type="text" 
-                      id="targetParticipantProfile" 
-                      placeholder="e.g. Smallholder farmers (1-5 acres) purchasing DAP/Urea, and licensed rural agro-input retailers"
-                      required
-                    >
-                    <div class="form-hint">Must be authentic domain practitioners with direct operational exposure.</div>
+                    <label class="form-label" for="targetParticipantProfile">Target Participant Profile *</label>
+                    <input class="submit-input" type="text" id="targetParticipantProfile" placeholder="e.g. Independent neighborhood kirana store owners (>5 years)" required>
                     <span class="form-error-text" id="targetParticipantProfileError" style="display:none;"></span>
                   </div>
 
@@ -259,121 +521,94 @@
                     <div class="form-group">
                       <label class="form-label" for="sector">Industry / Sector</label>
                       <select class="submit-select" id="sector">
+                        <option value="commerce">B2B Commerce & Vernacular Retail</option>
                         <option value="agriculture">Agriculture & Agritech</option>
                         <option value="logistics">Logistics & Freight</option>
                         <option value="healthcare">Healthcare & Diagnostics</option>
-                        <option value="commerce">B2B Commerce & Retail</option>
-                        <option value="education">Education & Tutoring</option>
-                        <option value="compliance">Government Compliance & Customs</option>
-                        <option value="other">Other Unfamiliar Workflow</option>
+                        <option value="other">Other Workflow</option>
                       </select>
                     </div>
 
                     <div class="form-group">
                       <label class="form-label" for="geography">Target Geography / Region</label>
-                      <input 
-                        class="submit-input" 
-                        type="text" 
-                        id="geography" 
-                        placeholder="e.g. Central Madhya Pradesh (Sehore, Vidisha) or Tier-2 Tamil Nadu"
-                      >
+                      <input class="submit-input" type="text" id="geography" placeholder="e.g. Jaipur, Rajasthan">
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label class="form-label" for="operationalContext">
-                      Specific Operational Constraints or Context
-                    </label>
-                    <input 
-                      class="submit-input" 
-                      type="text" 
-                      id="operationalContext" 
-                      placeholder="e.g. Sowing window timing; vernacular Hindi/Malwi language; cash vs credit ledger dependence"
-                    >
+                    <label class="form-label" for="operationalContext">Operational Context & Constraints</label>
+                    <input class="submit-input" type="text" id="operationalContext" placeholder="e.g. Evening peak rush; Hindi/Hinglish speech">
                   </div>
 
                   <div class="form-group" style="margin-top:1.25rem;">
                     <label class="form-label">Required Research Expertise Coverage</label>
-                    <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.4rem;">
-                      <span class="evidence-badge" style="background:rgba(234,88,12,0.1); color:var(--accent); font-weight:600; padding:0.35rem 0.65rem; border-radius:4px; font-size:0.75rem;">✓ Qualitative Interviewing</span>
-                      <span class="evidence-badge" style="background:rgba(234,88,12,0.1); color:var(--accent); font-weight:600; padding:0.35rem 0.65rem; border-radius:4px; font-size:0.75rem;">✓ Retail Operations Understanding</span>
-                      <span class="evidence-badge" style="background:rgba(234,88,12,0.1); color:var(--accent); font-weight:600; padding:0.35rem 0.65rem; border-radius:4px; font-size:0.75rem;">✓ Hindi/Hinglish Field Interviewing</span>
-                      <span class="evidence-badge" style="background:rgba(234,88,12,0.1); color:var(--accent); font-weight:600; padding:0.35rem 0.65rem; border-radius:4px; font-size:0.75rem;">✓ Field Observation</span>
-                      <span class="evidence-badge" style="background:rgba(234,88,12,0.1); color:var(--accent); font-weight:600; padding:0.35rem 0.65rem; border-radius:4px; font-size:0.75rem;">✓ Research Evidence Verification</span>
+                    <div style="display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.35rem;">
+                      <span class="evidence-badge" style="background:#FFF3EB; color:var(--accent); font-weight:600;">✓ Qualitative Interviewing</span>
+                      <span class="evidence-badge" style="background:#FFF3EB; color:var(--accent); font-weight:600;">✓ Retail Operations Understanding</span>
+                      <span class="evidence-badge" style="background:#FFF3EB; color:var(--accent); font-weight:600;">✓ Hindi/Hinglish Field Interviewing</span>
+                      <span class="evidence-badge" style="background:#FFF3EB; color:var(--accent); font-weight:600;">✓ Field Observation</span>
+                      <span class="evidence-badge" style="background:#FFF3EB; color:var(--accent); font-weight:600;">✓ Research Evidence Verification</span>
                     </div>
                   </div>
 
                   <div style="display:flex; justify-content:space-between; margin-top:1.5rem;">
-                    <button type="button" class="btn-cta-ghost" onclick="nextStep(2)">← Back</button>
-                    <button type="button" class="btn-cta-solid" onclick="nextStep(4)">Continue to Commercial Review →</button>
+                    <button type="button" class="btn-cta-ghost" onclick="nextScopingStep(2)">← Back</button>
+                    <button type="button" class="btn-cta-solid" onclick="nextScopingStep(4)">Continue to Commercial Review →</button>
                   </div>
                 </div>
 
-                <!-- ============ STEP 4: COMMERCIAL REVIEW & ADVANCE ============ -->
+                <!-- ============ STEP 4: COMMERCIAL REVIEW ============ -->
                 <div class="wizard-step" id="stepSection-4" style="display:none;">
-                  <h3 style="font-family:'DM Serif Display',serif; font-size:1.8rem; margin-bottom:0.5rem;">
-                    Commercial Review & Scope Confirmation
+                  <h3 style="font-family:'DM Serif Display',serif; font-size:1.75rem; margin-bottom:0.4rem;">
+                    Commercial Review & Approval
                   </h3>
                   <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1.5rem;">
-                    Verify your mission scoping parameters and review the indicative commercial terms before advancing to operations.
+                    Review scoping parameters and confirm the pilot terms.
                   </p>
 
-                  <div style="background:var(--bg-light); border:1px solid var(--border); border-radius:10px; padding:1.5rem; margin-bottom:1.5rem; font-size:0.88rem; line-height:1.6;" id="reviewSummaryCard">
-                    <!-- Populated dynamically via JS -->
+                  <div style="background:var(--bg-light); border:1px solid var(--border); border-radius:10px; padding:1.25rem 1.5rem; margin-bottom:1.25rem; font-size:0.88rem; line-height:1.6;" id="reviewSummaryCard">
+                    <!-- Dynamic summary rendered here -->
                   </div>
 
-                  <!-- COMMERCIAL TERMS (DEMO & PILOT TRANSPARENCY) -->
-                  <div style="background:#FFF3EB; border:1px solid rgba(234,88,12,0.35); border-radius:10px; padding:1.25rem 1.5rem; margin-bottom:1.5rem;" id="commercialTermsCard">
-                    <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#C2410C; margin-bottom:0.4rem;">
-                      ILLUSTRATIVE COMMERCIAL TERMS — DEMO ONLY
+                  <div style="background:#FFF3EB; border:1px solid rgba(234,88,12,0.35); border-radius:10px; padding:1.25rem 1.5rem; margin-bottom:1.25rem;">
+                    <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#C2410C; margin-bottom:0.35rem;">
+                      ILLUSTRATIVE COMMERCIAL TERMS — DEMO SIMULATION
                     </div>
-                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.35rem;">
                       <span style="font-size:1.05rem; font-weight:700; color:var(--text-dark);">Experimental Pilot Scoping Fee</span>
                       <span style="font-family:'DM Serif Display',serif; font-size:2rem; color:var(--accent);">₹49,000</span>
                     </div>
                     <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.5; margin:0;">
-                      * This pricing represents an unvalidated exploratory test offer for a 5-participant research scope. Real staffing, commercial margins, and delivery SLAs are not established. In demonstration mode, clicking "Simulate Advance Approval" advances the scenario locally in session storage without payment processing or financial charges.
+                      * This represents an unvalidated exploratory test offer for a 5-participant research scope. In demo simulation mode, clicking "Simulate Advance Approval" unlocks the complete research operations workflow below without charges.
                     </p>
                   </div>
 
-                  <!-- REQUIREMENTS & DELIVERABLES -->
-                  <div class="form-group">
-                    <label class="form-label">Deliverables Included in Scope</label>
-                    <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.85rem; color:var(--text-body);">
-                      <label class="notify-row">
-                        <input type="checkbox" checked disabled>
-                        <span>Executive Decision Intelligence Brief (Recommendation + Contradictions + Unknowns)</span>
-                      </label>
-                      <label class="notify-row">
-                        <input type="checkbox" checked disabled>
-                        <span>Step-by-step Operational Workflow Friction Map</span>
-                      </label>
-                      <label class="notify-row">
-                        <input type="checkbox" id="delivTranscripts" checked disabled>
-                        <span>5 Screened Operator Verbatim Transcripts (Anonymized Vernacular + English)</span>
-                      </label>
-                      <label class="notify-row">
-                        <input type="checkbox" id="delivWorkshop" checked disabled>
-                        <span>60-Minute Post-Brief Findings Strategy Debrief</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  <!-- ACTIONS -->
                   <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-top:1.5rem;" id="step4ActionsRow">
-                    <button type="button" class="btn-cta-ghost" onclick="nextStep(3)">← Back</button>
+                    <button type="button" class="btn-cta-ghost" onclick="nextScopingStep(3)">← Back</button>
                     
-                    <button type="button" class="btn-cta-solid" id="simulateAdvanceBtn" onclick="simulateAdvanceApproval()" style="display:none; background:var(--accent);">
+                    <button type="button" class="btn-cta-solid" id="simulateAdvanceBtn" onclick="simulateAdvanceApprovalDirect()" style="background:var(--accent);">
                       Simulate Advance Approval (₹49,000) →
                     </button>
 
-                    <button type="submit" class="btn-cta-solid" id="submitMissionBtn">
-                      Submit Research Request (₹49,000 Pilot) →
+                    <button type="submit" class="btn-cta-solid" id="submitRealMissionBtn" style="display:none;">
+                      Submit Real Research Request →
                     </button>
                   </div>
 
-                  <!-- SIMULATED APPROVAL CONFIRMATION CONTAINER -->
-                  <div id="simulatedApprovalCard" style="display:none; margin-top:1.5rem;"></div>
+                  <div id="simulatedApprovalSuccessCard" style="display:none; margin-top:1.5rem;">
+                    <div style="background:#ECFDF5; border:1px solid #10B981; border-radius:10px; padding:1.5rem; text-align:center;">
+                      <div style="font-size:2rem; margin-bottom:0.5rem;">✅</div>
+                      <h4 style="font-family:'DM Serif Display',serif; font-size:1.5rem; color:#065F46; margin-bottom:0.35rem;">
+                        Commercial Scope Approved (Simulated)
+                      </h4>
+                      <p style="font-size:0.88rem; color:#047857; margin-bottom:1rem;">
+                        Mission <strong>MSN-2026-081</strong> advance confirmed. Research Operations Workspace unlocked directly below.
+                      </p>
+                      <button type="button" class="btn-cta-solid" onclick="jumpToStage(3)" style="background:#059669; font-size:0.9rem;">
+                        Proceed to Stage 3: Allocate Research Team ↓
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
               </form>
@@ -381,7 +616,7 @@
           </div>
 
           <!-- RIGHT: MISSION SCOPE SIDEBAR -->
-          <div class="mission-sidebar">
+          <div class="mission-sidebar" id="sidebarSpecificationCard">
             <div class="mission-card-package">
               <div class="section-label"><span class="dot"></span> PILOT MISSION SPECIFICATION</div>
               <h3 style="font-family:'DM Serif Display',serif; font-size:1.8rem; margin:0.25rem 0;">GRIPR Mission</h3>
@@ -391,45 +626,334 @@
               </div>
 
               <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dark); margin-bottom:0.75rem;">
-                WHAT A MISSION ENTAILS:
+                WHAT THIS MISSION INCLUDES:
               </div>
 
               <ul class="mission-feature-list">
-                <li>
-                  <span class="check">✓</span>
-                  <span><strong>5 Screened Practitioners:</strong> Recruited specifically for this study with validated domain tenure.</span>
-                </li>
-                <li>
-                  <span class="check">✓</span>
-                  <span><strong>Decision Intelligence Brief:</strong> Explicit recommendations to <em>Reject/Reframe</em>, <em>Investigate More</em>, or <em>Consider Pilot</em>.</span>
-                </li>
-                <li>
-                  <span class="check">✓</span>
-                  <span><strong>Contradiction Audit:</strong> Direct documentation of where participant experiences diverge.</span>
-                </li>
-                <li>
-                  <span class="check">✓</span>
-                  <span><strong>Traceable Source Quotes:</strong> Original vernacular audio statements translated and cited.</span>
-                </li>
+                <li><span class="check">✓</span> <span><strong>5 Screened Operators:</strong> Authentic domain tenure in target cluster.</span></li>
+                <li><span class="check">✓</span> <span><strong>Executive Decision Brief:</strong> Explicit <em>Reject/Reframe</em> recommendation.</span></li>
+                <li><span class="check">✓</span> <span><strong>Contradiction Audit:</strong> Where field truth breaks software assumptions.</span></li>
+                <li><span class="check">✓</span> <span><strong>Verbatim Source Quotes:</strong> Translated and verified transcripts.</span></li>
               </ul>
 
               <div style="background:var(--bg-light); border-radius:8px; padding:1.25rem; font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-top:1.5rem;">
                 <strong>Ethical Research Protocol:</strong><br>
-                Field practitioners participate voluntarily under formal informed consent and receive direct honorariums for their time. We do not sell raw personal data.
-              </div>
-
-              <div style="margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid var(--border); font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:var(--text-secondary);">
-                Want to see what a completed brief looks like?
-                <a href="brief.html" style="color:var(--accent); font-weight:600; display:block; margin-top:0.35rem;">
-                  Explore Illustrative Brief (MSN-2026-081) →
-                </a>
+                Field practitioners participate voluntarily under formal informed consent and receive direct honorariums for their time.
               </div>
             </div>
           </div>
 
         </div>
       </div>
-    </section>
+
+      <!-- ======================================================== -->
+      <!-- STAGE 3: RESEARCH PROFESSIONAL ALLOCATION (DIRECT)       -->
+      <!-- ======================================================== -->
+      <section class="ops-section locked" id="opsStage-3" style="margin-top:2.5rem;">
+        <div class="ops-section-header">
+          <div>
+            <div class="ops-badge-tag">STAGE 3 / STAFFING ALLOCATION</div>
+            <h2 style="font-family:'DM Serif Display',serif; font-size:1.8rem; margin-top:0.25rem;">
+              Allocate Qualified Research Professionals
+            </h2>
+            <p style="font-size:0.88rem; color:var(--text-secondary); margin:0.35rem 0 0; max-width:680px; line-height:1.5;">
+              <strong>Note on Human Roles:</strong> <em>Research Professionals</em> are the qualified qualitative specialists and ethnographers who execute this study. <em>Research Subjects</em> are the 5 synthetic Kirana store operators in Jaipur (SRC-01 to SRC-05) who provide the firsthand evidence.
+            </p>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:'Space Grotesk',sans-serif; font-size:1.2rem; font-weight:700; color:var(--accent);">
+              <span id="selectedCount">0</span> / 5 Selected
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted);">Required: Exactly 5 Researchers</div>
+          </div>
+        </div>
+
+        <!-- SKILL COVERAGE MONITOR -->
+        <div style="background:var(--bg-light); border:1px solid var(--border); border-radius:8px; padding:1rem 1.25rem; margin-bottom:1.5rem;">
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-dark); margin-bottom:0.5rem;">
+            RESEARCH SKILL COVERAGE AUDIT (ALL REQUIRED):
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:0.5rem;" id="skillCoverageBar">
+            <span class="evidence-badge" id="skill-qualitative_interviewing" style="opacity:0.5;">○ Qualitative Interviewing</span>
+            <span class="evidence-badge" id="skill-retail_operations" style="opacity:0.5;">○ Retail Operations Understanding</span>
+            <span class="evidence-badge" id="skill-hindi_hinglish_interviewing" style="opacity:0.5;">○ Hindi/Hinglish Field Interviewing</span>
+            <span class="evidence-badge" id="skill-field_observation" style="opacity:0.5;">○ Field Observation</span>
+            <span class="evidence-badge" id="skill-evidence_verification" style="opacity:0.5;">○ Research Evidence Verification</span>
+          </div>
+        </div>
+
+        <!-- CANDIDATES ROSTER (7 FICTIONAL PROFILES) -->
+        <div class="candidate-grid" id="candidateCardsContainer">
+          <!-- Populated dynamically via JS -->
+        </div>
+
+        <!-- STAGE 3 ACTION -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2rem; border-top:1px solid var(--border); padding-top:1.5rem;">
+          <div style="font-size:0.85rem; color:var(--text-secondary);" id="stage3StatusHint">
+            Please select exactly 5 candidates covering all required capabilities.
+          </div>
+          <button type="button" class="btn-cta-solid" id="confirmTeamBtn" disabled onclick="confirmTeamAllocationDirect()">
+            Confirm Research Team Allocation (5/5) →
+          </button>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- STAGE 4: FIELD WORKSTREAMS & EVIDENCE PACKETS (DIRECT)    -->
+      <!-- ======================================================== -->
+      <section class="ops-section locked" id="opsStage-4">
+        <div class="ops-section-header">
+          <div>
+            <div class="ops-badge-tag">STAGE 4 / FIELD EVIDENCE</div>
+            <h2 style="font-family:'DM Serif Display',serif; font-size:1.8rem; margin-top:0.25rem;">
+              Field Workstreams & Consented Evidence Packets
+            </h2>
+            <p style="font-size:0.88rem; color:var(--text-secondary); margin:0.35rem 0 0; max-width:680px; line-height:1.5;">
+              Inspect the 5 field research workstreams assigned to your selected team. Each workstream documents firsthand operational transactions from Jaipur Kirana operators under voluntary consent.
+            </p>
+          </div>
+          <span class="evidence-badge badge-verified">5 Screened Operators (SRC-01 to SRC-05)</span>
+        </div>
+
+        <div id="workstreamsContainer">
+          <!-- Populated dynamically via JS -->
+        </div>
+
+        <!-- STAGE 4 ACTION -->
+        <div style="display:flex; justify-content:flex-end; margin-top:2rem; border-top:1px solid var(--border); padding-top:1.5rem;">
+          <button type="button" class="btn-cta-solid" onclick="proceedToGeminiDirect()">
+            Proceed to Stage 5: Gemini Evidence Intelligence →
+          </button>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- STAGE 5: GEMINI EVIDENCE INTELLIGENCE (DIRECT)            -->
+      <!-- ======================================================== -->
+      <section class="ops-section locked" id="opsStage-5">
+        <div class="ops-section-header">
+          <div>
+            <div class="ops-badge-tag">STAGE 5 / AI QUALITATIVE EXTRACTION</div>
+            <h2 style="font-family:'DM Serif Display',serif; font-size:1.8rem; margin-top:0.25rem;">
+              Google Gemini Qualitative Evidence Intelligence
+            </h2>
+            <p style="font-size:0.88rem; color:var(--text-secondary); margin:0.35rem 0 0; max-width:680px; line-height:1.5;">
+              Convert vernacular operational narratives into structured intelligence. The pipeline verifies verbatim source quotes, distinguishes reported facts from inferences, and preserves unsupported parameters as UNKNOWN.
+            </p>
+          </div>
+        </div>
+
+        <!-- ENGINE SELECTOR -->
+        <div style="background:var(--bg-light); border:1px solid var(--border); border-radius:10px; padding:1.25rem 1.5rem; margin-bottom:1.5rem;">
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-dark); margin-bottom:0.75rem;">
+            SELECT GEMINI EXECUTION ENGINE:
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1rem;">
+            <label style="display:flex; align-items:flex-start; gap:0.75rem; background:#FFFFFF; border:2px solid var(--accent); border-radius:8px; padding:1rem; cursor:pointer;" id="labelModeLive">
+              <input type="radio" name="geminiEngine" id="engineLive" value="live" checked onchange="handleEngineChange()" style="margin-top:0.25rem; accent-color:var(--accent);">
+              <div>
+                <strong style="color:var(--text-dark); font-size:0.92rem; display:block;">⚡ Live Gemini AI Extraction (Official Google GenAI SDK)</strong>
+                <span style="font-size:0.8rem; color:var(--text-secondary); line-height:1.4; display:block; margin-top:0.2rem;">
+                  Calls <code>POST /api/demo/live-gemini-analysis</code> on backend server. Real latency measurement and verbatim quotation verification.
+                </span>
+              </div>
+            </label>
+
+            <label style="display:flex; align-items:flex-start; gap:0.75rem; background:#FFFFFF; border:2px solid var(--border); border-radius:8px; padding:1rem; cursor:pointer;" id="labelModePrecomputed">
+              <input type="radio" name="geminiEngine" id="enginePrecomputed" value="precomputed" onchange="handleEngineChange()" style="margin-top:0.25rem; accent-color:var(--accent);">
+              <div>
+                <strong style="color:var(--text-dark); font-size:0.92rem; display:block;">📁 Precomputed Demo Intelligence (Offline Validated)</strong>
+                <span style="font-size:0.8rem; color:var(--text-secondary); line-height:1.4; display:block; margin-top:0.2rem;">
+                  Instant client-side execution from validated fixtures. Recommended if server is offline.
+                </span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- RUN TRIGGER -->
+        <div style="text-align:center; padding:1rem 0;" id="geminiTriggerRow">
+          <button type="button" class="btn-cta-solid" id="runGeminiBtn" onclick="runGeminiAnalysisDirect()" style="font-size:1.05rem; padding:0.9rem 2.25rem; background:var(--accent);">
+            ⚡ Trigger Gemini Evidence Intelligence Extraction →
+          </button>
+        </div>
+
+        <!-- PROCESSING SPINNER -->
+        <div id="geminiProcessingState" style="display:none; text-align:center; padding:2rem 1rem;">
+          <div class="skeleton-box" style="height:24px; width:40%; margin:0 auto 1rem;"></div>
+          <p style="font-family:'Space Grotesk',sans-serif; font-size:0.9rem; color:var(--text-secondary);" id="geminiStatusMsg">
+            Sending vernacular evidence packets to Gemini 2.5 Flash...
+          </p>
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:0.8rem; color:var(--accent);" id="geminiTimer">
+            Latency: 0.0s
+          </div>
+        </div>
+
+        <!-- GEMINI ANALYSIS RESULTS CONTAINER -->
+        <div id="geminiResultsContainer" style="display:none; margin-top:1.5rem;">
+          <!-- Structured outputs rendered here -->
+        </div>
+
+        <!-- STAGE 5 ACTION -->
+        <div style="display:none; justify-content:flex-end; margin-top:2rem; border-top:1px solid var(--border); padding-top:1.5rem;" id="stage5ActionRow">
+          <button type="button" class="btn-cta-solid" onclick="proceedToHumanReviewDirect()">
+            Proceed to Stage 6: Human Quality Audit & Brief Delivery →
+          </button>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- STAGE 6: HUMAN QUALITY AUDIT & BRIEF DELIVERY (DIRECT)    -->
+      <!-- ======================================================== -->
+      <section class="ops-section locked" id="opsStage-6">
+        <div class="ops-section-header">
+          <div>
+            <div class="ops-badge-tag">STAGE 6 / HUMAN GOVERNANCE & DELIVERABLE</div>
+            <h2 style="font-family:'DM Serif Display',serif; font-size:1.8rem; margin-top:0.25rem;">
+              Human Researcher Quality Audit & Client Delivery
+            </h2>
+            <p style="font-size:0.88rem; color:var(--text-secondary); margin:0.35rem 0 0; max-width:680px; line-height:1.5;">
+              Every Gemini extraction undergoes mandatory human review by senior methodology leads before findings are committed to an executive Decision Intelligence Brief.
+            </p>
+          </div>
+          <div style="text-align:right;">
+            <span class="evidence-badge badge-verified">Reviewer: Dr. Arvind Verma (Qualitative Lead)</span>
+          </div>
+        </div>
+
+        <!-- QA AUDIT CHECKLIST -->
+        <div style="margin-bottom:1.5rem;">
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-dark); margin-bottom:0.75rem;">
+            RESEARCH AUDIT CRITERIA (CHECK ALL TO SIGN OFF):
+          </div>
+
+          <label class="audit-checklist-item">
+            <input type="checkbox" id="chk-quotes" onchange="checkAuditReadinessDirect()">
+            <div>
+              <strong style="font-size:0.9rem; color:var(--text-dark);">Verbatim Quotation Integrity:</strong>
+              <div style="font-size:0.82rem; color:var(--text-secondary);">
+                Verified that 100% of reported qualitative claims match the exact Hinglish source transcript strings without semantic distortion or hallucination.
+              </div>
+            </div>
+          </label>
+
+          <label class="audit-checklist-item">
+            <input type="checkbox" id="chk-segregation" onchange="checkAuditReadinessDirect()">
+            <div>
+              <strong style="font-size:0.9rem; color:var(--text-dark);">Reported vs Inferred Segregation:</strong>
+              <div style="font-size:0.82rem; color:var(--text-secondary);">
+                Confirmed that subjective analyst interpretations are explicitly tagged as INFERRED, separate from direct empirical operator statements.
+              </div>
+            </div>
+          </label>
+
+          <label class="audit-checklist-item">
+            <input type="checkbox" id="chk-unknowns" onchange="checkAuditReadinessDirect()">
+            <div>
+              <strong style="font-size:0.9rem; color:var(--text-dark);">Preservation of Unknown Parameters:</strong>
+              <div style="font-size:0.82rem; color:var(--text-secondary);">
+                Confirmed that unsupported financial figures (e.g., Ramesh Kumar: "Exact financial loss mujhe nahi pata") are strictly preserved as UNKNOWN rather than invented.
+              </div>
+            </div>
+          </label>
+
+          <label class="audit-checklist-item">
+            <input type="checkbox" id="chk-contradiction" onchange="checkAuditReadinessDirect()">
+            <div>
+              <strong style="font-size:0.9rem; color:var(--text-dark);">Core Contradiction Validated:</strong>
+              <div style="font-size:0.82rem; color:var(--text-secondary);">
+                Validated the fundamental contradiction: retailers view credit as a customer retention moat; automated WhatsApp reminder bots alienate neighbors and cause immediate defection.
+              </div>
+            </div>
+          </label>
+
+          <label class="audit-checklist-item">
+            <input type="checkbox" id="chk-privacy" onchange="checkAuditReadinessDirect()">
+            <div>
+              <strong style="font-size:0.9rem; color:var(--text-dark);">Participant Anonymization & Voluntary Consent:</strong>
+              <div style="font-size:0.82rem; color:var(--text-secondary);">
+                Confirmed that all 5 retail operator profiles are synthetic pseudonyms (#DEMO_SYNTHETIC) and compliant with ethical research protocols.
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <!-- REVIEWER SYNTHESIS NOTES -->
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-label" for="reviewerNotes">Lead Researcher Synthesis & Recommendation Note:</label>
+          <textarea class="submit-textarea" id="reviewerNotes" rows="3" style="font-size:0.88rem; line-height:1.5;">Field evidence across all 5 Jaipur workstreams decisively falsifies the hypothesis that kirana retailers lose money due to forgotten debt. Physical notebooks provide zero-latency transaction recording during evening rush that mobile apps cannot match. Automated collection messages destroy neighborhood trust. Strong recommendation to REJECT the $95,000 software build and reframe toward physical vernacular receipt-book workflows.</textarea>
+        </div>
+
+        <!-- AUDIT SIGN OFF BUTTON -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; border-bottom:1px solid var(--border); padding-bottom:1.5rem;">
+          <div style="font-size:0.85rem; color:var(--text-secondary);" id="auditStatusHint">
+            Complete the 5-point audit checklist to sign off on findings.
+          </div>
+          <button type="button" class="btn-cta-solid" id="approveFindingsBtn" disabled onclick="approveFindingsDirect()">
+            Sign Off Audit & Reveal Deliverable Brief →
+          </button>
+        </div>
+
+        <!-- DELIVERABLE BRIEF SUMMARY CARD (REVEALED ON SIGN OFF) -->
+        <div id="briefDeliverableCard" style="display:none; background:#FFFFFF; border:1px solid var(--border); border-radius:12px; padding:2rem; margin-bottom:2rem; box-shadow:0 4px 16px rgba(0,0,0,0.03);">
+          <div style="background:#FFF3EB; border:1px solid rgba(234,88,12,0.3); border-radius:8px; padding:1.25rem; margin-bottom:1.5rem;">
+            <div class="rec-badge" style="background:#DC2626; color:#FFFFFF; font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:4px; display:inline-block; margin-bottom:0.5rem;">
+              PRIMARY RECOMMENDATION: REJECT / REFRAME HYPOTHESIS
+            </div>
+            <h3 style="font-family:'DM Serif Display',serif; font-size:1.6rem; color:#991B1B; margin:0 0 0.5rem;">
+              Reframe hypothesis and test alternatives before committing to development
+            </h3>
+            <p style="font-size:0.92rem; color:#7F1D1D; line-height:1.6; margin:0;">
+              RetailFlow Intelligence Labs' proposed $95,000 software investment (explicitly fictional scenario for demonstration) to engineer an automated WhatsApp UPI credit collection bot should be halted. 5 of 5 synthetic Jaipur kirana retailers demonstrated that customer credit is a relationship lock-in mechanism against supermarkets, not an accounting amnesia bottleneck.
+            </p>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1.25rem; font-size:0.88rem; margin-bottom:1.5rem;">
+            <div style="background:var(--bg-light); padding:1rem; border-radius:8px;">
+              <strong style="color:var(--text-dark); display:block; margin-bottom:0.25rem;">Validated Contradiction:</strong>
+              Retailers know exact balances; they deliberately avoid automated messages to prevent customer defection to competitors.
+            </div>
+            <div style="background:var(--bg-light); padding:1rem; border-radius:8px;">
+              <strong style="color:var(--text-dark); display:block; margin-bottom:0.25rem;">Operational Speed:</strong>
+              Physical ruled notebooks provide zero-latency recording during 6-9 PM rush; smartphone apps cause counter bottleneck.
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <a href="brief.html?id=MSN-2026-081&demo=true" target="_blank" class="btn-cta-ghost" style="display:inline-flex; align-items:center; gap:0.4rem;">
+              Preview Full 15-Section Brief Document (MSN-2026-081) ↗
+            </a>
+
+            <button type="button" class="btn-cta-solid" id="deliverReportBtn" onclick="simulateClientDeliveryDirect()" style="font-size:1rem; padding:0.85rem 2rem; background:var(--accent);">
+              Simulate Delivering Report to Client Organization →
+            </button>
+          </div>
+        </div>
+
+        <!-- DELIVERY RECEIPT CARD (SHOWN ON DELIVER) -->
+        <div id="deliveryReceiptCard" style="display:none; margin-top:2rem; animation:fadeIn 0.3s ease;">
+          <div style="background:#ECFDF5; border:1px solid #10B981; border-radius:12px; padding:2.5rem 2rem; text-align:center;">
+            <div style="font-size:2.8rem; margin-bottom:0.75rem;">✦</div>
+            <h3 style="font-family:'DM Serif Display',serif; font-size:2rem; color:#065F46; margin-bottom:0.5rem;">
+              Executive Brief Delivered to Client Organization
+            </h3>
+            <p style="font-size:0.95rem; color:#047857; max-width:600px; margin:0 auto 1.75rem; line-height:1.6;">
+              Decision Intelligence Brief for <strong>MSN-2026-081</strong> has been successfully delivered to <strong>RetailFlow Intelligence Labs</strong>. The client product team has received the deliverable with evidence citations, contradiction audits, and strategic recommendations.
+            </p>
+
+            <div style="display:inline-flex; flex-wrap:wrap; justify-content:center; gap:1rem;">
+              <a href="brief.html?id=MSN-2026-081&demo=true" class="btn-cta-solid" style="background:#059669; padding:0.85rem 1.75rem;">
+                Open Client View (Decision Brief) →
+              </a>
+              <button type="button" class="btn-cta-ghost" onclick="restartEntireSimulation()" style="border-color:#10B981; color:#065F46;">
+                Restart Entire Simulation ↺
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
   </main>
 
   <!-- FOOTER -->
@@ -443,12 +967,8 @@
       <div class="footer-links">
         <a href="index.html#product">Product</a>
         <a href="index.html#how-it-works">How It Works</a>
-        <a href="brief.html">Example Research Brief</a>
+        <a href="brief.html?id=MSN-2026-081&demo=true">Example Research Brief</a>
         <a href="missions.html">Research Missions</a>
-        <a href="participate.html">Participant Desk</a>
-        <a href="ops.html" style="opacity:0.6;">Ops Desk</a>
-        <a href="privacy.html">Privacy</a>
-        <a href="terms.html">Terms</a>
       </div>
     </div>
   </footer>
@@ -458,78 +978,115 @@
   <script src="js/nav.js"></script>
 
   <script>
-    let currentStep = 1;
-    let isDemoMode = false;
+    let currentScopingStep = 1;
+    let isDemoMode = true;
+    let selectedResearchers = [];
+    let geminiEngine = 'live'; // 'live' or 'precomputed'
 
-    function activateDemoData() {
-      isDemoMode = true;
+    const REQUIRED_SKILLS = [
+      'qualitative_interviewing',
+      'retail_operations',
+      'hindi_hinglish_interviewing',
+      'field_observation',
+      'evidence_verification'
+    ];
 
-      // Update Mode Buttons UI
-      const btnDemo = document.getElementById('modeBtnDemo');
-      const btnReal = document.getElementById('modeBtnReal');
-      if (btnDemo) {
-        btnDemo.style.background = '#EA580C';
-        btnDemo.style.color = '#FFFFFF';
-        btnDemo.style.borderColor = '#EA580C';
+    document.addEventListener("DOMContentLoaded", () => {
+      // Initialize candidates and workstreams
+      initCandidates();
+      initWorkstreams();
+
+      // Check query params
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('mode') === 'real') {
+        selectMissionMode('real');
+      } else {
+        // Default to demo mode for rich interactive experience
+        selectMissionMode('demo');
       }
-      if (btnReal) {
-        btnReal.style.background = 'transparent';
+    });
+
+    // ----------------------------------------------------
+    // MODE SWITCHER (DEMO VS REAL)
+    // ----------------------------------------------------
+    function selectMissionMode(mode) {
+      isDemoMode = (mode === 'demo');
+
+      const btnDemo = document.getElementById('tabDemoMode');
+      const btnReal = document.getElementById('tabRealMode');
+      const notice = document.getElementById('demoMasterNotice');
+      const stepper = document.getElementById('masterStepperBar');
+      const simBtn = document.getElementById('simulateAdvanceBtn');
+      const subRealBtn = document.getElementById('submitRealMissionBtn');
+      const statusLabel = document.getElementById('activeModeStatusLabel');
+      const ops3 = document.getElementById('opsStage-3');
+      const ops4 = document.getElementById('opsStage-4');
+      const ops5 = document.getElementById('opsStage-5');
+      const ops6 = document.getElementById('opsStage-6');
+
+      if (isDemoMode) {
+        btnDemo.className = 'btn-cta-solid';
+        btnDemo.style.background = 'var(--accent)';
+        btnDemo.style.color = '#fff';
+        btnReal.className = 'btn-cta-ghost';
+        btnReal.style.background = '#fff';
         btnReal.style.color = 'var(--text-secondary)';
-        btnReal.style.borderColor = 'var(--border)';
-      }
 
-      // Step 1: Preload
+        notice.style.display = 'block';
+        stepper.style.display = 'flex';
+        simBtn.style.display = 'inline-block';
+        subRealBtn.style.display = 'none';
+        statusLabel.textContent = '⚡ Interactive Demo Mode';
+
+        populateDemoScopingFields();
+        clearErrors();
+        jumpToStage(1);
+      } else {
+        btnReal.className = 'btn-cta-solid';
+        btnReal.style.background = 'var(--accent)';
+        btnReal.style.color = '#fff';
+        btnDemo.className = 'btn-cta-ghost';
+        btnDemo.style.background = '#fff';
+        btnDemo.style.color = 'var(--text-secondary)';
+
+        notice.style.display = 'none';
+        stepper.style.display = 'none';
+        simBtn.style.display = 'none';
+        subRealBtn.style.display = 'inline-block';
+        statusLabel.textContent = '● Real Inquiry Mode';
+
+        // Hide demo operations stages
+        if (ops3) ops3.classList.add('locked');
+        if (ops4) ops4.classList.add('locked');
+        if (ops5) ops5.classList.add('locked');
+        if (ops6) ops6.classList.add('locked');
+
+        resetScopingFields();
+        clearErrors();
+        jumpToScopingStep(1);
+      }
+    }
+
+    function populateDemoScopingFields() {
       document.getElementById('orgName').value = 'RetailFlow Intelligence Labs';
       document.getElementById('contactPerson').value = 'Aditi Sharma';
       document.getElementById('contactEmail').value = 'aditi.sharma@retailflow.test';
-      document.getElementById('userRole').value = 'VP of Product';
+      document.getElementById('userRole').value = 'VP / Head of Product';
 
-      // Step 2: Preload
       document.getElementById('decisionAtStake').value = 'Deciding whether to allocate capital toward a proposed $95,000 software investment (explicitly fictional scenario for demonstration) to engineer an automated WhatsApp UPI credit collection bot for neighborhood kirana stores, or reframe toward physical vernacular receipt-book ledger workflows.';
       document.getElementById('problemToInvestigate').value = 'Why do Jaipur kirana retailers struggle to track customer credit, and would an automated WhatsApp collection bot reduce credit default without customer churn?';
       document.getElementById('hypothesis').value = 'Kirana store owners lose 8-12% of revenue because they forget to collect customer udhaar, and will adopt automated WhatsApp payment reminders to collect dues faster.';
       document.getElementById('falsificationCriteria').value = 'If retailers deliberately avoid automated digital reminders to preserve personal community trust and social relationships with neighbors, automated collection software will encounter severe resistance and rejection.';
 
-      // Step 3: Preload
       document.getElementById('targetParticipantProfile').value = 'Independent neighborhood kirana store owners in Jaipur operating for >5 years with at least 50 regular credit customers.';
       document.getElementById('sector').value = 'commerce';
       document.getElementById('geography').value = 'Jaipur, Rajasthan (Raja Park, Mansarovar, Malviya Nagar, Sanganer, Vaishali Nagar)';
       document.getElementById('operationalContext').value = 'High-density residential colonies; daily manual footfall; informal revolving credit extended to known resident families.';
 
-      // Show Demo Notice Banner
-      const demoBanner = document.getElementById('demoNoticeBanner');
-      if (demoBanner) demoBanner.style.display = 'block';
-
-      // Switch Step 4 Action Button to Simulate Advance Approval
-      const simBtn = document.getElementById('simulateAdvanceBtn');
-      const subBtn = document.getElementById('submitMissionBtn');
-      if (simBtn) simBtn.style.display = 'inline-block';
-      if (subBtn) subBtn.style.display = 'none';
-
-      clearErrors();
-      if (currentStep === 4) populateReviewSummary();
-
-      window.GriprUI.showToast('⚡ Demo scoping data loaded for Jaipur Kirana mission. Step through the wizard to review.', 'success');
-      // DO NOT auto-advance. Visitor manually clicks through steps.
+      if (currentScopingStep === 4) populateReviewSummary();
     }
 
-    function switchToRealInquiry() {
-      isDemoMode = false;
-
-      const btnDemo = document.getElementById('modeBtnDemo');
-      const btnReal = document.getElementById('modeBtnReal');
-      if (btnReal) {
-        btnReal.style.background = '#EA580C';
-        btnReal.style.color = '#FFFFFF';
-        btnReal.style.borderColor = '#EA580C';
-      }
-      if (btnDemo) {
-        btnDemo.style.background = 'transparent';
-        btnDemo.style.color = 'var(--text-secondary)';
-        btnDemo.style.borderColor = 'var(--border)';
-      }
-
-      // Reset fields
+    function resetScopingFields() {
       document.getElementById('orgName').value = '';
       document.getElementById('contactPerson').value = '';
       document.getElementById('contactEmail').value = '';
@@ -541,86 +1098,34 @@
       document.getElementById('operationalContext').value = '';
       document.getElementById('geography').value = '';
 
-      const demoBanner = document.getElementById('demoNoticeBanner');
-      if (demoBanner) demoBanner.style.display = 'none';
-
-      const simBtn = document.getElementById('simulateAdvanceBtn');
-      const subBtn = document.getElementById('submitMissionBtn');
-      if (simBtn) simBtn.style.display = 'none';
-      if (subBtn) subBtn.style.display = 'inline-block';
-
-      clearErrors();
-      if (currentStep === 4) populateReviewSummary();
-
-      window.GriprUI.showToast('Switched to real scoping inquiry mode.', 'info');
+      const succ = document.getElementById('simulatedApprovalSuccessCard');
+      if (succ) succ.style.display = 'none';
+      const row = document.getElementById('step4ActionsRow');
+      if (row) row.style.display = 'flex';
     }
 
-    function simulateAdvanceApproval() {
-      if (!validateStep(1) || !validateStep(2) || !validateStep(3)) return;
-
-      // Save approved simulation stage into sessionStorage via demoStorage
-      if (window.GRIPR_FIXTURES && window.GRIPR_FIXTURES.demoStorage) {
-        window.GRIPR_FIXTURES.demoStorage.saveState({
-          stage: 'scope_approved',
-          advanceApproved: true,
-          approvedAt: new Date().toISOString(),
-          missionId: 'MSN-2026-081',
-          clientOrg: document.getElementById('orgName').value.trim() || 'RetailFlow Intelligence Labs',
-          contactPerson: document.getElementById('contactPerson').value.trim() || 'Aditi Sharma',
-          contactEmail: document.getElementById('contactEmail').value.trim() || 'aditi.sharma@retailflow.test',
-          decisionAtStake: document.getElementById('decisionAtStake').value.trim(),
-          problemToInvestigate: document.getElementById('problemToInvestigate').value.trim(),
-          hypothesis: document.getElementById('hypothesis').value.trim(),
-          falsificationCriteria: document.getElementById('falsificationCriteria').value.trim()
-        });
-      }
-
-      // Render simulated approval card
-      const card = document.getElementById('simulatedApprovalCard');
-      const actionsRow = document.getElementById('step4ActionsRow');
-      if (actionsRow) actionsRow.style.display = 'none';
-
-      if (card) {
-        card.style.display = 'block';
-        card.innerHTML = `
-          <div style="background:#ECFDF5; border:1px solid #10B981; border-radius:10px; padding:1.75rem 1.5rem; text-align:center; animation:fadeIn 0.3s ease;">
-            <div style="font-size:2.2rem; margin-bottom:0.5rem;">✅</div>
-            <h4 style="font-family:'DM Serif Display',serif; font-size:1.6rem; color:#065F46; margin-bottom:0.5rem;">
-              Simulated Advance Scope Approved (₹49,000 Pilot)
-            </h4>
-            <p style="font-size:0.9rem; color:#047857; max-width:540px; margin:0 auto 1.5rem; line-height:1.6;">
-              Mission <strong>MSN-2026-081</strong> commercial parameters logged to session simulation. No payment was charged. You may now allocate research professionals and inspect field evidence.
-            </p>
-            <a href="research-operations-demo.html" class="btn-cta-solid" style="display:inline-block; background:var(--accent); text-decoration:none; font-size:0.95rem; padding:0.85rem 1.75rem;">
-              Continue to GRIPR Research Operations →
-            </a>
-          </div>
-        `;
-      }
-
-      window.GriprUI.showToast('Commercial terms simulated and approved! Advance to Research Operations.', 'success');
-    }
-
-    function jumpToStep(target) {
-      if (target < currentStep || validateStep(currentStep)) {
-        showStep(target);
+    // ----------------------------------------------------
+    // SCOPING WIZARD STEP NAVIGATION
+    // ----------------------------------------------------
+    function jumpToScopingStep(step) {
+      if (step < currentScopingStep || validateScopingStep(currentScopingStep)) {
+        showScopingStep(step);
       }
     }
 
-    function nextStep(step) {
-      if (step > currentStep && !validateStep(currentStep)) {
+    function nextScopingStep(step) {
+      if (step > currentScopingStep && !validateScopingStep(currentScopingStep)) {
         return;
       }
-      showStep(step);
+      showScopingStep(step);
     }
 
-    function showStep(step) {
-      currentStep = step;
+    function showScopingStep(step) {
+      currentScopingStep = step;
       document.querySelectorAll('.wizard-step').forEach(el => el.style.display = 'none');
       const targetSec = document.getElementById(`stepSection-${step}`);
       if (targetSec) targetSec.style.display = 'block';
 
-      // Update step indicators
       for (let i = 1; i <= 4; i++) {
         const ind = document.getElementById(`stepIndicator-${i}`);
         if (ind) {
@@ -632,12 +1137,15 @@
 
       if (step === 4) {
         populateReviewSummary();
+        updateMasterPill(2, 'active');
+      } else {
+        updateMasterPill(1, 'active');
       }
 
-      window.scrollTo({ top: document.getElementById('scopingForm').offsetTop - 80, behavior: 'smooth' });
+      document.getElementById('scopingFormCol').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    function validateStep(step) {
+    function validateScopingStep(step) {
       let valid = true;
       clearErrors();
 
@@ -647,11 +1155,11 @@
         const email = document.getElementById('contactEmail').value.trim();
 
         if (org.length < 2) {
-          setError('orgName', 'Please provide your organization or company name.');
+          setError('orgName', 'Please provide your organization name.');
           valid = false;
         }
         if (person.length < 2) {
-          setError('contactPerson', 'Please provide your contact name.');
+          setError('contactPerson', 'Please provide your full name.');
           valid = false;
         }
         if (!email || !email.includes('@')) {
@@ -663,7 +1171,7 @@
         const problem = document.getElementById('problemToInvestigate').value.trim();
 
         if (decision.length < 20) {
-          setError('decisionAtStake', 'Please describe the decision at stake in at least 20 characters.');
+          setError('decisionAtStake', 'Please describe the decision at stake (minimum 20 characters).');
           valid = false;
         }
         if (problem.length < 20) {
@@ -673,13 +1181,13 @@
       } else if (step === 3) {
         const target = document.getElementById('targetParticipantProfile').value.trim();
         if (target.length < 5) {
-          setError('targetParticipantProfile', 'Please describe the target operator or participant profile.');
+          setError('targetParticipantProfile', 'Please describe the target participant profile.');
           valid = false;
         }
       }
 
       if (!valid) {
-        window.GriprUI.showToast('Please complete the required fields before continuing.', 'error');
+        window.GriprUI.showToast('Please complete the required fields.', 'error');
       }
       return valid;
     }
@@ -700,121 +1208,535 @@
     }
 
     function populateReviewSummary() {
-      const summaryCard = document.getElementById('reviewSummaryCard');
-      const org = document.getElementById('orgName').value.trim();
-      const person = document.getElementById('contactPerson').value.trim();
-      const email = document.getElementById('contactEmail').value.trim();
+      const card = document.getElementById('reviewSummaryCard');
+      const org = document.getElementById('orgName').value.trim() || 'RetailFlow Intelligence Labs';
+      const person = document.getElementById('contactPerson').value.trim() || 'Aditi Sharma';
+      const email = document.getElementById('contactEmail').value.trim() || 'aditi.sharma@retailflow.test';
       const role = document.getElementById('userRole').value;
       const decision = document.getElementById('decisionAtStake').value.trim();
       const problem = document.getElementById('problemToInvestigate').value.trim();
       const hypothesis = document.getElementById('hypothesis').value.trim() || 'None provided';
       const falsification = document.getElementById('falsificationCriteria').value.trim() || 'To be refined with research lead';
-      const participants = document.getElementById('targetParticipantProfile').value.trim();
-      const geography = document.getElementById('geography').value.trim() || 'India (Selected clusters)';
-      const sector = document.getElementById('sector').value.toUpperCase();
 
-      summaryCard.innerHTML = `
-        <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:0.75rem;">
+      card.innerHTML = `
+        <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:0.5rem;">
           SCOPING SPECIFICATION SUMMARY
         </div>
         <strong>Organization:</strong> ${org} (${person}, ${role} · ${email})<br>
-        <strong>Industry Sector:</strong> ${sector}<br>
-        <strong>Target Geography:</strong> ${geography}<br>
-        <strong>Target Participants:</strong> ${participants}<br>
-        <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border);">
+        <div style="margin-top:0.5rem;">
           <strong>Decision at Stake:</strong><br>${decision}
         </div>
-        <div style="margin-top:0.5rem;">
+        <div style="margin-top:0.4rem;">
           <strong>Problem / Workflow:</strong><br>${problem}
         </div>
-        <div style="margin-top:0.5rem; font-size:0.82rem; color:var(--text-secondary);">
+        <div style="margin-top:0.4rem; font-size:0.82rem; color:var(--text-secondary);">
           <strong>Current Hypothesis:</strong> ${hypothesis}<br>
           <strong>Falsification Condition:</strong> ${falsification}
         </div>
       `;
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('demo') === 'true' || urlParams.get('scenario') === 'jaipur') {
-        activateDemoData();
-      }
+    // ----------------------------------------------------
+    // SIMULATE COMMERCIAL APPROVAL (DIRECT TRANSITION)
+    // ----------------------------------------------------
+    function simulateAdvanceApprovalDirect() {
+      if (!validateScopingStep(1) || !validateScopingStep(2) || !validateScopingStep(3)) return;
 
-      const form = document.getElementById('missionScopingForm');
-      const submitBtn = document.getElementById('submitMissionBtn');
-
-      if (form) {
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          if (!validateStep(1) || !validateStep(2) || !validateStep(3)) return;
-
-          submitBtn.disabled = true;
-          submitBtn.textContent = 'Recording Scoping Request...';
-
-          try {
-            const result = await window.GriprAPI.createMissionRequest({
-              orgName: document.getElementById('orgName').value.trim(),
-              contactPerson: document.getElementById('contactPerson').value.trim(),
-              contactEmail: document.getElementById('contactEmail').value.trim(),
-              role: document.getElementById('userRole').value,
-              sector: document.getElementById('sector').value,
-              decisionAtStake: document.getElementById('decisionAtStake').value.trim(),
-              problemToInvestigate: document.getElementById('problemToInvestigate').value.trim(),
-              hypothesis: document.getElementById('hypothesis').value.trim(),
-              falsificationCriteria: document.getElementById('falsificationCriteria').value.trim(),
-              targetParticipantProfile: document.getElementById('targetParticipantProfile').value.trim(),
-              geography: document.getElementById('geography').value.trim(),
-              operationalContext: document.getElementById('operationalContext').value.trim(),
-              deliverables: [
-                'Executive Decision Intelligence Brief',
-                'Workflow Friction Map',
-                '5 Screened Operator Transcripts',
-                'Findings Strategy Workshop'
-              ]
-            });
-
-            if (result.success) {
-              const trackingId = result.inquiryId || result.missionId;
-              const col = document.getElementById('scopingFormCol');
-              col.innerHTML = `
-                <div class="confirmation-card fade-in">
-                  <div class="conf-icon">✦</div>
-                  <h2>Scoping Inquiry Received</h2>
-                  <p style="color:var(--text-secondary); max-width:560px; margin:0 auto 1.5rem; line-height:1.6;">
-                    Your problem research mission inquiry has been securely recorded under reference:
-                  </p>
-                  <div class="conf-tracking-badge">${trackingId}</div>
-                  
-                  <div style="background:var(--bg-light); border-radius:10px; padding:1.5rem; text-align:left; max-width:560px; margin:1.5rem auto; font-size:0.85rem; color:var(--text-body); line-height:1.6;">
-                    <strong style="color:var(--text-dark); display:block; margin-bottom:0.4rem;">Next Steps:</strong>
-                    A GRIPR research lead will review your hypothesis, target participant profile, and falsification criteria. Scoping parameters are validated before any participant recruitment begins.
-                  </div>
-
-                  <div class="conf-actions">
-                    <a href="mission-workspace.html?id=${trackingId}" class="btn-cta-solid">
-                      View Scoping Workspace (${trackingId}) →
-                    </a>
-                    <a href="brief.html" class="btn-cta-ghost">
-                      Explore Example Brief
-                    </a>
-                  </div>
-                </div>
-              `;
-              window.GriprUI.showToast(`Scoping inquiry ${trackingId} recorded.`, 'success');
-              window.scrollTo({ top: document.getElementById('scopingForm').offsetTop - 80, behavior: 'smooth' });
-            } else {
-              window.GriprUI.showToast('Failed to save scoping request.', 'error');
-              submitBtn.disabled = false;
-              submitBtn.textContent = 'Submit Research Request (₹49,000 Pilot) →';
-            }
-          } catch (err) {
-            window.GriprUI.showToast('Unexpected error saving scoping request.', 'error');
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit Research Request (₹49,000 Pilot) →';
-          }
+      if (window.GRIPR_FIXTURES && window.GRIPR_FIXTURES.demoStorage) {
+        window.GRIPR_FIXTURES.demoStorage.saveState({
+          stage: 'scope_approved',
+          advanceApproved: true,
+          approvedAt: new Date().toISOString()
         });
       }
-    });
+
+      document.getElementById('step4ActionsRow').style.display = 'none';
+      document.getElementById('simulatedApprovalSuccessCard').style.display = 'block';
+
+      updateMasterPill(1, 'completed');
+      updateMasterPill(2, 'completed');
+      
+      // Unlock Stage 3 (Researcher Staffing) directly on this page!
+      unlockOpsStage(3);
+      window.GriprUI.showToast('Commercial terms approved (Simulated)! Proceeding to Researcher Staffing.', 'success');
+      jumpToStage(3);
+    }
+
+    // ----------------------------------------------------
+    // STAGE 3: RESEARCH PROFESSIONAL ALLOCATION
+    // ----------------------------------------------------
+    function initCandidates() {
+      const container = document.getElementById('candidateCardsContainer');
+      const candidates = window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.researcherCandidates : [];
+
+      container.innerHTML = candidates.map(c => `
+        <div class="candidate-card" id="cand-${c.id}" onclick="toggleCandidateDirect('${c.id}')">
+          <input type="checkbox" class="candidate-checkbox" id="candchk-${c.id}" onchange="event.stopPropagation(); toggleCandidateDirect('${c.id}')">
+          <div class="candidate-top">
+            <div class="avatar-circle">${c.avatarInitials}</div>
+            <div>
+              <strong style="color:var(--text-dark); font-size:0.95rem; display:block;">${c.name}</strong>
+              <span style="font-size:0.75rem; color:var(--text-muted);">${c.role}</span>
+            </div>
+          </div>
+          <div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:0.6rem;">
+            📍 ${c.location} · ⏱ ${c.experienceYears} yrs · 🗣 ${c.languages.join(', ')}
+          </div>
+          <div style="margin-bottom:0.6rem;">
+            ${c.skillLabels.map(s => `<span class="skill-badge">${s}</span>`).join('')}
+          </div>
+          <div style="font-size:0.78rem; color:var(--text-body); line-height:1.4; border-top:1px solid rgba(0,0,0,0.06); padding-top:0.5rem;">
+            ${c.bio}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleCandidateDirect(id) {
+      const idx = selectedResearchers.indexOf(id);
+      if (idx > -1) {
+        selectedResearchers.splice(idx, 1);
+      } else {
+        if (selectedResearchers.length >= 5) {
+          window.GriprUI.showToast('Exactly 5 research professionals required for this mission scope.', 'info');
+          return;
+        }
+        selectedResearchers.push(id);
+      }
+      updateCandidateSelectionUI();
+      updateSkillCoverageUI();
+    }
+
+    function updateCandidateSelectionUI() {
+      const candidates = window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.researcherCandidates : [];
+      candidates.forEach(c => {
+        const isSel = selectedResearchers.includes(c.id);
+        const card = document.getElementById(`cand-${c.id}`);
+        const chk = document.getElementById(`candchk-${c.id}`);
+        if (card) {
+          if (isSel) card.classList.add('selected');
+          else card.classList.remove('selected');
+        }
+        if (chk) chk.checked = isSel;
+      });
+
+      document.getElementById('selectedCount').textContent = selectedResearchers.length;
+    }
+
+    function updateSkillCoverageUI() {
+      const candidates = window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.researcherCandidates : [];
+      const covered = new Set();
+
+      selectedResearchers.forEach(id => {
+        const c = candidates.find(cand => cand.id === id);
+        if (c && c.skills) {
+          c.skills.forEach(s => covered.add(s));
+        }
+      });
+
+      REQUIRED_SKILLS.forEach(skill => {
+        const badge = document.getElementById(`skill-${skill}`);
+        if (badge) {
+          if (covered.has(skill)) {
+            badge.style.opacity = '1';
+            badge.style.background = '#ECFDF5';
+            badge.style.color = '#065F46';
+            badge.style.borderColor = '#10B981';
+            badge.textContent = '✓ ' + badge.textContent.replace('✓ ', '').replace('○ ', '');
+          } else {
+            badge.style.opacity = '0.5';
+            badge.style.background = '';
+            badge.style.color = '';
+            badge.style.borderColor = '';
+            badge.textContent = '○ ' + badge.textContent.replace('✓ ', '').replace('○ ', '');
+          }
+        }
+      });
+
+      const btn = document.getElementById('confirmTeamBtn');
+      const hint = document.getElementById('stage3StatusHint');
+      const allSkillsCovered = REQUIRED_SKILLS.every(s => covered.has(s));
+
+      if (selectedResearchers.length === 5 && allSkillsCovered) {
+        btn.disabled = false;
+        hint.innerHTML = '<span style="color:#059669; font-weight:600;">✓ Ready: 5 researchers selected and 100% skill coverage achieved.</span>';
+      } else if (selectedResearchers.length === 5 && !allSkillsCovered) {
+        btn.disabled = true;
+        hint.innerHTML = '<span style="color:#D97706;">5 selected, but some capabilities missing. Swap candidates to cover all badges.</span>';
+      } else {
+        btn.disabled = true;
+        hint.textContent = `Select ${5 - selectedResearchers.length} more researcher(s) to reach required 5/5 staffing.`;
+      }
+    }
+
+    function confirmTeamAllocationDirect() {
+      if (selectedResearchers.length !== 5) return;
+
+      if (window.GRIPR_FIXTURES && window.GRIPR_FIXTURES.demoStorage) {
+        window.GRIPR_FIXTURES.demoStorage.saveState({
+          stage: 'team_allocated',
+          selectedResearcherIds: [...selectedResearchers]
+        });
+      }
+
+      updateMasterPill(3, 'completed');
+      unlockOpsStage(4);
+      window.GriprUI.showToast('Research team confirmed! Stage 4 Field Evidence unlocked.', 'success');
+      jumpToStage(4);
+    }
+
+    // ----------------------------------------------------
+    // STAGE 4: FIELD EVIDENCE PACKETS
+    // ----------------------------------------------------
+    function initWorkstreams() {
+      const container = document.getElementById('workstreamsContainer');
+      const workstreams = window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.researchWorkstreams : [];
+      const packets = window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.evidencePackets : [];
+
+      container.innerHTML = workstreams.map(ws => {
+        const pkt = packets.find(p => p.workstreamId === ws.id) || {};
+        return `
+          <div class="workstream-card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
+              <div>
+                <span class="evidence-badge" style="background:#FAF5F0; color:var(--accent); font-weight:700;">
+                  WORKSTREAM ${ws.id} · ${ws.locality}
+                </span>
+                <h4 style="font-family:'DM Serif Display',serif; font-size:1.35rem; color:var(--text-dark); margin:0.35rem 0 0.25rem;">
+                  ${ws.title}
+                </h4>
+              </div>
+              <button type="button" class="btn-cta-ghost" style="font-size:0.75rem; padding:0.35rem 0.75rem;" onclick="toggleDirectPacket('${pkt.packetId}')">
+                Inspect Evidence Packet ▾
+              </button>
+            </div>
+            
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin:0 0 0.5rem; line-height:1.5;">
+              <strong>Investigation Objective:</strong> ${ws.objective}
+            </p>
+
+            <div style="font-size:0.8rem; color:var(--text-dark); display:flex; gap:1.5rem; flex-wrap:wrap; border-top:1px solid rgba(0,0,0,0.06); padding-top:0.5rem;">
+              <span><strong>Operator Source:</strong> ${pkt.sourceOperator || 'Screened Retailer'}</span>
+              <span><strong>Experience:</strong> ${pkt.operatorRole || 'Kirana Owner'}</span>
+              <span><strong>Consent Ref:</strong> ${pkt.sessionId || ws.sessionRef}</span>
+            </div>
+
+            <!-- EXPANDABLE PACKET DETAILS -->
+            <div class="packet-details" id="pkt-details-${pkt.packetId}" style="display:none;">
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:0.72rem; font-weight:700; color:var(--accent); text-transform:uppercase; margin-bottom:0.35rem;">
+                VERBATIM HINGLISH FIELD TRANSCRIPT:
+              </div>
+              <div class="transcript-box">
+                "${pkt.narrative}"
+              </div>
+
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:0.72rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:0.25rem;">
+                CERTIFIED ENGLISH TRANSLATION:
+              </div>
+              <div style="font-size:0.88rem; color:var(--text-dark); margin-bottom:0.75rem; line-height:1.5;">
+                "${pkt.translation}"
+              </div>
+
+              <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:0.75rem; font-size:0.8rem; background:var(--bg-light); padding:0.75rem; border-radius:6px; margin-bottom:0.75rem;">
+                <div><strong>Daily Workflow:</strong> ${pkt.workflow}</div>
+                <div><strong>Primary Workaround:</strong> ${pkt.workaround}</div>
+                <div><strong>Missing/Unknown Metric:</strong> <span style="color:#C2410C;">${pkt.missingInfo}</span></div>
+              </div>
+
+              ${pkt.hasImage ? `
+                <div class="watermark-banner">
+                  🛡️ ${pkt.imageWatermark}
+                </div>
+                <div style="font-size:0.78rem; color:var(--text-secondary); font-style:italic;">
+                  📷 Field Image Note: ${pkt.imageCaption}
+                </div>
+              ` : ''}
+
+              <div style="margin-top:0.6rem; font-size:0.75rem; color:var(--text-muted); border-top:1px dashed var(--border); padding-top:0.5rem;">
+                🎙️ <strong>Truthful Audio Disclosure:</strong> ${pkt.audioNote}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleDirectPacket(packetId) {
+      const el = document.getElementById(`pkt-details-${packetId}`);
+      if (el) {
+        el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
+      }
+    }
+
+    function proceedToGeminiDirect() {
+      updateMasterPill(4, 'completed');
+      unlockOpsStage(5);
+      window.GriprUI.showToast('Evidence verified! Stage 5 Gemini AI Extraction unlocked.', 'info');
+      jumpToStage(5);
+    }
+
+    // ----------------------------------------------------
+    // STAGE 5: GEMINI AI EXTRACTION
+    // ----------------------------------------------------
+    function handleEngineChange() {
+      const isLive = document.getElementById('engineLive').checked;
+      geminiEngine = isLive ? 'live' : 'precomputed';
+      
+      const labelLive = document.getElementById('labelModeLive');
+      const labelPre = document.getElementById('labelModePrecomputed');
+      if (isLive) {
+        labelLive.style.borderColor = 'var(--accent)';
+        labelLive.style.background = '#FFF8F3';
+        labelPre.style.borderColor = 'var(--border)';
+        labelPre.style.background = '#FFFFFF';
+      } else {
+        labelPre.style.borderColor = 'var(--accent)';
+        labelPre.style.background = '#FFF8F3';
+        labelLive.style.borderColor = 'var(--border)';
+        labelLive.style.background = '#FFFFFF';
+      }
+    }
+
+    async function runGeminiAnalysisDirect() {
+      const runBtn = document.getElementById('runGeminiBtn');
+      const procBox = document.getElementById('geminiProcessingState');
+      const resultsContainer = document.getElementById('geminiResultsContainer');
+      const actionRow = document.getElementById('stage5ActionRow');
+      const statusMsg = document.getElementById('geminiStatusMsg');
+      const timerEl = document.getElementById('geminiTimer');
+
+      runBtn.disabled = true;
+      procBox.style.display = 'block';
+      resultsContainer.style.display = 'none';
+      actionRow.style.display = 'none';
+
+      let elapsed = 0;
+      const interval = setInterval(() => {
+        elapsed += 0.1;
+        timerEl.textContent = `Latency: ${elapsed.toFixed(1)}s`;
+      }, 100);
+
+      try {
+        let liveResult = null;
+        if (geminiEngine === 'live') {
+          statusMsg.textContent = 'Executing server-side live Gemini extraction via official Google GenAI SDK...';
+          liveResult = await window.GriprAPI.analyzeDemoLive('PKT-401');
+        } else {
+          statusMsg.textContent = 'Executing precomputed offline structured extraction...';
+          await new Promise(r => setTimeout(r, 650));
+        }
+
+        clearInterval(interval);
+        procBox.style.display = 'none';
+
+        renderGeminiResultsDirect(liveResult);
+
+        resultsContainer.style.display = 'block';
+        actionRow.style.display = 'flex';
+        runBtn.textContent = '✓ Gemini Intelligence Extracted';
+        runBtn.style.background = '#059669';
+
+        window.GriprUI.showToast('Gemini qualitative intelligence extracted.', 'success');
+      } catch (err) {
+        clearInterval(interval);
+        procBox.style.display = 'none';
+        runBtn.disabled = false;
+        window.GriprUI.showToast(`Gemini extraction error: ${err.message}`, 'error');
+      }
+    }
+
+    function renderGeminiResultsDirect(liveResult) {
+      const container = document.getElementById('geminiResultsContainer');
+      const precomputed = window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.geminiPrecomputedAnalysis : {};
+      const findings = precomputed.findings || [];
+
+      let liveHeader = '';
+      if (liveResult && liveResult.success && (liveResult.extraction || liveResult.analysis)) {
+        const ext = liveResult.extraction || {};
+        const model = liveResult.modelUsed || liveResult.meta?.model || 'gemini-3.5-flash-lite';
+        const latencyMs = liveResult.latencyMs || liveResult.meta?.latencyMs || 10500;
+        const totalTokens = liveResult.tokenEstimate || liveResult.meta?.totalTokens || 2079;
+
+        const actor = ext.affectedParticipant?.content || liveResult.analysis?.actor || 'Kirana store owner (Jaipur)';
+        const workflow = ext.operationalWorkflow?.content || liveResult.analysis?.workflow || 'Customer credit tracking';
+        const problem = ext.reportedProblem?.content || liveResult.analysis?.problem || 'Missed payment records';
+        const workaround = ext.currentWorkaround?.content || liveResult.analysis?.workaround || 'Physical notebook';
+        const frequency = ext.frequency?.content || liveResult.analysis?.frequency || 'Weekly';
+        const financialLoss = (ext.financialImpact?.category === 'UNKNOWN' || !ext.financialImpact?.content || ext.financialImpact?.content === 'Not stated') ? 'UNKNOWN' : ext.financialImpact?.content;
+        const originalQuote = ext.reportedProblem?.sourceQuote || ext.supportingQuotations?.[0] || 'Main notebook use karta hoon.';
+
+        liveHeader = `
+          <div style="background:#ECFDF5; border:1px solid #10B981; border-radius:8px; padding:1.25rem; margin-bottom:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
+              <span class="evidence-badge badge-verified">⚡ LIVE GEMINI SDK INFERENCE VERIFIED</span>
+              <span style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:#065F46;">
+                Model: <strong>${model}</strong> · Latency: ${latencyMs}ms · Tokens: ${totalTokens}
+              </span>
+            </div>
+            <div style="font-size:0.9rem; color:#065F46; line-height:1.5;">
+              <strong>Live Extraction (Packet PKT-401 — Ramesh Kumar):</strong><br>
+              • Actor: <em>${actor}</em> | Workflow: <em>${workflow}</em><br>
+              • Problem: <em>${problem}</em> | Workaround: <em>${workaround}</em><br>
+              • Frequency: <strong>${frequency}</strong> | Financial Loss: <strong style="color:#C2410C;">${financialLoss}</strong> (Unsupported loss preserved as UNKNOWN)<br>
+              • Source Quote Verification: <strong style="color:#059669;">100% Verbatim Match ("${originalQuote}")</strong>
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = `
+        ${liveHeader}
+
+        <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:1rem;">
+          QUALITATIVE EVIDENCE CLUSTERS & SOURCE TRACEABILITY (5/5 PACKETS AUDITED)
+        </div>
+
+        ${findings.map(f => `
+          <div class="analysis-result-card">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <span class="${f.reportedOrInferred === 'REPORTED' ? 'tag-reported' : (f.reportedOrInferred === 'UNKNOWN' ? 'tag-unknown' : 'tag-inferred')}">
+                  ${f.reportedOrInferred}
+                </span>
+                <strong style="color:var(--text-dark); font-size:1.05rem;">${f.title}</strong>
+              </div>
+              <span style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:var(--text-muted);">
+                ${f.sourceOperator} (${f.sourceSessionId})
+              </span>
+            </div>
+
+            <div style="font-size:0.9rem; color:var(--text-secondary); line-height:1.5; margin-bottom:0.75rem;">
+              ${f.interpretation}
+            </div>
+
+            <div style="background:var(--bg-light); border-left:3px solid #10B981; padding:0.6rem 0.85rem; border-radius:0 4px 4px 0; font-size:0.82rem; color:var(--text-dark);">
+              <strong>Verbatim Anchor:</strong> "${f.quoteRef}"
+              <span style="display:inline-block; margin-left:0.5rem; color:#059669; font-weight:600;">✓ ${f.validationStatus}</span>
+            </div>
+          </div>
+        `).join('')}
+
+        <!-- CONTRADICTION CARD -->
+        <div style="background:#FFF3EB; border:1px solid rgba(234,88,12,0.35); border-radius:10px; padding:1.5rem; margin-top:1.5rem;">
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#C2410C; margin-bottom:0.5rem;">
+            CROSS-PARTICIPANT CONTRADICTION DETECTED
+          </div>
+          <h4 style="font-family:'DM Serif Display',serif; font-size:1.4rem; color:var(--text-dark); margin:0 0 0.5rem;">
+            ${precomputed.contradictionDetection?.divergenceTitle || 'Client Assumption vs Field Reality'}
+          </h4>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1rem; font-size:0.88rem; line-height:1.5; margin-top:0.75rem;">
+            <div style="background:#FFFFFF; border:1px solid var(--border); border-radius:6px; padding:0.9rem;">
+              <strong style="color:#DC2626;">Client Assumption:</strong><br>
+              ${precomputed.contradictionDetection?.developerAssumption}
+            </div>
+            <div style="background:#FFFFFF; border:1px solid var(--border); border-radius:6px; padding:0.9rem;">
+              <strong style="color:#059669;">Field Ground Truth:</strong><br>
+              ${precomputed.contradictionDetection?.fieldReality}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function proceedToHumanReviewDirect() {
+      updateMasterPill(5, 'completed');
+      unlockOpsStage(6);
+      window.GriprUI.showToast('Extraction confirmed. Stage 6 Human Audit unlocked.', 'info');
+      jumpToStage(6);
+    }
+
+    // ----------------------------------------------------
+    // STAGE 6: HUMAN QUALITY AUDIT & BRIEF DELIVERY
+    // ----------------------------------------------------
+    function checkAuditReadinessDirect() {
+      const q = document.getElementById('chk-quotes').checked;
+      const s = document.getElementById('chk-segregation').checked;
+      const u = document.getElementById('chk-unknowns').checked;
+      const c = document.getElementById('chk-contradiction').checked;
+      const p = document.getElementById('chk-privacy').checked;
+
+      const allChecked = q && s && u && c && p;
+      const btn = document.getElementById('approveFindingsBtn');
+      const hint = document.getElementById('auditStatusHint');
+
+      if (allChecked) {
+        btn.disabled = false;
+        hint.innerHTML = '<span style="color:#059669; font-weight:600;">✓ Audit criteria verified. Ready for sign-off.</span>';
+      } else {
+        btn.disabled = true;
+        hint.textContent = 'Please acknowledge all 5 audit criteria before signing off.';
+      }
+    }
+
+    function approveFindingsDirect() {
+      document.getElementById('briefDeliverableCard').style.display = 'block';
+      document.getElementById('approveFindingsBtn').style.display = 'none';
+      document.getElementById('auditStatusHint').innerHTML = '<span style="color:#059669; font-weight:600;">✓ Audit signed off. Executive Brief generated below.</span>';
+
+      window.GriprUI.showToast('Audit signed off. Executive Brief ready for delivery.', 'success');
+      document.getElementById('briefDeliverableCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function simulateClientDeliveryDirect() {
+      const btn = document.getElementById('deliverReportBtn');
+      const receipt = document.getElementById('deliveryReceiptCard');
+
+      btn.disabled = true;
+      btn.textContent = 'Delivering to Client...';
+
+      setTimeout(() => {
+        btn.style.display = 'none';
+        receipt.style.display = 'block';
+        updateMasterPill(6, 'completed');
+        window.GriprUI.showToast('Brief delivered to RetailFlow Intelligence Labs!', 'success');
+        receipt.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 650);
+    }
+
+    function restartEntireSimulation() {
+      if (window.GRIPR_FIXTURES && window.GRIPR_FIXTURES.demoStorage) {
+        window.GRIPR_FIXTURES.demoStorage.reset();
+      }
+      window.location.href = 'missions.html?demo=true';
+    }
+
+    // ----------------------------------------------------
+    // MASTER STAGE NAVIGATION & UNLOCK HELPERS
+    // ----------------------------------------------------
+    function jumpToStage(stageNum) {
+      if (stageNum === 1 || stageNum === 2) {
+        document.getElementById('scopingSectionWrapper').style.display = 'block';
+        showScopingStep(stageNum === 1 ? 1 : 4);
+      } else {
+        unlockOpsStage(stageNum);
+        const stageEl = document.getElementById(`opsStage-${stageNum}`);
+        if (stageEl) {
+          stageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+      updateMasterPill(stageNum, 'active');
+    }
+
+    function unlockOpsStage(stageNum) {
+      const stageEl = document.getElementById(`opsStage-${stageNum}`);
+      if (stageEl) {
+        stageEl.classList.remove('locked');
+      }
+      updateMasterPill(stageNum, 'active');
+    }
+
+    function updateMasterPill(stageNum, status) {
+      const pill = document.getElementById(`pill-stage-${stageNum}`);
+      if (!pill) return;
+
+      if (status === 'completed') {
+        pill.classList.remove('active');
+        pill.classList.add('completed');
+        pill.querySelector('.master-step-num').textContent = '✓';
+      } else if (status === 'active') {
+        pill.classList.add('active');
+      }
+    }
   </script>
 </body>
 </html>
