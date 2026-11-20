@@ -106,11 +106,11 @@ describe('GRIPR.STUDIO — Cloud Run Deployment Readiness & Security Audit', () 
     });
   });
 
-  // TASK 3: No Localhost Hardcoding
+  // TASK 3: No Localhost Hardcoding & Environment-Aware Routing
   describe('TASK 3 — No Localhost Hardcoding & Clean Production Execution', () => {
-    it('12. js/api.js uses relative /api routing without hardcoded 127.0.0.1:3000', () => {
+    it('12. js/api.js uses environment-aware routing without hardcoded 127.0.0.1:3000', () => {
       const content = fs.readFileSync(path.resolve(rootDir, 'js/api.js'), 'utf8');
-      expect(content).toContain("const BACKEND_URL = '/api';");
+      expect(content).toContain('resolveBackendUrl');
       expect(content).not.toContain("'http://127.0.0.1:3000/api'");
       expect(content).not.toContain("'http://localhost:3000/api'");
     });
@@ -163,13 +163,73 @@ describe('GRIPR.STUDIO — Cloud Run Deployment Readiness & Security Audit', () 
     });
   });
 
-  // Backend API Integrity
-  describe('API Routing & Healthcheck', () => {
+  // Backend API Integrity & Split Hosting
+  describe('API Routing, Healthcheck & Split Hosting Readiness', () => {
     it('16. GET /api/health returns 200 with ok status', async () => {
       const res = await app.inject({ method: 'GET', url: '/api/health' });
       expect(res.statusCode).toBe(200);
       const json = res.json();
       expect(json.status).toBe('ok');
+    });
+
+    it('17. GET /api/health persistence engine metadata accurately reflects environment', async () => {
+      const res = await app.inject({ method: 'GET', url: '/api/health' });
+      expect(res.statusCode).toBe(200);
+      const json = res.json();
+      expect(json.persistence).toBeDefined();
+      expect(json.persistence.engine).toBeDefined();
+      expect(typeof json.persistence.isCloudFirestore).toBe('boolean');
+    });
+
+    it('18. CORS origin policy accepts Cloudflare Pages and Railway origins', async () => {
+      const cfRes = await app.inject({
+        method: 'OPTIONS',
+        url: '/api/health',
+        headers: {
+          'Origin': 'https://gripr-studio.pages.dev',
+          'Access-Control-Request-Method': 'GET'
+        }
+      });
+      expect(cfRes.statusCode).toBe(204);
+      expect(cfRes.headers['access-control-allow-origin']).toBe('https://gripr-studio.pages.dev');
+
+      const railwayRes = await app.inject({
+        method: 'OPTIONS',
+        url: '/api/health',
+        headers: {
+          'Origin': 'https://gripr-production.up.railway.app',
+          'Access-Control-Request-Method': 'GET'
+        }
+      });
+      expect(railwayRes.statusCode).toBe(204);
+      expect(railwayRes.headers['access-control-allow-origin']).toBe('https://gripr-production.up.railway.app');
+    });
+
+    it('19. CORS origin policy rejects untrusted external origins', async () => {
+      const untrustedRes = await app.inject({
+        method: 'OPTIONS',
+        url: '/api/health',
+        headers: {
+          'Origin': 'https://malicious-scam-site.example.com',
+          'Access-Control-Request-Method': 'GET'
+        }
+      });
+      expect(untrustedRes.headers['access-control-allow-origin']).toBeUndefined();
+    });
+
+    it('20. Static public build manifest contains only safe static files and zero secrets', () => {
+      const publicDir = path.resolve(rootDir, 'public');
+      if (fs.existsSync(publicDir)) {
+        const forbidden = ['.env', 'api', 'data', 'Dockerfile', 'pnpm-lock.yaml', 'package.json'];
+        const files = fs.readdirSync(publicDir);
+        for (const item of forbidden) {
+          expect(files).not.toContain(item);
+        }
+        expect(files).toContain('index.html');
+        expect(files).toContain('missions.html');
+        expect(files).toContain('_redirects');
+        expect(files).toContain('_headers');
+      }
     });
   });
 });

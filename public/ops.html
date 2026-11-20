@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research Operations Desk — GRIPR.STUDIO</title>
+  <meta name="description" content="Internal operations desk for managing B2B problem research missions, screening participants, and synthesizing Decision Intelligence Briefs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/feed.css">
+</head>
+<body class="admin-page">
+
+  <!-- NAV -->
+  <div class="nav-wrapper nav-dark" style="border-bottom-color:rgba(234,88,12,0.3);">
+    <nav>
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <a href="index.html" class="nav-logo" style="color:#fff;">GRIPR</a>
+        <span class="admin-mode-pill">RESEARCH OPERATIONS DESK</span>
+      </div>
+
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Platform Home</a>
+        <a href="missions.html" class="nav-link">Missions Intake</a>
+        <a href="brief.html" class="nav-link">Brief Viewer</a>
+        <a href="participate.html" class="nav-link">Participant Portal</a>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <button class="filter-btn" id="resetOpsBtn" style="font-size:0.7rem; border-color:rgba(255,255,255,0.2);">
+          Reset Demo Fixtures ↺
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <main>
+    <section class="container admin-header-strip">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1.5rem;">
+        <div>
+          <div class="admin-badge-strip">
+            <span class="dot" style="background:#10B981;"></span>
+            <span style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:var(--text-light-muted); letter-spacing:0.08em; text-transform:uppercase;">
+              INTERNAL OPERATIONAL TOOLING · DEMO SYNTHETIC FIXTURES MODE
+            </span>
+          </div>
+          <h1 style="font-family:'DM Serif Display',serif; font-size:clamp(2rem, 4vw, 2.8rem); color:#fff; font-weight:400;">
+            Research Operations Desk
+          </h1>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:0.6rem 1rem; font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:var(--text-light-muted);">
+          ⚠️ Prototype Disclaimer: Internal desk view. Real authorization is reserved for backend/storage phases.
+        </div>
+      </div>
+
+      <!-- METRICS BAR -->
+      <div class="admin-metrics-row">
+        <div class="admin-stat-box">
+          <div class="admin-stat-num" id="metricActiveMissions">--</div>
+          <div class="admin-stat-label">Active Research Missions</div>
+        </div>
+        <div class="admin-stat-box">
+          <div class="admin-stat-num" id="metricPendingReviews">--</div>
+          <div class="admin-stat-label">Tasks Pending Moderation</div>
+        </div>
+        <div class="admin-stat-box">
+          <div class="admin-stat-num" id="metricParticipants">--</div>
+          <div class="admin-stat-label">Screened Participant Records</div>
+        </div>
+        <div class="admin-stat-box">
+          <div class="admin-stat-num" id="metricCompletedBriefs">--</div>
+          <div class="admin-stat-label">Decision Briefs Ready</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SPLIT WORKBENCH -->
+    <section class="container">
+      <div class="admin-workbench-layout">
+
+        <!-- LEFT: QUEUE & TASKS -->
+        <div>
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-light-muted); margin-bottom:1rem; display:flex; justify-content:space-between;">
+            <span>OPERATIONS QUEUE (<span id="opsQueueCount">0</span>)</span>
+            <span style="color:var(--accent);">ACTIVE PIPELINE</span>
+          </div>
+
+          <div class="admin-queue-list" id="opsQueueList">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- RIGHT: EVALUATION WORKBENCH -->
+        <div>
+          <div class="admin-detail-panel" id="opsDetailPanel">
+            <div style="text-align:center; padding:4rem 1rem; color:var(--text-light-muted);">
+              Select an item from the queue to review mission scope, screen participants, or validate AI-assisted extractions.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="container" style="border-top-color:rgba(255,255,255,0.06); padding: 2.5rem 0;">
+    <div class="footer-left">
+      <div class="footer-logo" style="color:#fff;">GRIPR <span class="beta-badge" style="font-size:0.55rem; padding:0.15rem 0.4rem;">INTERNAL</span></div>
+      <div class="footer-tagline">Restricted operations & research facilitation interface.</div>
+    </div>
+    <div class="footer-right">
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="missions.html">Missions</a>
+        <a href="brief.html">Example Brief</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/fixtures.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      let activeItem = null;
+      let cachedData = {};
+
+      async function refreshDesk() {
+        const res = await window.GriprAPI.getResearchOperationsQueue();
+        if (!res.success) return;
+
+        cachedData = res;
+        document.getElementById('metricActiveMissions').textContent = res.metrics.activeMissions;
+        document.getElementById('metricPendingReviews').textContent = res.metrics.pendingReviews;
+        document.getElementById('metricParticipants').textContent = res.metrics.totalParticipantsScreened;
+        document.getElementById('metricCompletedBriefs').textContent = res.metrics.completedBriefs;
+        document.getElementById('opsQueueCount').textContent = res.opsQueue.length;
+
+        const queueList = document.getElementById('opsQueueList');
+        if (res.opsQueue.length === 0) {
+          queueList.innerHTML = `
+            <div style="text-align:center; padding:3rem 1rem; background:rgba(255,255,255,0.02); border-radius:10px; color:var(--text-light-muted);">
+              All operations tasks are up to date.
+            </div>
+          `;
+          return;
+        }
+
+        queueList.innerHTML = res.opsQueue.map(item => {
+          const isSelected = activeItem && activeItem.id === item.id;
+          const statusBadge = item.status === 'reviewed' 
+            ? '<span style="color:#10B981; font-weight:bold;">[Reviewed]</span>'
+            : (item.status === 'flagged' ? '<span style="color:#F59E0B; font-weight:bold;">[Flagged]</span>' : '<span style="color:var(--accent);">[Action Required]</span>');
+
+          return `
+            <div 
+              class="queue-item-card ${isSelected ? 'active-item' : ''}" 
+              data-id="${item.id}"
+              onclick="selectOpsItem('${item.id}')"
+            >
+              <div class="queue-item-header">
+                <span style="font-weight:700; color:#fff;">${item.id}</span>
+                <span>${statusBadge}</span>
+              </div>
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:0.72rem; color:var(--text-light-muted); margin-bottom:0.4rem;">
+                Linked Mission: <strong>${item.missionId}</strong>
+              </div>
+              <div style="font-size:0.85rem; color:#fff; font-weight:500;">
+                ${item.title}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        if (!activeItem && res.opsQueue.length > 0) {
+          selectOpsItem(res.opsQueue[0].id);
+        } else if (activeItem) {
+          const fresh = res.opsQueue.find(q => q.id === activeItem.id);
+          if (fresh) renderDetailWorkbench(fresh);
+        }
+      }
+
+      window.selectOpsItem = (id) => {
+        const item = cachedData.opsQueue.find(q => q.id === id);
+        if (!item) return;
+        activeItem = item;
+
+        document.querySelectorAll('.queue-item-card').forEach(card => {
+          card.classList.toggle('active-item', card.dataset.id === id);
+        });
+
+        renderDetailWorkbench(item);
+      };
+
+      function renderDetailWorkbench(item) {
+        const panel = document.getElementById('opsDetailPanel');
+        const linkedMission = cachedData.missions.find(m => m.id === item.missionId) || {};
+
+        panel.innerHTML = `
+          <div style="border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:1.25rem; margin-bottom:1.5rem;">
+            <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:var(--accent); font-weight:700; text-transform:uppercase; letter-spacing:0.1em;">
+              OPERATIONS TASK: ${item.id} · ${item.type.toUpperCase()}
+            </div>
+            <h2 style="font-family:'DM Serif Display',serif; font-size:1.8rem; color:#fff; margin:0.35rem 0;">
+              ${item.title}
+            </h2>
+            <div style="font-family:'Space Grotesk',sans-serif; font-size:0.8rem; color:var(--text-light-muted);">
+              Linked Organization: <strong>${linkedMission.orgName || 'Client Org'}</strong> (${item.missionId}) · Stage: <strong style="color:var(--accent);">${linkedMission.status || 'Active'}</strong>
+            </div>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:1.5rem; margin-bottom:1.5rem;">
+            <div style="font-family:'Space Grotesk',sans-serif; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:0.5rem;">
+              MISSION CONTEXT & FALSIFICATION HYPOTHESIS
+            </div>
+            <div style="font-size:0.9rem; color:#fff; line-height:1.6; margin-bottom:0.75rem;">
+              <strong>Decision Under Investigation:</strong><br>
+              ${linkedMission.decisionAtStake || 'Core product roadmap fork.'}
+            </div>
+            <div style="font-size:0.85rem; color:rgba(255,255,255,0.7); line-height:1.5;">
+              <strong>Falsification Condition:</strong> ${linkedMission.falsificationCriteria || 'Defined in scoping alignment.'}
+            </div>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.02); border-left:3px solid #3B82F6; padding:1.25rem; border-radius:0 8px 8px 0; margin-bottom:1.5rem;">
+            <div style="font-family:'Space Grotesk',sans-serif; font-size:0.72rem; color:#60A5FA; font-weight:700; text-transform:uppercase; margin-bottom:0.4rem;">
+              CURRENT ACTION & STATUS:
+            </div>
+            <div style="font-size:0.9rem; color:rgba(255,255,255,0.85); line-height:1.5;">
+              ${item.actionTaken}
+            </div>
+          </div>
+
+          <div class="admin-actions-bar">
+            <button class="btn-cta-solid" style="padding:0.7rem 1.4rem; font-size:0.85rem;" onclick="processOpsAction('${item.id}', 'approve')">
+              ✓ Approve & Include in Decision Brief
+            </button>
+            <button class="filter-btn" style="padding:0.7rem 1.2rem; border-color:#F59E0B; color:#F59E0B;" onclick="processOpsAction('${item.id}', 'flag')">
+              ⚠️ Flag Missing Evidence / Gap
+            </button>
+            <a href="mission-workspace.html?id=${item.missionId}" class="filter-btn" style="padding:0.7rem 1.2rem; text-decoration:none;">
+              Open Workspace →
+            </a>
+          </div>
+        `;
+      }
+
+      window.processOpsAction = async (id, action) => {
+        const res = await window.GriprAPI.reviewEvidence(id, action, {
+          notes: action === 'approve' 
+            ? 'Internally reviewed and approved for Decision Brief inclusion.' 
+            : 'Flagged for follow-up verification with participant.'
+        });
+        if (res.success) {
+          window.GriprUI.showToast(res.message, action === 'approve' ? 'success' : 'info');
+          refreshDesk();
+        }
+      };
+
+      document.getElementById('resetOpsBtn').addEventListener('click', () => {
+        window.GriprAPI.resetFixtures();
+        activeItem = null;
+        window.GriprUI.showToast('B2B demo fixtures re-initialized.', 'info');
+        refreshDesk();
+      });
+
+      refreshDesk();
+    });
+  </script>
+</body>
+</html>

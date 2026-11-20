@@ -17,8 +17,45 @@
  */
 
 (function () {
-  // Relative API routing for same-origin Cloud Run or unified server deployment (Section 3)
-  const BACKEND_URL = '/api';
+  // Configurable backend URL resolution (Cloudflare Pages, Railway, Local)
+  const DEFAULT_RAILWAY_URL = 'https://gripr-production.up.railway.app/api';
+
+  function resolveBackendUrl() {
+    // 1. Explicit global override in window (e.g. from config script or presenter injection)
+    if (typeof window !== 'undefined' && window.__GRIPR_API_URL__) {
+      return String(window.__GRIPR_API_URL__).replace(/\/+$/, '');
+    }
+    // 2. LocalStorage override (configured by presenter or user)
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem('gripr_api_base_url');
+        if (stored && stored.trim()) {
+          return stored.trim().replace(/\/+$/, '');
+        }
+      }
+    } catch (_) {}
+
+    // 3. Document meta tag (<meta name="gripr-api-url" content="...">)
+    if (typeof document !== 'undefined') {
+      const meta = document.querySelector('meta[name="gripr-api-url"]');
+      if (meta && meta.content && meta.content.trim()) {
+        return meta.content.trim().replace(/\/+$/, '');
+      }
+    }
+
+    // 4. If hosted on Cloudflare Pages or static domain without local /api
+    if (typeof window !== 'undefined' && window.location) {
+      const host = window.location.hostname;
+      if (host.endsWith('.pages.dev') || host.endsWith('.cloudflarepages.com')) {
+        return DEFAULT_RAILWAY_URL;
+      }
+    }
+
+    // 5. Default relative path for same-origin / unified deployment
+    return '/api';
+  }
+
+  let BACKEND_URL = resolveBackendUrl();
 
   const STORAGE_KEY_MISSIONS = 'gripr_b2b_missions_v2';
   const STORAGE_KEY_SESSIONS = 'gripr_b2b_sessions_v2';
@@ -75,9 +112,10 @@
 
   // Auto-detect backend health
   async function probeBackendHealth() {
+    BACKEND_URL = resolveBackendUrl();
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1200);
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
       const res = await fetch(`${BACKEND_URL}/health`, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (res.ok) {
@@ -120,22 +158,31 @@
       pill.style.cursor = 'pointer';
       pill.style.boxShadow = '0 2px 10px rgba(0,0,0,0.15)';
       pill.style.transition = 'all 0.2s ease';
-      pill.title = 'Click to toggle between Live API and Demo Fixtures';
       pill.onclick = () => {
         const next = GriprAPI.getMode() === 'live' ? 'demo' : 'live';
         GriprAPI.setMode(next);
         location.reload();
+      };
+      pill.ondblclick = (e) => {
+        e.stopPropagation();
+        const current = localStorage.getItem('gripr_api_base_url') || resolveBackendUrl();
+        const newUrl = prompt('Enter Railway / Fastify Backend API base URL (e.g. https://gripr-production.up.railway.app/api):', current);
+        if (newUrl !== null) {
+          GriprAPI.setApiBaseUrl(newUrl);
+        }
       };
       document.body.appendChild(pill);
     }
 
     const isLive = GriprAPI.getMode() === 'live';
     const hasToken = !!localStorage.getItem(STORAGE_KEY_AUTH_TOKEN);
+    const activeUrl = resolveBackendUrl();
+    pill.title = `GRIPR API: ${activeUrl} (${isLive ? 'Connected' : 'Offline / Demo Fixtures'})\nClick to toggle mode. Double-click to configure API URL.`;
     if (isLive) {
       pill.style.background = '#064E3B';
       pill.style.color = '#ECFDF5';
       pill.style.border = '1px solid #059669';
-      pill.innerHTML = `<span style="width:7px; height:7px; border-radius:50%; background:#10B981; display:inline-block;"></span> LIVE API (Fastify)${hasToken ? ' 🔑' : ''}`;
+      pill.innerHTML = `<span style="width:7px; height:7px; border-radius:50%; background:#10B981; display:inline-block;"></span> LIVE API (${activeUrl})${hasToken ? ' 🔑' : ''}`;
     } else {
       pill.style.background = '#1E1E1E';
       pill.style.color = '#FEF3C7';
@@ -147,6 +194,35 @@
   window.addEventListener('DOMContentLoaded', probeBackendHealth);
 
   window.GriprAPI = {
+    /**
+     * Get configured backend URL
+     */
+    getApiBaseUrl() {
+      return resolveBackendUrl();
+    },
+
+    /**
+     * Set configured backend URL (e.g. Railway HTTPS service domain)
+     */
+    setApiBaseUrl(url) {
+      if (url && typeof url === 'string' && url.trim()) {
+        localStorage.setItem('gripr_api_base_url', url.trim());
+      } else {
+        localStorage.removeItem('gripr_api_base_url');
+      }
+      BACKEND_URL = resolveBackendUrl();
+      probeBackendHealth();
+    },
+
+    /**
+     * Reset backend URL to automatic default
+     */
+    resetApiBaseUrl() {
+      localStorage.removeItem('gripr_api_base_url');
+      BACKEND_URL = resolveBackendUrl();
+      probeBackendHealth();
+    },
+
     /**
      * Get active mode: 'live' or 'demo'
      */

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
+    "build:pages": "node ../scripts/build-pages.js",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "serve": "node ../scripts/serve.js",

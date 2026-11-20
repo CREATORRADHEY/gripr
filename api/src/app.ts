@@ -80,19 +80,34 @@ export function buildApp(options: AppOptions = {}): FastifyInstance {
   // Security & utility plugins
   app.register(sensible);
 
-  // CORS
+  // CORS (Support split hosting across Cloudflare Pages, Railway, Render, and Local Dev)
   app.register(cors, {
     origin: (origin, cb) => {
       if (!origin) return cb(null, true);
-      if (env.isDev && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+      // Loopback origins for development / testing
+      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
         return cb(null, true);
       }
-      if (env.ALLOWED_ORIGINS.includes(origin)) {
+      // Explicitly allowed origins from environment
+      if (env.ALLOWED_ORIGINS.includes(origin) || env.ALLOWED_ORIGINS.includes('*')) {
+        return cb(null, true);
+      }
+      // Cloudflare Pages deployments (*.pages.dev / custom domain patterns)
+      if (/^https:\/\/[a-z0-9_-]+\.pages\.dev$/i.test(origin)) {
+        return cb(null, true);
+      }
+      // Railway service domains (*.railway.app / *.up.railway.app)
+      if (/^https:\/\/[a-z0-9_.-]+\.railway\.app$/i.test(origin)) {
+        return cb(null, true);
+      }
+      // Render service domains (*.onrender.com)
+      if (/^https:\/\/[a-z0-9_.-]+\.onrender\.com$/i.test(origin)) {
         return cb(null, true);
       }
       return cb(new Error('CORS origin not allowed by policy'), false);
     },
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     credentials: true
   });
 
