@@ -11,7 +11,7 @@ const EnvSchema = z.object({
   HOST: z.string().default('127.0.0.1'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   GEMINI_API_KEY: z.string().optional().default(''),
-  GEMINI_MODEL: z.string().default('gemini-3.5-flash'),
+  GEMINI_MODEL: z.string().default('gemini-3.5-flash-lite'),
   FRONTEND_ORIGIN: z.string().default('http://127.0.0.1:5500,http://localhost:5500,http://127.0.0.1:8080,http://localhost:8080'),
   INTERNAL_AUTH_SECRET: z.string().default('gripr_dev_ops_secret_2026'),
   DEMO_MODE: z.enum(['true', 'false']).transform(v => v === 'true').default('false'),

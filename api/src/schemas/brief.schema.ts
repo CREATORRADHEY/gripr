@@ -64,7 +64,7 @@ export const DecisionBriefSchema = z.object({
     description: z.string(),
     tradeOffs: z.string()
   })),
-  createdAt: z.string(),
+  createdAt: z.string().default(() => new Date().toISOString()),
   approvedAt: z.string().nullable().optional(),
   approvedBy: z.string().nullable().optional()
 });

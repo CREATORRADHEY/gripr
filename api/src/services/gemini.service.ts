@@ -27,7 +27,7 @@ export class GeminiService {
   private modelName: string;
 
   constructor() {
-    this.modelName = env.GEMINI_MODEL || 'gemini-3.5-flash';
+    this.modelName = env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
     if (env.GEMINI_API_KEY && env.GEMINI_API_KEY.trim().length > 0) {
       try {
         this.ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
@@ -129,11 +129,13 @@ export class GeminiService {
           { role: 'user', parts: [{ text: `${EXTRACTION_SYSTEM_PROMPT}\n\n${prompt}` }] }
         ],
         config: {
-          responseMimeType: 'application/json'
+          responseMimeType: 'application/json',
+          maxOutputTokens: 8192
         }
       });
 
-      const text = response.text || '';
+      let text = response.text || '';
+      text = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
       const parsed = JSON.parse(text);
       const validated = GeminiExtractionSchema.parse(parsed);
       return {
@@ -173,11 +175,13 @@ export class GeminiService {
           { role: 'user', parts: [{ text: `${COMPARISON_SYSTEM_PROMPT}\n\n${prompt}` }] }
         ],
         config: {
-          responseMimeType: 'application/json'
+          responseMimeType: 'application/json',
+          maxOutputTokens: 8192
         }
       });
 
-      const text = response.text || '';
+      let text = response.text || '';
+      text = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
       const parsed = JSON.parse(text);
       return CrossParticipantComparisonSchema.parse(parsed);
     };
@@ -212,12 +216,29 @@ export class GeminiService {
           { role: 'user', parts: [{ text: `${SYNTHESIS_SYSTEM_PROMPT}\n\n${prompt}` }] }
         ],
         config: {
-          responseMimeType: 'application/json'
+          responseMimeType: 'application/json',
+          maxOutputTokens: 8192
         }
       });
 
-      const text = response.text || '';
+      let text = response.text || '';
+      text = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
       const parsed = JSON.parse(text);
+      if (!parsed.createdAt) {
+        parsed.createdAt = new Date().toISOString();
+      }
+      if (!parsed.id) {
+        parsed.id = `BRF-${mission.id.slice(4)}-${Date.now().toString(36).toUpperCase()}`;
+      }
+      if (!parsed.missionId) {
+        parsed.missionId = mission.id;
+      }
+      if (!parsed.organizationId) {
+        parsed.organizationId = mission.organizationId || 'ORG-DEFAULT';
+      }
+      if (!parsed.status) {
+        parsed.status = 'DRAFT — REQUIRES HUMAN REVIEW';
+      }
       return DecisionBriefSchema.parse(parsed);
     };
 

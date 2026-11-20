@@ -365,7 +365,7 @@
     },
 
     /**
-     * 4. Get Decision Intelligence Brief for a mission (Human approved only)
+     * 4. Get Decision Intelligence Brief for a mission
      * @param {string} missionId
      */
     async getMissionBrief(missionId = 'MSN-2026-081') {
@@ -375,31 +375,40 @@
             headers: this.getHeaders()
           });
           const json = await res.json();
-          if (res.status === 401) {
-            return { success: false, error: 'Authentication required to inspect brief.', authRequired: true };
+          if (res.ok && json.success) {
+            return json;
+          }
+          // If 401/404 or backend unavailable, fallback to showcase brief so example brief is always accessible
+          if (missionId === 'MSN-2026-081' || res.status === 401 || res.status === 404) {
+            return this.getDemoBrief(missionId);
           }
           if (res.status === 403) {
             return { success: false, error: 'Brief is under human research review or restricted to authorized organization.', status: 'PENDING_REVIEW' };
           }
-          if (!res.ok) return { success: false, error: json.error?.message || 'Brief not available' };
-          return json;
+          return { success: false, error: json.error?.message || 'Brief not available' };
         } catch (err) {
+          if (missionId === 'MSN-2026-081') {
+            return this.getDemoBrief(missionId);
+          }
           return { success: false, error: `Live API call failed: ${err.message}` };
         }
       }
 
-      await delay(100);
+      return this.getDemoBrief(missionId);
+    },
+
+    getDemoBrief(missionId = 'MSN-2026-081') {
       const briefs = getRaw(STORAGE_KEY_BRIEFS);
-      const brief = briefs.find(b => b.missionId.toUpperCase() === (missionId || '').toUpperCase()) || briefs[0];
+      const brief = briefs.find(b => (b.missionId || '').toUpperCase() === (missionId || '').toUpperCase()) || (window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.decisionBrief : null);
       if (!brief) return { success: false, error: `No brief found for mission ${missionId}` };
 
       const sessions = getRaw(STORAGE_KEY_SESSIONS);
-      const missionSessions = sessions.filter(s => s.missionId.toUpperCase() === (missionId || '').toUpperCase());
+      const missionSessions = sessions.filter(s => (s.missionId || '').toUpperCase() === (missionId || '').toUpperCase());
 
       return {
         success: true,
         brief,
-        sessions: missionSessions,
+        sessions: missionSessions.length > 0 ? missionSessions : (window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.participantSessions : []),
         mode: 'DEMO_SYNTHETIC'
       };
     },

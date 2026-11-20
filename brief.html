@@ -119,12 +119,15 @@
       const container = document.getElementById('briefContent');
 
       if (!res.success || !res.brief) {
+        document.getElementById('executiveSummaryText').textContent = 'Unable to display brief.';
         container.innerHTML = `
-          <div class="empty-feed">
+          <div class="empty-feed" style="background:#fff; border:1px solid var(--border); padding:3.5rem 1.5rem; border-radius:12px; margin:2rem 0;">
             <div class="empty-feed-icon">⚠️</div>
-            <h3>Decision Brief Not Found</h3>
-            <p>No completed Decision Intelligence Brief exists for mission reference "${missionId}".</p>
-            <a href="missions.html" class="btn-cta-solid" style="display:inline-block; margin-top:1rem;">Back to Missions</a>
+            <h3 style="color:var(--text-dark); margin-bottom:0.5rem;">${res.authRequired ? 'Authentication Required' : 'Decision Brief Not Found'}</h3>
+            <p style="color:var(--text-secondary); max-width:520px; margin:0 auto 1.5rem; line-height:1.6;">
+              ${res.error || `No completed Decision Intelligence Brief exists for mission reference "${missionId}".`}
+            </p>
+            <a href="missions.html" class="btn-cta-solid" style="display:inline-block;">Explore Other Missions</a>
           </div>
         `;
         return;
