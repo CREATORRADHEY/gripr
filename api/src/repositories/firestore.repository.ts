@@ -156,7 +156,7 @@ export class FirestoreMissionRepository implements IMissionRepository {
         contactEmail: 'aditi.sharma@retailflow.test',
         role: 'VP Product',
         sector: 'retail',
-        decisionAtStake: 'Deciding whether to allocate $95,000 to engineer an automated WhatsApp UPI credit collection bot for neighborhood kirana stores, or reframe toward physical vernacular receipt-book ledger workflows.',
+        decisionAtStake: 'Deciding whether to allocate capital toward a proposed $95,000 software investment (explicitly fictional scenario for demonstration) to engineer an automated WhatsApp UPI credit collection bot for neighborhood kirana stores, or reframe toward physical vernacular receipt-book ledger workflows.',
         hypothesis: 'We believe Jaipur neighborhood kirana store owners lose 8-12% of revenue because they forget to collect customer udhaar, and will adopt automated WhatsApp payment reminders to collect dues faster.',
         falsificationCriteria: 'If retailers deliberately avoid automated digital reminders to preserve personal community trust and social relationships with neighbors, automated collection software will encounter severe resistance and rejection.',
         problemToInvestigate: 'Customer credit tracking friction, notebook ledger page overflow, and community relationship trust dynamics among neighborhood kirana operators.',
@@ -453,12 +453,12 @@ export class FirestoreBriefRepository implements IBriefRepository {
         title: 'Decision Intelligence Brief: Why Jaipur Kirana Retailers Struggle to Track Customer Credit',
         status: 'APPROVED',
         recommendation: 'REJECT_OR_REFRAME',
-        recommendationRationale: 'All 5 screened retailers demonstrated that customer credit (udhaar) is a customer retention mechanism rooted in neighborhood trust, not an accounting or debt-collection bottleneck. Automated WhatsApp collection reminders alienate customers and drive them to competing neighborhood stores. RetailFlow must halt planned development of automated collection bots and reframe toward physical vernacular duplicate ledger tools.',
-        executiveSummary: 'RetailFlow Intelligence Labs\' initial hypothesis—that neighborhood kirana store owners lose revenue from forgotten credit and will eagerly adopt an automated WhatsApp UPI collection bot—is FALSIFIED by firsthand field evidence across 5 Jaipur retail operators. Kirana owners deliberately avoid automated collection messages because debt badgering threatens their core competitive moat: personal relationship trust. Retailers prefer manual notebooks despite transcription errors because paper ledgers are socially non-intrusive.',
+        recommendationRationale: 'All 5 synthetic participant profiles demonstrated that customer credit (udhaar) is a customer retention mechanism rooted in neighborhood trust, not an accounting or debt-collection bottleneck. Automated WhatsApp collection reminders alienate customers and drive them to competing neighborhood stores. In this illustrative scenario, the client is advised to reframe the hypothesis and test alternatives before committing to development.',
+        executiveSummary: 'Notice: This illustrative Decision Intelligence Brief is a synthetic demonstration model and does not constitute real customer research or market validation. RetailFlow Intelligence Labs\' initial hypothesis—that neighborhood kirana store owners lose revenue from forgotten credit and will eagerly adopt an automated WhatsApp UPI collection bot—is falsified in this scenario across 5 synthetic Jaipur retail operator profiles. Kirana owners deliberately avoid automated collection messages because debt badgering threatens their core competitive moat: personal relationship trust. Operators prefer manual notebooks despite transcription errors because paper ledgers are socially non-intrusive.',
         researchQuestion: 'Why do Jaipur kirana retailers struggle to track customer credit, and would an automated WhatsApp collection bot reduce credit default without customer churn?',
-        decisionAtStake: 'Deciding whether to allocate $95,000 to engineer an automated WhatsApp UPI credit collection bot, or reframe toward physical vernacular receipt-book ledger workflows.',
+        decisionAtStake: 'Deciding whether to allocate capital toward a proposed $95,000 software investment (explicitly fictional scenario for demonstration) to engineer an automated WhatsApp UPI credit collection bot, or reframe toward physical vernacular receipt-book ledger workflows.',
         hypothesis: 'Kirana store owners lose 8-12% of revenue because they forget to collect customer udhaar, and will adopt automated WhatsApp payment reminders to collect dues faster.',
-        falsificationOutcome: 'FALSIFIED: 5 of 5 participants demonstrated that automated debt collection damages neighborhood trust and drives customer defection. The bottleneck is customer cash-flow timing, not retailer memory.',
+        falsificationOutcome: 'FALSIFIED IN SCENARIO: 5 of 5 synthetic profiles demonstrated that automated debt collection damages neighborhood trust and drives customer defection. The bottleneck is customer cash-flow timing, not retailer memory.',
         sampleContext: {
           totalSessions: 5,
           participantRoles: ['Kirana Store Owner (18 yrs)', 'Provision Store Owner (12 yrs)', 'Daily Grocery Vendor (8 yrs)', 'Family Kirana Co-owner (15 yrs)', 'General Store Owner (22 yrs)'],
@@ -508,17 +508,17 @@ export class FirestoreBriefRepository implements IBriefRepository {
           'Study conducted exclusively in Western UP; credit customs in South India may differ'
         ],
         hypothesesGenerated: [
-          'A dealer-enablement credit platform would achieve higher adoption than a B2C direct app'
+          'A physical carbon-copy receipt book would achieve higher adoption than a standalone mobile debt app'
         ],
         followUpQuestions: [
-          'What percentage of retail dealer margin is derived from interest charges vs manufacturer incentives?'
+          'What percentage of customer credit is settled in cash vs UPI at month-end?'
         ],
         decisionOptions: [
           {
             option: 'REJECT_OR_REFRAME',
-            headline: 'Cancel B2C App Build — Reframe Around Dealer Credit Underwriting',
-            description: 'De-allocate the $180,000 B2C mobile app budget. Explore partnership with existing rural input retailers by providing digital inventory financing instead.',
-            tradeOffs: 'Avoids multi-million dollar customer acquisition failure; requires negotiating with fragmented retail distributors.'
+            headline: 'Reframe hypothesis and test alternatives before committing to development',
+            description: 'Reframe the product hypothesis and explore lower-risk alternatives before committing capital to a proposed $95,000 software investment (explicitly fictional scenario).',
+            tradeOffs: 'Eliminates premature software development risk while validating whether physical-digital hybrid receipt workflows offer genuine operator value.'
           }
         ],
         createdAt: '2026-03-05T14:00:00Z',

@@ -18,7 +18,7 @@ window.GRIPR_FIXTURES = {
       contactEmail: "aditi.sharma@retailflow.test",
       role: "VP of Product",
       sector: "retail",
-      decisionAtStake: "Deciding whether to allocate $95,000 to engineer an automated WhatsApp UPI credit collection bot for neighborhood kirana stores, or reframe toward physical vernacular receipt-book ledger workflows.",
+      decisionAtStake: "Deciding whether to allocate capital toward a proposed $95,000 software investment (explicitly fictional scenario for demonstration) to engineer an automated WhatsApp UPI credit collection bot for neighborhood kirana stores, or reframe toward physical vernacular receipt-book ledger workflows.",
       hypothesis: "We believe Jaipur neighborhood kirana store owners lose 8-12% of revenue because they forget to collect customer udhaar (credit), and will adopt an automated digital payment reminder system to replace physical notebooks.",
       falsificationCriteria: "If retailers deliberately avoid automated digital reminders to preserve personal community trust and social relationships with neighbors, automated collection software will encounter severe resistance and rejection.",
       targetParticipantProfile: "Independent neighborhood kirana store owners in Jaipur operating for >5 years with at least 50 regular credit customers.",
@@ -107,12 +107,12 @@ window.GRIPR_FIXTURES = {
     }
   ],
 
-  // Screened firsthand participant sessions for MSN-2026-081 (#DEMO_SYNTHETIC)
+  // Synthetic participant sessions for MSN-2026-081 demonstration (#DEMO_SYNTHETIC)
   participantSessions: [
     {
       id: "SES-401",
       missionId: "MSN-2026-081",
-      participantPseudonym: "Participant 01 (Ramesh Kumar, #SYNTHETIC_DEMO)",
+      participantPseudonym: "Participant 01 (Synthetic Profile: Ramesh Kumar, #SYNTHETIC_DEMO)",
       role: "Kirana Store Owner (18 Years in Business)",
       location: "Raja Park, Jaipur, Rajasthan",
       language: "Hinglish / Hindi",
@@ -134,7 +134,7 @@ window.GRIPR_FIXTURES = {
     {
       id: "SES-402",
       missionId: "MSN-2026-081",
-      participantPseudonym: "Participant 02 (Suresh Sharma, #SYNTHETIC_DEMO)",
+      participantPseudonym: "Participant 02 (Synthetic Profile: Suresh Sharma, #SYNTHETIC_DEMO)",
       role: "Provision Store Owner (12 Years in Business)",
       location: "Mansarovar, Jaipur, Rajasthan",
       language: "Hinglish",
@@ -156,7 +156,7 @@ window.GRIPR_FIXTURES = {
     {
       id: "SES-403",
       missionId: "MSN-2026-081",
-      participantPseudonym: "Participant 03 (Dinesh Meena, #SYNTHETIC_DEMO)",
+      participantPseudonym: "Participant 03 (Synthetic Profile: Dinesh Meena, #SYNTHETIC_DEMO)",
       role: "Daily Grocery & Dairy Vendor (8 Years in Business)",
       location: "Sanganer, Jaipur, Rajasthan",
       language: "Hinglish / Hindi",
@@ -177,7 +177,7 @@ window.GRIPR_FIXTURES = {
     {
       id: "SES-404",
       missionId: "MSN-2026-081",
-      participantPseudonym: "Participant 04 (Anita Agarwal, #SYNTHETIC_DEMO)",
+      participantPseudonym: "Participant 04 (Synthetic Profile: Anita Agarwal, #SYNTHETIC_DEMO)",
       role: "Family Kirana Co-owner (15 Years in Business)",
       location: "Malviya Nagar, Jaipur, Rajasthan",
       language: "Hindi",
@@ -188,7 +188,7 @@ window.GRIPR_FIXTURES = {
       trigger: "Third-party errand runners (children/domestic helpers) creating verbal miscommunication on quantities.",
       impact: "Frequent reconciliations, 5-10% disputed items at billing settlement.",
       workaround: "Started writing itemized carbon-copy physical slips; one copy given to child, one retained in shop.",
-      divergenceNotes: "Carbon-copy paper slips work 10x better than mobile apps because the paper slip physically enters the customer's household kitchen.",
+      divergenceNotes: "Retailer observed that carbon-copy paper slips provide direct household kitchen visibility without requiring mobile app adoption.",
       consent: {
         studyProcessing: true,
         sanitizedBriefSharing: true,
@@ -198,7 +198,7 @@ window.GRIPR_FIXTURES = {
     {
       id: "SES-405",
       missionId: "MSN-2026-081",
-      participantPseudonym: "Participant 05 (Mukesh Choudhary, #SYNTHETIC_DEMO)",
+      participantPseudonym: "Participant 05 (Synthetic Profile: Mukesh Choudhary, #SYNTHETIC_DEMO)",
       role: "Corner General Store Owner (22 Years in Business)",
       location: "Vaishali Nagar, Jaipur, Rajasthan",
       language: "Hinglish / Rajasthani",
@@ -225,17 +225,17 @@ window.GRIPR_FIXTURES = {
     briefTitle: "Why Jaipur Kirana Retailers Struggle to Track Customer Credit",
     status: "APPROVED",
     recommendation: "REJECT_OR_REFRAME",
-    recommendationRationale: "All 5 screened retailers demonstrated that customer credit (udhaar) is a customer retention mechanism rooted in neighborhood trust, not an accounting or debt-collection bottleneck. Automated WhatsApp collection reminders alienate customers and drive them to competing neighborhood stores. RetailFlow must halt planned development of automated collection bots and reframe toward physical vernacular duplicate ledger tools.",
-    executiveSummary: "RetailFlow Intelligence Labs' initial hypothesis—that neighborhood kirana store owners lose revenue from forgotten credit and will eagerly adopt an automated WhatsApp UPI collection bot—is FALSIFIED by firsthand field evidence across 5 Jaipur retail operators. Kirana owners deliberately avoid automated collection messages because debt badgering threatens their core competitive moat: personal relationship trust. Retailers prefer manual notebooks despite transcription errors because paper ledgers are socially non-intrusive.",
+    recommendationRationale: "All 5 synthetic participant profiles demonstrated that customer credit (udhaar) is a customer retention mechanism rooted in neighborhood trust, not an accounting or debt-collection bottleneck. Automated WhatsApp collection reminders alienate customers and drive them to competing neighborhood stores. In this illustrative scenario, the client is advised to reframe the hypothesis and test alternatives before committing to development.",
+    executiveSummary: "Notice: This illustrative Decision Intelligence Brief is a synthetic demonstration model and does not constitute real customer research or market validation. RetailFlow Intelligence Labs' initial hypothesis—that neighborhood kirana store owners lose revenue from forgotten credit and will eagerly adopt an automated WhatsApp UPI collection bot—is falsified in this scenario across 5 synthetic Jaipur retail operator profiles. Kirana owners deliberately avoid automated collection messages because debt badgering threatens their core competitive moat: personal relationship trust. Operators prefer manual notebooks despite transcription errors because paper ledgers are socially non-intrusive.",
     researchQuestion: "Why do Jaipur kirana retailers struggle to track customer credit, and would an automated WhatsApp collection bot reduce credit default without customer churn?",
-    decisionAtStake: "Deciding whether to allocate $95,000 to engineer an automated WhatsApp UPI credit collection bot, or reframe toward physical vernacular receipt-book ledger workflows.",
+    decisionAtStake: "Deciding whether to allocate capital toward a proposed $95,000 software investment (explicitly fictional scenario for demonstration) to engineer an automated WhatsApp UPI credit collection bot, or reframe toward physical vernacular receipt-book ledger workflows.",
     hypothesis: "Kirana store owners lose 8-12% of revenue because they forget to collect customer udhaar, and will adopt automated WhatsApp payment reminders to collect dues faster.",
-    falsificationOutcome: "FALSIFIED: 5 of 5 participants demonstrated that automated debt collection damages neighborhood trust and drives customer defection. The bottleneck is customer cash-flow timing, not retailer memory.",
+    falsificationOutcome: "FALSIFIED IN SCENARIO: 5 of 5 synthetic profiles demonstrated that automated debt collection damages neighborhood trust and drives customer defection. The bottleneck is customer cash-flow timing, not retailer memory.",
     sampleCohort: {
       totalParticipants: 5,
-      breakdown: "5 Screened Independent Kirana & Provision Store Owners (8 to 22 years in business)",
-      geographicCluster: "Jaipur, Rajasthan (Raja Park, Mansarovar, Sanganer, Malviya Nagar, Vaishali Nagar)",
-      methodology: "Permissioned in-depth qualitative sessions with verbatim vernacular transcription and cross-actor contradiction auditing (#DEMO_SYNTHETIC)"
+      breakdown: "5 Synthetic Demonstration Profiles (Fictional Jaipur Retail Scenarios)",
+      geographicCluster: "Simulated Jaipur Neighborhoods (Raja Park, Mansarovar, Sanganer, Malviya Nagar, Vaishali Nagar)",
+      methodology: "Simulated research sessions demonstrating Gemini qualitative extraction and human contradiction auditing (#DEMO_SYNTHETIC)"
     },
     keyObservations: [
       {
@@ -272,7 +272,7 @@ window.GRIPR_FIXTURES = {
       },
       {
         pointOfDivergence: "Digital App Convenience vs Physical Household Touchpoint",
-        details: "Product teams assume digital notifications provide superior reach. Retailers proved that physical carbon-copy paper slips (SES-404) are far more effective because they physically sit inside the family kitchen."
+        details: "Product teams often assume digital notifications provide superior reach. However, participant 04 reported that physical carbon-copy paper slips provide household visibility where digital messages are frequently missed by household decision-makers."
       }
     ],
     missingInformationAndGaps: [
@@ -281,9 +281,9 @@ window.GRIPR_FIXTURES = {
       "Interviews were restricted to Jaipur municipal areas; rural peri-urban kirana stores in Rajasthan may exhibit differing credit dynamics."
     ],
     researchLimitations: [
-      "Sample size of 5 participants is designed strictly for hypothesis falsification and friction mapping, NOT statistical market sizing.",
-      "All participants are male or co-owner operators; consumer household viewpoints were inferred through retailer operational accounts.",
-      "Interviews conducted in urban Jaipur; behavior in tier-1 metros with heavy quick-commerce penetration will differ."
+      "Demonstration sample size of 5 synthetic profiles is designed strictly for methodology illustration, NOT statistical market sizing or commercial validation.",
+      "All participant profiles are synthetic representations; consumer household viewpoints were inferred through retailer operational accounts.",
+      "Scenarios set in urban Jaipur; behavior in tier-1 metros with heavy quick-commerce penetration will differ."
     ],
     aiAssistedInterpretation: {
       modelBadge: "Google Gemini AI Qualitative Clustering",
@@ -292,8 +292,8 @@ window.GRIPR_FIXTURES = {
     },
     decisionRecommendation: {
       primaryRecommendation: "REJECT / REFRAME HYPOTHESIS",
-      recommendedAction: "Halt planned $95,000 automated WhatsApp debt collection bot build immediately.",
-      pivotOption: "Reframe research around a Vernacular Duplicate Slip Ledger with zero customer-facing collection badgering.",
+      recommendedAction: "Reframe hypothesis and test alternatives before committing to development.",
+      pivotOption: "Reframe research around a Vernacular Duplicate Slip Ledger with zero customer-facing collection badgering (proposed $95,000 software investment is an explicitly fictional scenario).",
       suggestedNextSteps: [
         "1. Conduct a second scoped mission (Cohort 2) focused on 5 Jaipur kirana stores testing physical carbon-copy vernacular receipt books.",
         "2. Interview homemakers to understand how kitchen grocery bills are audited and scheduled for monthly payout.",
