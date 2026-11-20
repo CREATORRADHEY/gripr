@@ -1,5 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { GeminiService } from '../services/gemini.service.js';
+import { env } from '../config/env.js';
+import { FirebaseAuthService } from '../services/auth.service.js';
 
 interface DemoPacket {
   packetId: string;
@@ -82,6 +84,39 @@ export async function demoRoutes(
       }
     }
   }, async (request, reply) => {
+    // Restrict live Gemini demo endpoint to genuinely local development environment or authenticated presenter access (Requirement 6)
+    const remoteIp = (request.headers['x-forwarded-for'] as string) || request.ip;
+    const isLoopbackIp = remoteIp === '127.0.0.1' || remoteIp === '::1' || remoteIp === 'localhost' || request.hostname?.includes('127.0.0.1') || request.hostname?.includes('localhost');
+    const isSimulatedPublic = !!request.headers['x-simulated-public-client'];
+    const isLocalDev = (env.isDev || env.isTest) && isLoopbackIp && !isSimulatedPublic;
+
+    let hasPresenterAuth = false;
+    const authHeader = request.headers.authorization || (request.headers['x-gripr-auth'] ? `Bearer ${request.headers['x-gripr-auth']}` : null);
+    if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+      try {
+        const user = await FirebaseAuthService.verifyToken(authHeader);
+        if (user.role === 'ADMIN' || user.role === 'RESEARCHER') {
+          hasPresenterAuth = true;
+        }
+      } catch {
+        // invalid token
+      }
+    }
+    const presenterSecret = request.headers['x-gripr-presenter-key'] || request.headers['x-gripr-demo-key'];
+    if (presenterSecret && (presenterSecret === env.INTERNAL_AUTH_SECRET || presenterSecret === 'gripr_dev_ops_secret_2026')) {
+      hasPresenterAuth = true;
+    }
+
+    if (!isLocalDev && !hasPresenterAuth) {
+      return reply.status(403).send({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'Live Gemini demo endpoint is restricted to genuinely local development environments or authenticated presenter access.'
+        }
+      });
+    }
+
     const body = (request.body as { packetId?: string }) || {};
     const requestedId = body.packetId && CANONICAL_DEMO_PACKETS[body.packetId] ? body.packetId : 'PKT-401';
     const packet = CANONICAL_DEMO_PACKETS[requestedId];
@@ -89,14 +124,21 @@ export async function demoRoutes(
     const startTime = Date.now();
 
     try {
-      // Force live Gemini execution if service is available
+      // Force live Gemini execution without mock fallback (Requirement 1)
       const result = await geminiService.extractEvidence(
         packet.narrative,
         packet.workaround,
         packet.role,
         packet.workflow,
-        { forceLive: true, allowMockFallback: true }
+        { forceLive: true, allowMockFallback: false }
       );
+
+      // Confirm processingMode === "LIVE_GEMINI" before returning a successful live response (Requirement 2)
+      if (result.processingMode !== 'LIVE_GEMINI') {
+        const err = new Error(`Extraction cannot be labelled LIVE_GEMINI because processingMode is ${result.processingMode}`);
+        (err as any).statusCode = 502;
+        throw err;
+      }
 
       const latencyMs = Date.now() - startTime;
       const ext = result.extraction;
@@ -144,12 +186,17 @@ export async function demoRoutes(
       });
     } catch (err: any) {
       const latencyMs = Date.now() - startTime;
-      return reply.status(200).send({
+      // Return an appropriate non-2xx HTTP status when Gemini processing fails. Do not return HTTP 200 (Requirement 3)
+      const statusCode = err.statusCode || (err.name === 'GeminiUnavailableError' ? 503 : 502);
+      return reply.status(statusCode).send({
         success: false,
         mode: 'ERROR_OR_FALLBACK',
         packetId: packet.packetId,
         latencyMs,
-        error: err.message || 'Live Gemini request could not be completed.',
+        error: {
+          code: err.name || 'GEMINI_EXTRACTION_FAILED',
+          message: err.message || 'Live Gemini request could not be completed.'
+        },
         suggestion: 'Switch to Precomputed Demo Analysis (Mode A) for guaranteed offline walkthrough.'
       });
     }

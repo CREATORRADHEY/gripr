@@ -105,9 +105,9 @@ export class GeminiService {
 
     // Deterministic fallback for automated tests (or when Gemini unconfigured in dev)
     if (!this.isAvailable() || (env.isTest && !options?.forceLive)) {
-      if (env.isProd || (!options?.allowMockFallback && !env.isTest && !env.DEMO_MODE)) {
+      if (env.isProd || options?.allowMockFallback === false || (!env.isTest && !env.DEMO_MODE)) {
         throw new GeminiUnavailableError(
-          'Gemini extraction failed: Live Gemini API key is missing or unconfigured. Production fail-closed rule prevents silent synthetic generation.'
+          'Gemini extraction failed: Live Gemini API key is missing or unconfigured. Fallback is strictly disabled for requests labelled LIVE_GEMINI.'
         );
       }
 

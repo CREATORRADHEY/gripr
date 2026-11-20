@@ -875,6 +875,32 @@
             </div>
           </div>
 
+          <!-- GEMINI ERROR STATE (HOTFIX: VISIBLE ERROR & PRECOMPUTED FALLBACK PRESERVED) -->
+          <div id="geminiErrorContainer" style="display:none; background:#FEF2F2; border:2px solid #F87171; border-radius:10px; padding:1.5rem; margin-top:1.5rem;">
+            <div style="display:flex; align-items:flex-start; gap:0.75rem;">
+              <span style="font-size:1.5rem; line-height:1;">⚠️</span>
+              <div style="flex:1;">
+                <div style="font-family:'Space Grotesk',sans-serif; font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#B91C1C; margin-bottom:0.35rem;">
+                  LIVE GEMINI EXTRACTION FAILED (FAIL-CLOSED ENFORCED)
+                </div>
+                <div style="font-size:0.92rem; color:#991B1B; font-weight:600; margin-bottom:0.5rem;" id="geminiErrorHeadline">
+                  Unable to complete live Gemini extraction.
+                </div>
+                <p style="font-size:0.85rem; color:#7F1D1D; line-height:1.5; margin:0 0 1rem;" id="geminiErrorDetails">
+                  Live Gemini extraction could not be completed on the backend server.
+                </p>
+                <div style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+                  <button type="button" class="btn-cta-solid" onclick="switchToPrecomputedAndRun()" style="background:#475569; padding:0.5rem 1.25rem; font-size:0.85rem;">
+                    📁 Switch to Precomputed Demo Intelligence (Guaranteed Offline) →
+                  </button>
+                  <button type="button" class="btn-cta-ghost" onclick="retryGeminiLiveDirect()" style="border-color:#F87171; color:#991B1B; padding:0.5rem 1.25rem; font-size:0.85rem;">
+                    ↺ Retry Live Analysis
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- GEMINI ANALYSIS RESULTS CONTAINER -->
           <div id="geminiResultsContainer" style="display:none; margin-top:1.5rem;">
             <!-- Structured outputs rendered here -->
@@ -1637,6 +1663,23 @@
       }
     }
 
+    function switchToPrecomputedAndRun() {
+      const radio = document.getElementById('enginePrecomputed');
+      if (radio) {
+        radio.checked = true;
+        handleEngineChange();
+      }
+      const errBox = document.getElementById('geminiErrorContainer');
+      if (errBox) errBox.style.display = 'none';
+      runGeminiAnalysisDirect();
+    }
+
+    function retryGeminiLiveDirect() {
+      const errBox = document.getElementById('geminiErrorContainer');
+      if (errBox) errBox.style.display = 'none';
+      runGeminiAnalysisDirect();
+    }
+
     async function runGeminiAnalysisDirect() {
       const runBtn = document.getElementById('runGeminiBtn');
       const procBox = document.getElementById('geminiProcessingState');
@@ -1644,11 +1687,13 @@
       const actionRow = document.getElementById('stage5ActionRow');
       const statusMsg = document.getElementById('geminiStatusMsg');
       const timerEl = document.getElementById('geminiTimer');
+      const errBox = document.getElementById('geminiErrorContainer');
 
       runBtn.disabled = true;
       procBox.style.display = 'block';
       resultsContainer.style.display = 'none';
       actionRow.style.display = 'none';
+      if (errBox) errBox.style.display = 'none';
 
       let elapsed = 0;
       const interval = setInterval(() => {
@@ -1661,6 +1706,31 @@
         if (geminiEngine === 'live') {
           statusMsg.textContent = 'Calling server-side POST /api/demo/live-gemini-analysis via official Google GenAI SDK...';
           liveResult = await window.GriprAPI.analyzeDemoLive('PKT-401');
+
+          // HOTFIX: If analyzeDemoLive() returns success:false, stop processing immediately (Requirement 4 & 5)
+          if (!liveResult || !liveResult.success) {
+            clearInterval(interval);
+            procBox.style.display = 'none';
+            runBtn.disabled = false;
+            runBtn.textContent = '⚡ Retry Live Gemini Extraction';
+            runBtn.style.background = 'var(--accent)';
+
+            // Hide results container and stage 5 action row (CRITICAL: never unlock on failure)
+            resultsContainer.style.display = 'none';
+            actionRow.style.display = 'none';
+
+            // Show visible error container
+            if (errBox) {
+              const errMsg = (liveResult && (liveResult.error?.message || liveResult.error)) || 'Live Gemini request could not be completed on backend.';
+              document.getElementById('geminiErrorHeadline').textContent = 'Live Gemini processing could not be completed.';
+              document.getElementById('geminiErrorDetails').textContent = `${errMsg} Fallback is strictly disabled for requests labelled LIVE_GEMINI. You may switch to Precomputed Demo Intelligence for guaranteed offline walkthrough.`;
+              errBox.style.display = 'block';
+              errBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            window.GriprUI.showToast(`Live Gemini extraction failed: ${(liveResult && (liveResult.error?.message || liveResult.error)) || 'Service unavailable'}.`, 'error');
+            return; // STOP PROCESSING IMMEDIATELY
+          }
         } else {
           statusMsg.textContent = 'Executing precomputed offline structured extraction...';
           await new Promise(r => setTimeout(r, 650));
@@ -1668,6 +1738,7 @@
 
         clearInterval(interval);
         procBox.style.display = 'none';
+        if (errBox) errBox.style.display = 'none';
 
         renderGeminiResultsDirect(liveResult);
 
@@ -1681,6 +1752,19 @@
         clearInterval(interval);
         procBox.style.display = 'none';
         runBtn.disabled = false;
+        runBtn.textContent = '⚡ Retry Live Gemini Extraction';
+        runBtn.style.background = 'var(--accent)';
+
+        resultsContainer.style.display = 'none';
+        actionRow.style.display = 'none';
+
+        if (errBox) {
+          document.getElementById('geminiErrorHeadline').textContent = 'Live Gemini processing encountered an exception.';
+          document.getElementById('geminiErrorDetails').textContent = `${err.message || 'Unknown network or execution error.'} You may switch to Precomputed Demo Intelligence for guaranteed offline walkthrough.`;
+          errBox.style.display = 'block';
+          errBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
         window.GriprUI.showToast(`Gemini extraction error: ${err.message}`, 'error');
       }
     }

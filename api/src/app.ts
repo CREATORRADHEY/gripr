@@ -27,7 +27,7 @@ import {
   FirestoreAuditLogRepository,
   FirestoreOperationsRepository
 } from './repositories/firestore.repository.js';
-import { geminiService } from './services/gemini.service.js';
+import { GeminiService, geminiService } from './services/gemini.service.js';
 import { ResearchService } from './services/research.service.js';
 import { EvidenceService } from './services/evidence.service.js';
 import { MatchingService } from './services/matching.service.js';
@@ -45,6 +45,7 @@ import { demoRoutes } from './routes/demo.js';
 export interface AppOptions {
   logger?: boolean | object;
   useMemoryRepo?: boolean;
+  geminiService?: GeminiService;
 }
 
 // Global persistent storage engine for persistent server runtime
@@ -110,6 +111,8 @@ export function buildApp(options: AppOptions = {}): FastifyInstance {
   const auditRepo = useMemory ? new MemoryAuditLogRepository() : new FirestoreAuditLogRepository(globalFirestoreStorage);
   const opsRepo = useMemory ? memoryOpsRepo : new FirestoreOperationsRepository(globalFirestoreStorage);
 
+  const activeGeminiService = options.geminiService ?? geminiService;
+
   // Instantiate services with repositories
   const researchService = new ResearchService(
     missionRepo,
@@ -119,9 +122,9 @@ export function buildApp(options: AppOptions = {}): FastifyInstance {
     consentRepo,
     auditRepo
   );
-  const evidenceService = new EvidenceService(evidenceRepo, sessionRepo, geminiService);
-  const matchingService = new MatchingService(sessionRepo, geminiService);
-  const briefService = new BriefService(briefRepo, missionRepo, sessionRepo, evidenceRepo, geminiService, auditRepo);
+  const evidenceService = new EvidenceService(evidenceRepo, sessionRepo, activeGeminiService);
+  const matchingService = new MatchingService(sessionRepo, activeGeminiService);
+  const briefService = new BriefService(briefRepo, missionRepo, sessionRepo, evidenceRepo, activeGeminiService, auditRepo);
 
   // Register API routes
   app.register(healthRoutes, { prefix: '/api' });
@@ -138,7 +141,7 @@ export function buildApp(options: AppOptions = {}): FastifyInstance {
       evidenceService,
       auditRepo
     });
-    await demoRoutes(api, { geminiService });
+    await demoRoutes(api, { geminiService: activeGeminiService });
   }, { prefix: '/api' });
 
   return app;
