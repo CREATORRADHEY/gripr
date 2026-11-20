@@ -27,7 +27,18 @@ CRITICAL RULES:
 - Do NOT extrapolate report counts into market prevalence.
 
 OUTPUT FORMAT:
-Return pure valid JSON matching the schema.`;
+Return pure valid JSON matching this exact structure:
+{
+  "sessionIds": ["sessionA_id", "sessionB_id"],
+  "relationship": "RELATED_SAME_MECHANISM" | "RELATED_DIFFERENT_MECHANISM" | "INSUFFICIENT_EVIDENCE" | "UNRELATED",
+  "sharedWorkflow": true | false,
+  "sharedImpact": true | false,
+  "mechanismComparison": "Detailed string explaining causal alignment or difference",
+  "divergencePoints": ["string"],
+  "contradictionDetected": true | false,
+  "contradictionDetails": "string explanation if contradictionDetected is true",
+  "similarityScore": 0.85
+}`;
 
 export function buildComparisonUserPrompt(sessionA: any, sessionB: any): string {
   return `Analyze and compare the following two qualitative research sessions:

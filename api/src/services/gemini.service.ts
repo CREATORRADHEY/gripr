@@ -12,6 +12,7 @@ export interface GeminiCallOptions {
   timeoutMs?: number;
   maxRetries?: number;
   allowMockFallback?: boolean;
+  forceLive?: boolean;
 }
 
 export class GeminiUnavailableError extends Error {
@@ -26,7 +27,7 @@ export class GeminiService {
   private modelName: string;
 
   constructor() {
-    this.modelName = env.GEMINI_MODEL || 'gemini-2.5-flash';
+    this.modelName = env.GEMINI_MODEL || 'gemini-3.5-flash';
     if (env.GEMINI_API_KEY && env.GEMINI_API_KEY.trim().length > 0) {
       try {
         this.ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
@@ -45,8 +46,9 @@ export class GeminiService {
   }
 
   public getProcessingMode(): ProcessingMode {
+    if (env.isTest) return 'DEMO_SYNTHETIC';
     if (this.isAvailable()) return 'LIVE_GEMINI';
-    if (env.isTest || env.DEMO_MODE) return 'DEMO_SYNTHETIC';
+    if (env.DEMO_MODE) return 'DEMO_SYNTHETIC';
     return 'ERROR_UNAVAILABLE';
   }
 
@@ -101,8 +103,8 @@ export class GeminiService {
     const sanitizedNarrative = this.sanitizeNarrative(narrative);
     const sanitizedWorkaround = this.sanitizeNarrative(workaround);
 
-    // Fail-closed rule for production
-    if (!this.isAvailable()) {
+    // Deterministic fallback for automated tests (or when Gemini unconfigured in dev)
+    if (!this.isAvailable() || (env.isTest && !options?.forceLive)) {
       if (env.isProd || (!options?.allowMockFallback && !env.isTest && !env.DEMO_MODE)) {
         throw new GeminiUnavailableError(
           'Gemini extraction failed: Live Gemini API key is missing or unconfigured. Production fail-closed rule prevents silent synthetic generation.'
@@ -155,7 +157,7 @@ export class GeminiService {
   ): Promise<CrossParticipantComparison> {
     const model = options?.model || this.modelName;
 
-    if (!this.isAvailable()) {
+    if (!this.isAvailable() || (env.isTest && !options?.forceLive)) {
       if (env.isProd || (!options?.allowMockFallback && !env.isTest && !env.DEMO_MODE)) {
         throw new GeminiUnavailableError('Gemini cross-participant comparison failed: live AI unavailable.');
       }
@@ -194,7 +196,7 @@ export class GeminiService {
   ): Promise<DecisionBrief> {
     const model = options?.model || this.modelName;
 
-    if (!this.isAvailable()) {
+    if (!this.isAvailable() || (env.isTest && !options?.forceLive)) {
       if (env.isProd || (!options?.allowMockFallback && !env.isTest && !env.DEMO_MODE)) {
         throw new GeminiUnavailableError('Gemini brief synthesis failed: live AI unavailable.');
       }

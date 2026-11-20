@@ -20,7 +20,46 @@ STRICT EVIDENCE BOUNDARIES:
 - The brief is initially marked "DRAFT — REQUIRES HUMAN REVIEW".
 
 OUTPUT FORMAT:
-Return pure valid JSON strictly matching the schema.`;
+Return pure valid JSON matching this exact structure:
+{
+  "id": "BRF-YYYY-NNN",
+  "missionId": "MSN-...",
+  "organizationId": "ORG-...",
+  "title": "Executive Decision Brief Title",
+  "status": "DRAFT — REQUIRES HUMAN REVIEW",
+  "recommendation": "REJECT_OR_REFRAME" | "INVESTIGATE_FURTHER" | "CONSIDER_PILOT",
+  "recommendationRationale": "Detailed justification based on evidence",
+  "executiveSummary": "Executive overview of findings",
+  "researchQuestion": "Original research question",
+  "decisionAtStake": "Core business decision at stake",
+  "hypothesis": "Hypothesis tested",
+  "falsificationOutcome": "Falsification assessment summary",
+  "sampleContext": {
+    "totalSessions": 5,
+    "participantRoles": ["string"],
+    "geographies": ["string"],
+    "limitationsDisclaimer": "Small qualitative research sample (N=5). Does not establish statistical prevalence or market size."
+  },
+  "observedWorkflows": ["string"],
+  "coreProblems": ["string"],
+  "supportingEvidence": [
+    { "claim": "string", "sourceSessionId": "string", "verbatimQuote": "string", "operatorRole": "string" }
+  ],
+  "contradictoryFindings": [
+    { "aspect": "string", "observationA": "string", "observationB": "string", "implication": "string" }
+  ],
+  "existingWorkarounds": [
+    { "workaround": "string", "costOrFriction": "string", "whyCurrentTechFails": "string" }
+  ],
+  "knownImpacts": ["string"],
+  "unknownInformation": ["string"],
+  "researchLimitations": ["string"],
+  "hypothesesGenerated": ["string"],
+  "followUpQuestions": ["string"],
+  "decisionOptions": [
+    { "option": "REJECT_OR_REFRAME", "headline": "string", "description": "string", "tradeOffs": "string" }
+  ]
+}`;
 
 export function buildSynthesisUserPrompt(mission: any, sessions: any[], analyses: any[]): string {
   return `Synthesize a Decision Intelligence Brief for the following B2B Research Mission:

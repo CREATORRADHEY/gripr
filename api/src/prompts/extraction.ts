@@ -35,7 +35,27 @@ CRITICAL TRUTH & VERACITY RULES:
    - Extract both the original vernacular quote and clear English conceptual meaning.
 
 OUTPUT FORMAT:
-Return pure valid JSON strictly matching the requested schema.`;
+Return pure valid JSON matching this exact structure:
+{
+  "affectedParticipant": { "content": "string", "category": "REPORTED", "sourceQuote": "string or null", "confidenceNotes": "string" },
+  "industryOrDomain": { "content": "string", "category": "REPORTED", "sourceQuote": "string or null", "confidenceNotes": "string" },
+  "operationalWorkflow": { "content": "string", "category": "REPORTED", "sourceQuote": "string or null", "confidenceNotes": "string" },
+  "reportedProblem": { "content": "string", "category": "REPORTED", "sourceQuote": "string or null", "confidenceNotes": "string" },
+  "triggeringEvent": { "content": "string", "category": "REPORTED", "sourceQuote": "string or null", "confidenceNotes": "string" },
+  "consequencesReported": [
+    { "content": "string", "category": "REPORTED", "sourceQuote": "string or null", "confidenceNotes": "string" }
+  ],
+  "frequency": { "content": "string", "category": "REPORTED | UNKNOWN", "sourceQuote": "string or null", "confidenceNotes": "string" },
+  "financialImpact": { "content": "string", "category": "REPORTED | UNKNOWN", "sourceQuote": "string or null", "confidenceNotes": "string" },
+  "currentWorkaround": { "content": "string", "category": "REPORTED", "sourceQuote": "string or null", "confidenceNotes": "string" },
+  "contextualConstraints": [
+    { "content": "string", "category": "REPORTED", "sourceQuote": "string or null", "confidenceNotes": "string" }
+  ],
+  "missingInformation": [ "string" ],
+  "potentialResearchQuestions": [ "string" ],
+  "supportingQuotations": [ "string" ],
+  "alternativeInterpretations": [ "string" ]
+}`;
 
 export function buildExtractionUserPrompt(narrative: string, workaround: string, role?: string, workflow?: string): string {
   return `Extract structured problem evidence from the following firsthand participant research submission.
