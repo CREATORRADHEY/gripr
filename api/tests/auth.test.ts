@@ -72,7 +72,7 @@ describe('TEST GROUP B: Authentication, Roles & Tenant Isolation', () => {
       organizationId: 'ORG-COMPETING-AGRO'
     });
 
-    // Try to access KisanDirect mission (MSN-2026-081 belonging to ORG-KISANDIRECT-081)
+    // Try to access RetailFlow mission (MSN-2026-081 belonging to ORG-RETAILFLOW-081)
     const res = await app.inject({
       method: 'GET',
       url: '/api/missions/MSN-2026-081',
@@ -88,12 +88,12 @@ describe('TEST GROUP B: Authentication, Roles & Tenant Isolation', () => {
   });
 
   it('Organization user can access their own mission workspace', async () => {
-    // Create token for KisanDirect organization user
+    // Create token for RetailFlow organization user
     const kisanToken = FirebaseAuthService.createTestToken({
-      uid: 'arunav-kisan',
-      email: 'a.sengupta@kisandirect-example.in',
+      uid: 'aditi-retailflow',
+      email: 'aditi@retailflow.test',
       role: 'ORGANIZATION_USER',
-      organizationId: 'ORG-KISANDIRECT-081'
+      organizationId: 'ORG-RETAILFLOW-081'
     });
 
     const res = await app.inject({
@@ -143,7 +143,7 @@ describe('TEST GROUP B: Authentication, Roles & Tenant Isolation', () => {
     const orgToken = FirebaseAuthService.createTestToken({
       uid: 'user-org',
       role: 'ORGANIZATION_USER',
-      organizationId: 'ORG-KISANDIRECT-081'
+      organizationId: 'ORG-RETAILFLOW-081'
     });
 
     const res = await app.inject({
@@ -157,5 +157,27 @@ describe('TEST GROUP B: Authentication, Roles & Tenant Isolation', () => {
     expect(res.statusCode).toBe(403);
     const body = res.json();
     expect(body.error.code).toBe('FORBIDDEN');
+  });
+
+  it('strictly rejects custom HS256 tokens when forceRejectHS256 is active (Task 1: No HS256 in prod)', async () => {
+    const hs256Token = FirebaseAuthService.createTestToken({
+      uid: 'adversary-hs256',
+      email: 'attacker@test.in',
+      role: 'ADMIN'
+    });
+
+    await expect(FirebaseAuthService.verifyToken(hs256Token, { forceRejectHS256: true }))
+      .rejects.toThrow('Unauthorized token algorithm. Custom HS256 tokens are strictly forbidden in non-test environments');
+  });
+
+  it('rejects fake/unregistered Firebase tokens with signature verification failure', async () => {
+    // Generate an RS256-like 3-part token that was not signed by Google certs
+    const fakeHeader = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
+    const fakePayload = Buffer.from(JSON.stringify({ uid: 'fake-user', iss: 'https://securetoken.google.com/gripr-studio' })).toString('base64url');
+    const fakeSig = Buffer.from('invalid-signature-bytes').toString('base64url');
+    const fakeToken = `${fakeHeader}.${fakePayload}.${fakeSig}`;
+
+    await expect(FirebaseAuthService.verifyToken(fakeToken))
+      .rejects.toThrow('Firebase ID token verification failed via Admin SDK');
   });
 });

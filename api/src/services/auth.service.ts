@@ -1,4 +1,6 @@
 import crypto from 'node:crypto';
+import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 import { env } from '../config/env.js';
 
 export type UserRole = 'RESEARCHER' | 'ADMIN' | 'ORGANIZATION_USER' | 'RESEARCH_PARTICIPANT';
@@ -23,11 +25,49 @@ export interface DecodedTokenPayload {
   iat?: number;
 }
 
+// Track initialization of the official Firebase Admin App
+let firebaseAdminApp: App | null = null;
+
+export function getFirebaseAdminApp(): App {
+  if (firebaseAdminApp) return firebaseAdminApp;
+  const existingApps = getApps();
+  if (existingApps.length > 0 && existingApps[0]) {
+    firebaseAdminApp = existingApps[0];
+    return firebaseAdminApp;
+  }
+
+  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT || 'gripr-studio';
+
+  // Check for explicit service account credentials in env
+  const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY || process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  if (serviceAccount) {
+    try {
+      if (typeof serviceAccount === 'string' && serviceAccount.trim().startsWith('{')) {
+        const parsed = JSON.parse(serviceAccount);
+        firebaseAdminApp = initializeApp({
+          credential: cert(parsed),
+          projectId: parsed.project_id || projectId
+        });
+        return firebaseAdminApp;
+      }
+    } catch {
+      // Fall through to default app initialization
+    }
+  }
+
+  firebaseAdminApp = initializeApp({
+    projectId
+  });
+  return firebaseAdminApp;
+}
+
 export class FirebaseAuthService {
   private static tokenSecret = env.INTERNAL_AUTH_SECRET || 'gripr_secure_jwt_secret_2026';
 
   /**
-   * Cryptographically signs a test or service token for testing and local authentication
+   * UNIT TEST ONLY FIXTURE
+   * Cryptographically signs an HS256 token strictly for offline unit-test assertions.
+   * This method is explicitly forbidden from being used as a valid authentication path in live/production.
    */
   public static createTestToken(payload: {
     uid: string;
@@ -37,7 +77,7 @@ export class FirebaseAuthService {
     missionId?: string;
     expiresInSeconds?: number;
   }): string {
-    const header = { alg: 'HS256', typ: 'JWT' };
+    const header = { alg: 'HS256', typ: 'JWT', testFixture: true };
     const now = Math.floor(Date.now() / 1000);
     const exp = now + (payload.expiresInSeconds ?? 3600);
 
@@ -64,9 +104,12 @@ export class FirebaseAuthService {
   }
 
   /**
-   * Verifies a Firebase ID token or internally signed service token
+   * Verifies an ID token.
+   * In all non-test environments, this strictly delegates to the official Firebase Admin SDK verifyIdToken()
+   * which validates RS256 signature against Google certs, issuer, audience, expiration, and project identity.
+   * Custom HS256 tokens are NEVER accepted as equivalent to real Firebase ID tokens.
    */
-  public static async verifyToken(tokenString: string): Promise<AuthUser> {
+  public static async verifyToken(tokenString: string, options?: { forceRejectHS256?: boolean }): Promise<AuthUser> {
     if (!tokenString || typeof tokenString !== 'string') {
       throw new Error('Token missing or invalid format');
     }
@@ -75,7 +118,7 @@ export class FirebaseAuthService {
       ? tokenString.slice(7).trim()
       : tokenString.trim();
 
-    // Support development / test secret token in test environment
+    // Support isolated test reviewer tokens strictly inside unit-test environment
     if (env.isTest && (cleanToken === env.INTERNAL_AUTH_SECRET || cleanToken === 'reviewer-test')) {
       return {
         uid: 'dev-test-reviewer',
@@ -89,6 +132,45 @@ export class FirebaseAuthService {
       throw new Error('Malformed token structure: must be a 3-part JWT');
     }
 
+    let header: { alg?: string; typ?: string; testFixture?: boolean } = {};
+    try {
+      header = JSON.parse(Buffer.from(parts[0], 'base64url').toString('utf8'));
+    } catch {
+      throw new Error('Invalid token header: cannot parse JSON');
+    }
+
+    // STRICT SECURITY CHECK:
+    // Custom HS256 tokens are NEVER accepted in non-test environments or when forceRejectHS256 is enabled.
+    if (header.alg === 'HS256') {
+      if (!env.isTest || options?.forceRejectHS256) {
+        throw new Error('Unauthorized token algorithm. Custom HS256 tokens are strictly forbidden in non-test environments. Real Firebase ID tokens verified by Firebase Admin SDK are required.');
+      }
+      // ONLY inside env.isTest: verify isolated unit-test fixture
+      return this.verifyTestTokenIsolated(cleanToken, parts);
+    }
+
+    // OFFICIAL FIREBASE ADMIN SDK VERIFICATION FOR REAL FIREBASE ID TOKENS
+    const app = getFirebaseAdminApp();
+    try {
+      const decoded = await getAuth(app).verifyIdToken(cleanToken, true);
+      const role: UserRole = (decoded.role as UserRole) || (decoded['gripr_role'] as UserRole) || 'ORGANIZATION_USER';
+      return {
+        uid: decoded.uid,
+        email: decoded.email || '',
+        role,
+        organizationId: (decoded.organizationId as string) || (decoded['gripr_org'] as string) || undefined,
+        missionId: (decoded.missionId as string) || undefined
+      };
+    } catch (err: any) {
+      throw new Error(`Firebase ID token verification failed via Admin SDK: ${err.message || 'Invalid token'}`);
+    }
+  }
+
+  /**
+   * Private isolated unit-test verification helper.
+   * Strictly accessible only when env.isTest is true.
+   */
+  private static verifyTestTokenIsolated(token: string, parts: string[]): AuthUser {
     const [encodedHeader, encodedBody, signature] = parts;
 
     // Verify HMAC signature
@@ -97,7 +179,6 @@ export class FirebaseAuthService {
       .update(`${encodedHeader}.${encodedBody}`)
       .digest('base64url');
 
-    // Secure timing-safe equality check
     let validSignature = false;
     try {
       const a = Buffer.from(signature);

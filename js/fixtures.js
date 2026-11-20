@@ -1,11 +1,11 @@
 /**
  * GRIPR.STUDIO — B2B Problem Intelligence Fixtures (Phase 1 Refactor)
  * 
- * DISCLAIMER:
+ * DISCLAIMER & SYNTHETIC DATA NOTICE:
  * All records herein are explicitly labelled SYNTHETIC DEMO FIXTURES (#DEMO_SYNTHETIC).
- * They represent structured B2B research missions, screened participant sessions,
- * and Decision Intelligence Briefs designed for prototype validation.
- * No real user personally identifiable information (PII) is included.
+ * They represent structured B2B research missions, screened fictional participant sessions,
+ * and Decision Intelligence Briefs designed exclusively for Buildathon demonstration and prototype testing.
+ * No real user personally identifiable information (PII) is included, and no verified customer traction is claimed.
  */
 
 window.GRIPR_FIXTURES = {
@@ -13,20 +13,20 @@ window.GRIPR_FIXTURES = {
   missions: [
     {
       id: "MSN-2026-081",
-      orgName: "BharatAgritech Labs",
-      contactPerson: "Aditi Rao",
-      contactEmail: "aditi.rao@bharatagri.test",
+      orgName: "RetailFlow Intelligence Labs",
+      contactPerson: "Aditi Sharma",
+      contactEmail: "aditi.sharma@retailflow.test",
       role: "VP of Product",
-      sector: "agriculture",
-      decisionAtStake: "Deciding whether to allocate $180,000 to engineer a standalone B2C farmer fertilizer price-comparison mobile app, or reframe toward a dealer procurement credit network.",
-      hypothesis: "We believe smallholder farmers overpay for fertilizer because they lack real-time digital visibility into dealer spot prices, and will download an app to find cheaper dealers.",
-      falsificationCriteria: "If farmers already know dealer prices are inflated but are locked into specific retailers due to informal seasonal credit, price comparison alone will not change purchasing behavior.",
-      targetParticipantProfile: "Smallholder farmers (1-5 acres) purchasing DAP and Urea in non-canal irrigated districts during peak sowing.",
-      industry: "Agricultural Inputs & Rural Fintech",
-      geography: "Madhya Pradesh (Sehore and Vidisha districts)",
-      operationalContext: "10-day seasonal sowing window; high time-sensitivity; local dealer monopoly.",
+      sector: "retail",
+      decisionAtStake: "Deciding whether to allocate $95,000 to engineer an automated WhatsApp UPI credit collection bot for neighborhood kirana stores, or reframe toward physical vernacular receipt-book ledger workflows.",
+      hypothesis: "We believe Jaipur neighborhood kirana store owners lose 8-12% of revenue because they forget to collect customer udhaar (credit), and will adopt an automated digital payment reminder system to replace physical notebooks.",
+      falsificationCriteria: "If retailers deliberately avoid automated digital reminders to preserve personal community trust and social relationships with neighbors, automated collection software will encounter severe resistance and rejection.",
+      targetParticipantProfile: "Independent neighborhood kirana store owners in Jaipur operating for >5 years with at least 50 regular credit customers.",
+      industry: "Neighborhood Retail & Vernacular Fintech",
+      geography: "Jaipur, Rajasthan (Raja Park, Mansarovar, Malviya Nagar, Sanganer, Vaishali Nagar)",
+      operationalContext: "High-density residential colonies; daily manual footfall; informal revolving credit extended to known resident families.",
       urgency: "Decision needed before Q3 product roadmapping (within 4 weeks).",
-      constraints: "Interviews must be conducted in regional vernacular (Malwi/Hinglish); operators cannot read complex English text.",
+      constraints: "Interviews must be conducted in regional vernacular (Hindi / Hinglish); operators manage stores 14 hours daily and have minimal time for phone interaction.",
       deliverables: ["Decision Intelligence Brief", "Workflow Friction Map", "5 Screened Operator Transcripts", "Strategy Workshop"],
       status: "Brief Ready", // Requested | Scoping | Awaiting Agreement | Researching | Evidence Review | Brief Ready | Closed
       pricing: "₹49,000 (Experimental Pilot Scope)",
@@ -89,35 +89,20 @@ window.GRIPR_FIXTURES = {
   // Invitation-based research studies for field participants (#DEMO_SYNTHETIC)
   invitations: [
     {
-      token: "INV-AGRI-081",
+      token: "INV-KIRANA-081",
       missionId: "MSN-2026-081",
-      studyTitle: "Research Study: Rural Fertilizer Spot-Pricing & Dealer Credit Realities",
-      commissioningOrgType: "Agricultural Technology Research Team",
+      studyTitle: "Research Study: Jaipur Kirana Customer Credit & Khata Operations",
+      commissioningOrgType: "Retail Technology Product Team",
       facilitator: "GRIPR Research Operations Desk",
-      targetProfile: "Smallholder farmers (1-5 acres) who purchased DAP or Urea during recent sowing seasons in Sehore/Vidisha districts, MP.",
+      targetProfile: "Neighborhood kirana store owners in Jaipur operating for >5 years with at least 50 regular credit customers.",
       estimatedDuration: "12-15 minutes structured narrative session",
       honorarium: "₹1,500 direct bank transfer honorarium upon verified research completion",
-      consentNotice: "Participation is confidential and voluntary. Your personal identifiers (name, exact shop name) are redacted before research briefs are generated.",
+      consentNotice: "Participation is confidential and voluntary. Your personal identifiers (name, exact shop address) are redacted before research briefs are generated.",
       specificQuestions: [
-        { id: "q_incident", label: "Describe your most recent experience purchasing fertilizer during sowing. What rate was demanded vs officially listed?", type: "textarea", required: true },
-        { id: "q_credit", label: "Did you pay full cash or purchase on dealer credit? How did payment terms affect the price?", type: "textarea", required: true },
-        { id: "q_workaround", label: "When a dealer charges above MRP or runs out of stock, what do you and your neighbors do instead?", type: "textarea", required: true },
-        { id: "q_impact", label: "What was the estimated cost or delay incurred by this situation?", type: "text", required: true }
-      ]
-    },
-    {
-      token: "INV-COLD-082",
-      missionId: "MSN-2026-082",
-      studyTitle: "Research Study: Perishable Produce Transport & Sub-Load Transit Friction",
-      commissioningOrgType: "Logistics Technology Research Group",
-      facilitator: "GRIPR Research Operations Desk",
-      targetProfile: "Perishable produce farmers and transport consolidators in Nashik/Pune.",
-      estimatedDuration: "15 minutes structured session",
-      honorarium: "₹1,500 honorarium for verified participants",
-      consentNotice: "Confidential research session. Data used exclusively for logistics workflow mapping.",
-      specificQuestions: [
-        { id: "q_incident", label: "Describe the last time you tried to transport a produce harvest under 2 tons to the market.", type: "textarea", required: true },
-        { id: "q_workaround", label: "What cooling or aggregation method did you employ when refrigerated trucks were unavailable?", type: "textarea", required: true }
+        { id: "q_incident", label: "Describe your weekly process for tracking customer credit (udhaar). How do you record and reconcile dues?", type: "textarea", required: true },
+        { id: "q_credit", label: "How do customers react when reminded about outstanding balances? Have you tried digital reminders?", type: "textarea", required: true },
+        { id: "q_workaround", label: "When payment records are missed or contested, what workaround or ledger method do you use?", type: "textarea", required: true },
+        { id: "q_impact", label: "What is your estimated unrecovered financial loss per month?", type: "text", required: true }
       ]
     }
   ],
@@ -127,62 +112,62 @@ window.GRIPR_FIXTURES = {
     {
       id: "SES-401",
       missionId: "MSN-2026-081",
-      participantPseudonym: "Participant 01 (Farmer)",
-      role: "Smallholder Farmer (3.5 Acres, Soybean & Wheat)",
-      location: "Sehore District, Madhya Pradesh",
-      language: "Hinglish / Malwi",
+      participantPseudonym: "Participant 01 (Ramesh Kumar, #SYNTHETIC_DEMO)",
+      role: "Kirana Store Owner (18 Years in Business)",
+      location: "Raja Park, Jaipur, Rajasthan",
+      language: "Hinglish / Hindi",
       sessionDate: "2026-05-06",
-      verbatim: "Gaon mein fertilizer rates ka koi live system nahi hai. Dealership wale apni marzi ka rate lagate hain jab demand high hoti hai. Kisaan majboor hota hai kyunki sowing window sirf 10 din ki hoti hai.",
-      translation: "In the village there is no live system for fertilizer rates. Dealerships charge arbitrary rates when demand peaks. Farmers have no choice because the sowing window is only 10 days.",
-      workflow: "Field preparation -> Sowing window opens -> Retailer visit -> Spot rate quotation -> Credit negotiation -> Loading.",
-      trigger: "Sowing window opens with seasonal rainfall; acute spot demand surge over 72 hours.",
-      impact: "Paid ₹1,650 for DAP bag against official MRP of ₹1,350 (22% unbudgeted markup); total ₹4,200 extra input cost.",
-      workaround: "Borrowed ₹5,000 cash from local village moneylender at 3% monthly interest to pay dealer immediate spot cash.",
-      divergenceNotes: "States that price transparency alone is useless if the dealer withholds the physical bag for credit customers.",
+      verbatim: "Main Jaipur mein ek kirana store chalata hoon. Har hafte mujhe customer udhaar track karne mein problem hoti hai. Main notebook use karta hoon. Kabhi-kabhi payment records miss ho jaate hain. Exact financial loss mujhe nahi pata.",
+      translation: "I run a kirana store in Jaipur. Every week I face problems tracking customer credit. I use a physical notebook. Sometimes payment records get missed. I don't know the exact financial loss.",
+      workflow: "Customer visits counter -> Items packed -> Customer requests 'Khate mein likh lo' -> Retailer opens notebook -> Handwrites total -> End of week tally.",
+      trigger: "Peak evening rush (6 PM - 9 PM); multiple credit customers simultaneously demanding quick packing.",
+      impact: "Unknown exact financial loss. Missed tally entries cause unrecoverable disputes at month-end.",
+      workaround: "Single physical ruled notebook kept beside the cash drawer; crossed out upon payment.",
+      divergenceNotes: "Explicitly refuses to speculate on revenue loss figures: 'Exact financial loss mujhe nahi pata'.",
       consent: {
         studyProcessing: true,
         sanitizedBriefSharing: true,
         followUpInterview: true,
-        contactEmail: "farmer.sehore.demo@gripr.test"
+        contactEmail: "ramesh.rajapark.demo@gripr.test"
       }
     },
     {
       id: "SES-402",
       missionId: "MSN-2026-081",
-      participantPseudonym: "Participant 02 (Farmer & Tractor Operator)",
-      role: "Smallholder Farmer (4.5 Acres)",
-      location: "Vidisha District, Madhya Pradesh",
+      participantPseudonym: "Participant 02 (Suresh Sharma, #SYNTHETIC_DEMO)",
+      role: "Provision Store Owner (12 Years in Business)",
+      location: "Mansarovar, Jaipur, Rajasthan",
       language: "Hinglish",
       sessionDate: "2026-05-08",
-      verbatim: "Hum sabko pata hota hai ki dukan wala 250 rupaye extra le raha hai. Par hum doosre gaon nahi ja sakte kyunki wahan ka dealer humein udhaar nahi dega. Purana hisab yahin chalta hai.",
-      translation: "All of us already know the shopkeeper is charging 250 rupees extra. But we cannot travel to another village because that dealer will not extend credit to strangers. Our credit history is locked to this one shop.",
-      workflow: "Informal ledger accounting -> Credit drawdown during sowing -> Repayment post-harvest at mandi.",
-      trigger: "Lack of alternative collateral-free working capital during pre-sowing purchase.",
-      impact: "Tied purchasing lock-in; forced to purchase pesticide bundles as an unneeded condition of getting Urea bags.",
-      workaround: "Accepting forced bundled products (unwanted micronutrient packets) and attempting to resell them to neighbors at 50% loss.",
-      divergenceNotes: "Directly refutes the hypothesis that price ignorance is the primary root cause.",
+      verbatim: "Agar main software se automated WhatsApp reminder bhejunga, toh mohalle wale naraz ho jayenge aur samne wali dukan pe chale jayenge. Udhaar vishwas pe chalta hai, machine pe nahi.",
+      translation: "If I send automated WhatsApp reminders through software, neighborhood customers will feel insulted and switch to the competitor across the street. Customer credit runs on personal trust, not machines.",
+      workflow: "Neighborhood trust accounting -> Informal credit ledger -> Gentle in-person inquiry when customer visits shop for daily milk.",
+      trigger: "Fear of customer churn and social confrontation with resident families.",
+      impact: "Delay of 45-60 days in recovering working capital; accepts delay to protect customer retention.",
+      workaround: "Only mentions overdue balance verbally when the customer visits the shop for small cash items.",
+      divergenceNotes: "Proves that automated digital reminders actively harm the retailer's primary competitive advantage: community trust.",
       consent: {
         studyProcessing: true,
         sanitizedBriefSharing: true,
         followUpInterview: true,
-        contactEmail: "operator.vidisha.demo@gripr.test"
+        contactEmail: "sharma.mansarovar.demo@gripr.test"
       }
     },
     {
       id: "SES-403",
       missionId: "MSN-2026-081",
-      participantPseudonym: "Participant 03 (Cooperative Secretary)",
-      role: "Primary Agricultural Credit Society (PACS) Secretary",
-      location: "Bhopal Periphery, Madhya Pradesh",
-      language: "Hindi",
-      sessionDate: "2026-05-09",
-      verbatim: "Sarkari quota time par nahi pahunchta. Rake point par consignment delay hoti hai. Jab tak sarkari fertilizer aata hai, private dealer sara stock premium par bech chuka hota hai.",
-      translation: "The official government quota does not arrive on time. Consignments are delayed at rail rake points. By the time cooperative fertilizer arrives, private dealers have already sold out their stock at high premiums.",
-      workflow: "District rake point allocation -> Cooperative truck movement -> Society distribution -> POS biometric verification.",
-      trigger: "Rail rake scheduling bottlenecks during multi-district sowing overlap.",
-      impact: "Cooperative societies receive stock after sowing is completed, forcing farmers to buy from private spot retailers.",
-      workaround: "Cooperative distributes tokens in advance, but farmers abandon tokens to purchase from private stores to avoid missing rainfall.",
-      divergenceNotes: "Identifies logistics timing rather than retailer greed as the primary catalyst for spot premiums.",
+      participantPseudonym: "Participant 03 (Dinesh Meena, #SYNTHETIC_DEMO)",
+      role: "Daily Grocery & Dairy Vendor (8 Years in Business)",
+      location: "Sanganer, Jaipur, Rajasthan",
+      language: "Hinglish / Hindi",
+      sessionDate: "2026-05-10",
+      verbatim: "Diary mein page bhar jaate hain toh pichla hisaab naye page pe transfer karne mein galti hoti hai. Par customer ke samne phone nikal ke entry karna apmaan samjha jata hai.",
+      translation: "When diary pages fill up, transferring old balances to a new page creates errors. But taking out a smartphone in front of a respected elder or regular customer to log credit is seen as disrespectful.",
+      workflow: "Quick paper pencil entry on loose slips -> Evening transfer to thick Khata book -> Balance carry-over.",
+      trigger: "Ledger book page overflow and human transcription errors between daily slip and master diary.",
+      impact: "Estimated 2-3 hours wasted every Sunday evening reconciling ledger totals.",
+      workaround: "Maintains two parallel diaries: one for active balances and one archive ledger.",
+      divergenceNotes: "Highlight: Smartphone usage at the billing counter is culturally coded as transactional skepticism.",
       consent: {
         studyProcessing: true,
         sanitizedBriefSharing: true,
@@ -192,40 +177,39 @@ window.GRIPR_FIXTURES = {
     {
       id: "SES-404",
       missionId: "MSN-2026-081",
-      participantPseudonym: "Participant 04 (Retail Input Dealer)",
-      role: "Licensed Fertilizer & Seed Retailer",
-      location: "Sehore Town, Madhya Pradesh",
-      language: "Hinglish",
+      participantPseudonym: "Participant 04 (Anita Agarwal, #SYNTHETIC_DEMO)",
+      role: "Family Kirana Co-owner (15 Years in Business)",
+      location: "Malviya Nagar, Jaipur, Rajasthan",
+      language: "Hindi",
       sessionDate: "2026-05-11",
-      verbatim: "Company humein DAP ke sath slow-moving zinc packets lene ko bolti hai. Agar hum nahi lete toh humein Urea ka allotment nahi milta. Hum woh cost kisaan pe pass karne ko majboor hain.",
-      translation: "The manufacturer forces us retailers to buy slow-moving zinc packets alongside DAP. If we refuse, they withhold our Urea quota. We are forced to pass that bundled cost on to the farmer.",
-      workflow: "Manufacturer wholesaler billing -> Retail dealer unloading -> Mandatory bundling absorption -> Retail sale.",
-      trigger: "Wholesale upstream bundling enforced by regional distribution distributors.",
-      impact: "Retail margin on regulated Urea is only ₹11/bag, which fails to cover shop rent, electricity, and unloading labour.",
-      workaround: "Retailers informally bundle the inventory or add a ₹100-200 'service/handling fee' to remain solvent.",
-      divergenceNotes: "Reveals manufacturer-to-dealer upstream margin distortion rather than pure retailer exploitation.",
+      verbatim: "Ghar ki auratein aksar bachhon ko bhejti hain saman lene bina paise ke. Bachhe batate nahi ki kitna udhaar likhwaya. Mahine ke aakhiri hafte mein hisaab milane par behes hoti hai.",
+      translation: "Homemakers frequently send small children to fetch groceries on credit without cash. The children don't remember what was written. At month-end, reconciling accounts leads to arguments with families.",
+      workflow: "Child arrives with grocery list -> Items provided on credit -> Verbal entry in register -> Month-end family settlement.",
+      trigger: "Third-party errand runners (children/domestic helpers) creating verbal miscommunication on quantities.",
+      impact: "Frequent reconciliations, 5-10% disputed items at billing settlement.",
+      workaround: "Started writing itemized carbon-copy physical slips; one copy given to child, one retained in shop.",
+      divergenceNotes: "Carbon-copy paper slips work 10x better than mobile apps because the paper slip physically enters the customer's household kitchen.",
       consent: {
         studyProcessing: true,
         sanitizedBriefSharing: true,
-        followUpInterview: true,
-        contactEmail: "dealer.sehore.demo@gripr.test"
+        followUpInterview: true
       }
     },
     {
       id: "SES-405",
       missionId: "MSN-2026-081",
-      participantPseudonym: "Participant 05 (Marginal Farmer)",
-      role: "Marginal Farmer (1.8 Acres)",
-      location: "Ashta Tehsil, Madhya Pradesh",
-      language: "Malwi / Hindi",
+      participantPseudonym: "Participant 05 (Mukesh Choudhary, #SYNTHETIC_DEMO)",
+      role: "Corner General Store Owner (22 Years in Business)",
+      location: "Vaishali Nagar, Jaipur, Rajasthan",
+      language: "Hinglish / Rajasthani",
       sessionDate: "2026-05-12",
-      verbatim: "Phone mein app dekhne se kya hoga? Agar app dikhayega ki 30 km door saste mein mil raha hai, toh wahan jane ka tempo rent 800 rupaye lagega. Local dukan se hi lena padta hai.",
-      translation: "What will checking an app on the phone do? Even if an app shows fertilizer is cheaper 30 km away, the tempo vehicle fare to fetch it will cost 800 rupees. We have to purchase from the local village shop regardless.",
-      workflow: "Physical neighborhood walking inspection -> Local shop purchase -> Head-load transport to field.",
-      trigger: "Last-mile rural transport cost negates inter-village price arbitrage.",
-      impact: "Geographic mobility barrier limits purchasing radius to strictly under 5 km.",
-      workaround: "Pooling purchases with 3 neighboring farmers on a single shared tractor trolley.",
-      divergenceNotes: "Demonstrates that physical transport friction exceeds digital price arbitrage value.",
+      verbatim: "Digital khata app try kiya tha do saal pehle. Problem app mein nahi hai, problem ye hai ki customer UPI se turant paise nahi deta. Bolta hai 'agley hafte salary aane par denge'. App se cash thodi nikalta hai.",
+      translation: "I tried a digital ledger app two years ago. The issue isn't the app; it's that customers don't have immediate liquidity. They say 'I'll pay when salary arrives next week'. An app doesn't create cash where there is none.",
+      workflow: "Customer salary cycle alignment -> Credit extension 1st-25th -> Settlement between 1st-5th of next month.",
+      trigger: "Household liquidity mismatch with grocery consumption timing.",
+      impact: "App notification spam caused 3 affluent customers to close accounts and shop elsewhere.",
+      workaround: "Uninstalled digital collection app; returned to physical Khata ledger with cordial verbal check-ins.",
+      divergenceNotes: "Critical insight: Digital debt badgering ignores customer monthly wage payout schedules.",
       consent: {
         studyProcessing: true,
         sanitizedBriefSharing: true,
@@ -237,77 +221,83 @@ window.GRIPR_FIXTURES = {
   // Full Decision Intelligence Brief for MSN-2026-081 (#DEMO_SYNTHETIC)
   decisionBrief: {
     missionId: "MSN-2026-081",
-    briefTitle: "Decision Intelligence Brief: Rural Fertilizer Spot-Pricing & Procurement Dynamics",
-    executiveSummary: "BharatAgritech's initial hypothesis—that smallholder farmers will adopt a B2C price-comparison mobile app to avoid paying retailer markups—is FALSIFIED by firsthand field evidence. Farmers do not overpay due to lack of price awareness; they overpay because they are locked into informal seasonal credit with local retailers, face mandatory upstream product bundling, and cannot justify last-mile transportation costs to arbitrage prices across sub-districts.",
-    researchQuestion: "Does lack of digital spot-price visibility drive fertilizer price overpayment, and would a B2C mobile comparison app alter smallholder procurement behavior?",
-    clientDecisionAtStake: "Deciding whether to allocate $180,000 to build and launch a consumer farmer price-discovery app, or pivot toward an institutional B2B dealer credit and procurement network.",
+    title: "Decision Intelligence Brief: Why Jaipur Kirana Retailers Struggle to Track Customer Credit",
+    briefTitle: "Why Jaipur Kirana Retailers Struggle to Track Customer Credit",
+    status: "APPROVED",
+    recommendation: "REJECT_OR_REFRAME",
+    recommendationRationale: "All 5 screened retailers demonstrated that customer credit (udhaar) is a customer retention mechanism rooted in neighborhood trust, not an accounting or debt-collection bottleneck. Automated WhatsApp collection reminders alienate customers and drive them to competing neighborhood stores. RetailFlow must halt planned development of automated collection bots and reframe toward physical vernacular duplicate ledger tools.",
+    executiveSummary: "RetailFlow Intelligence Labs' initial hypothesis—that neighborhood kirana store owners lose revenue from forgotten credit and will eagerly adopt an automated WhatsApp UPI collection bot—is FALSIFIED by firsthand field evidence across 5 Jaipur retail operators. Kirana owners deliberately avoid automated collection messages because debt badgering threatens their core competitive moat: personal relationship trust. Retailers prefer manual notebooks despite transcription errors because paper ledgers are socially non-intrusive.",
+    researchQuestion: "Why do Jaipur kirana retailers struggle to track customer credit, and would an automated WhatsApp collection bot reduce credit default without customer churn?",
+    decisionAtStake: "Deciding whether to allocate $95,000 to engineer an automated WhatsApp UPI credit collection bot, or reframe toward physical vernacular receipt-book ledger workflows.",
+    hypothesis: "Kirana store owners lose 8-12% of revenue because they forget to collect customer udhaar, and will adopt automated WhatsApp payment reminders to collect dues faster.",
+    falsificationOutcome: "FALSIFIED: 5 of 5 participants demonstrated that automated debt collection damages neighborhood trust and drives customer defection. The bottleneck is customer cash-flow timing, not retailer memory.",
     sampleCohort: {
       totalParticipants: 5,
-      breakdown: "3 Smallholder & Marginal Farmers (1.8 to 4.5 acres), 1 Cooperative Society (PACS) Secretary, 1 Licensed Fertilizer Retailer",
-      geographicCluster: "Sehore and Vidisha districts, Madhya Pradesh",
-      methodology: "Permissioned in-depth qualitative sessions with verbatim vernacular transcription and cross-actor contradiction auditing"
+      breakdown: "5 Screened Independent Kirana & Provision Store Owners (8 to 22 years in business)",
+      geographicCluster: "Jaipur, Rajasthan (Raja Park, Mansarovar, Sanganer, Malviya Nagar, Vaishali Nagar)",
+      methodology: "Permissioned in-depth qualitative sessions with verbatim vernacular transcription and cross-actor contradiction auditing (#DEMO_SYNTHETIC)"
     },
     keyObservations: [
       {
-        title: "Credit Lock-in Trumps Price Awareness",
-        description: "100% of interviewed farmers stated they already know retailers demand 18–25% above MRP. However, they rely on the retailer for 4-month informal harvest credit. They cannot switch to an unfamiliar cheaper dealer who demands upfront cash.",
+        title: "Credit is a Relationship Lock-in Mechanism, Not Pure Debt",
+        description: "100% of interviewed retailers stated that offering credit is the primary reason families do not switch to modern supermarkets (Blinkit, DMart). Threatening this relationship with robotic reminders causes instant customer defection.",
         traceableSessionIds: ["SES-401", "SES-402"]
       },
       {
-        title: "Upstream Wholesaler Bundling Forces Retailer Markups",
-        description: "Retailers operate on thin legal margins (₹11/bag on regulated Urea) and are forced by upstream distributors to buy slow-moving bio-fertilizers. Retailers pass this cost on through informal markups to stay solvent.",
-        traceableSessionIds: ["SES-404"]
-      },
-      {
-        title: "Last-Mile Transport Negates Inter-Village Arbitrage",
-        description: "Hiring a rural three-wheeler or tempo to haul 4 bags from a cheaper dealership 25 km away costs ₹600–₹800, wiping out any $2–$3/bag price savings identified by an app.",
+        title: "Liquidity Timing Trumps Notification Frequency",
+        description: "Customers delay payment because household salaries are paid on the 1st-5th of each month. Sending reminders on the 15th or 22nd creates frustration without generating cash.",
         traceableSessionIds: ["SES-405"]
       },
       {
-        title: "Sowing Window Creates Non-Negotiable Time Panic",
-        description: "The 10-day sowing window forces immediate purchasing upon the first rainfall. Farmers prioritize immediate physical possession over price negotiation.",
-        traceableSessionIds: ["SES-401", "SES-403"]
+        title: "Smartphones at the Billing Counter Signal Social Disrespect",
+        description: "Taking out a smartphone to record credit in front of respected neighborhood elders is culturally coded as transactional distrust. Notebook entries are accepted as traditional and dignified.",
+        traceableSessionIds: ["SES-403"]
+      },
+      {
+        title: "Paper Slips Bridge the Household Kitchen Gap",
+        description: "Children and domestic helpers frequently fetch groceries. A physical carbon-copy paper slip reaches the homemaker's kitchen, whereas SMS/WhatsApp messages are ignored or overlooked.",
+        traceableSessionIds: ["SES-404"]
       }
     ],
     operationalWorkflowFriction: [
-      { step: "1. Sowing Window Opens", friction: "Rainfall triggers synchronized demand surge across all village farms simultaneously within 72 hours." },
-      { step: "2. Retailer Stock Inspection", friction: "Retailers reserve scarce DAP/Urea bags specifically for long-term credit customers or cash-premium buyers." },
-      { step: "3. Forced Product Bundling", friction: "Farmer is forced to take unwanted micronutrient packets along with fertilizer bags." },
-      { step: "4. Informal Ledger Logging", friction: "Farmer signs paper notebook with undefined interest rates and harvest-linked repayment commitments." }
+      { step: "1. Peak Evening Rush", friction: "Multiple customers demand quick item packing; manual notebook entries are postponed and forgotten." },
+      { step: "2. Third-Party Pickups", friction: "Children sent without cash cannot verify prices, causing disputed balance totals at month-end." },
+      { step: "3. Page Transfer Errors", friction: "Transferring unpaid balances across notebook pages introduces transcription mistakes." },
+      { step: "4. Month-End Settlement", friction: "Retailer must politely navigate cordial verbal reminders without alienating long-term families." }
     ],
     contradictionsAndDivergences: [
       {
-        pointOfDivergence: "Retailer Exploitation vs Upstream Margin Squeeze",
-        details: "Farmers view local retailers as opportunistic price-gougers during sowing (SES-401). In contrast, the retailer interview (SES-404) proved that manufacturers mandate purchase of slow-moving zinc packets with every DAP consignment, forcing retailers to recover costs or go bankrupt."
+        pointOfDivergence: "Information Asymmetry vs Social Capital",
+        details: "Software developers assume credit tracking fails due to forgotten records (SES-401). Field operators reveal that even when records are accurate, collection cannot be automated because credit is governed by community social norms (SES-402, SES-405)."
       },
       {
-        pointOfDivergence: "Cooperative Supply Failure",
-        details: "Farmers believe cooperative staff secretly divert subsidized fertilizer to private markets (SES-401). The cooperative secretary (SES-403) demonstrated that railway rake point scheduling delays prevent stock from arriving before the sowing window closes."
+        pointOfDivergence: "Digital App Convenience vs Physical Household Touchpoint",
+        details: "Product teams assume digital notifications provide superior reach. Retailers proved that physical carbon-copy paper slips (SES-404) are far more effective because they physically sit inside the family kitchen."
       }
     ],
     missingInformationAndGaps: [
-      "Wholesale distributor invoice records were not directly audited; claims of mandatory manufacturer bundling rely on retailer testimony.",
-      "The feasibility of digital Kisan Credit Card (KCC) point-of-sale integration for standalone retailers was not evaluated in this pilot.",
-      "District cooperative society corruption versus pure logistical rake delays requires formal RTI administrative data validation."
+      "Exact unrecoverable default percentages across seasonal migrant workers versus permanent property-owning residents were not quantified in this pilot.",
+      "The feasibility of integrated vernacular mini-thermal receipt printers was not tested in this initial cohort.",
+      "Interviews were restricted to Jaipur municipal areas; rural peri-urban kirana stores in Rajasthan may exhibit differing credit dynamics."
     ],
     researchLimitations: [
-      "Sample size of 5 participants is designed for hypothesis falsification and friction mapping, NOT statistical market sizing.",
-      "Geographic focus limited to central Madhya Pradesh; states with strict digital cooperative systems (e.g., Kerala, Tamil Nadu) behave differently.",
-      "Interviews conducted immediately post-Rabi sowing; seasonal Kharif supply dynamics may vary."
+      "Sample size of 5 participants is designed strictly for hypothesis falsification and friction mapping, NOT statistical market sizing.",
+      "All participants are male or co-owner operators; consumer household viewpoints were inferred through retailer operational accounts.",
+      "Interviews conducted in urban Jaipur; behavior in tier-1 metros with heavy quick-commerce penetration will differ."
     ],
     aiAssistedInterpretation: {
-      modelBadge: "Gemini 1.5 Pro Cross-Verification Synthesis",
-      interpretationNotice: "The following synthesis represents AI-assisted qualitative clustering reviewed by a human research analyst. It is an analytical interpretation, not a reported fact.",
-      synthesis: "The core commercial bottleneck is not information asymmetry (price ignorance), but working capital lock-in and physical distribution friction. A B2C consumer app will suffer high initial install drop-off because users cannot act upon price visibility. The viable commercial entry point is a B2B procurement and trade credit network that provides authorized retailers with unbundled inventory financing."
+      modelBadge: "Google Gemini AI Qualitative Clustering",
+      interpretationNotice: "The following synthesis represents AI-assisted qualitative clustering reviewed and approved by a human research analyst. It is an analytical interpretation, not a reported fact.",
+      synthesis: "The core commercial error is framing neighborhood credit as a collections problem. For kirana stores, credit is customer acquisition and retention capital. An automated collection bot attacks the retailer's core competitive advantage against quick-commerce. The high-leverage product opportunity is not debt badgering, but error-free physical-digital hybrid vernacular duplicate receipts that provide physical transparency to the household."
     },
     decisionRecommendation: {
       primaryRecommendation: "REJECT / REFRAME HYPOTHESIS",
-      recommendedAction: "Cancel the $180,000 B2C price-comparison app roadmap immediately.",
-      pivotOption: "Reframe research around a B2B Retailer Working Capital & Unbundled Procurement Network (Option C).",
+      recommendedAction: "Halt planned $95,000 automated WhatsApp debt collection bot build immediately.",
+      pivotOption: "Reframe research around a Vernacular Duplicate Slip Ledger with zero customer-facing collection badgering.",
       suggestedNextSteps: [
-        "1. Conduct a second scoped mission (Cohort 2) focused on 6 agricultural input retailers to map wholesale manufacturer bundling terms.",
-        "2. Interview rural regional rural banks (RRBs) regarding digital KCC disbursement at independent agro-dealers.",
-        "3. Avoid consumer marketing spend until the credit lock-in bottleneck is structurally unbundled."
+        "1. Conduct a second scoped mission (Cohort 2) focused on 5 Jaipur kirana stores testing physical carbon-copy vernacular receipt books.",
+        "2. Interview homemakers to understand how kitchen grocery bills are audited and scheduled for monthly payout.",
+        "3. Avoid all consumer-facing automated collection features that threaten community trust."
       ]
     }
   },
@@ -318,17 +308,17 @@ window.GRIPR_FIXTURES = {
       id: "OPS-901",
       missionId: "MSN-2026-081",
       type: "session_review",
-      title: "Review Participant Session SES-405 (Marginal Farmer, Ashta)",
+      title: "Review Participant Session SES-401 (Ramesh Kumar, Raja Park)",
       status: "reviewed",
-      actionTaken: "Approved for Decision Brief inclusion; flagged transport friction as core contradiction."
+      actionTaken: "Approved for Decision Brief inclusion; verified source quotation integrity and unknown financial loss."
     },
     {
       id: "OPS-902",
-      missionId: "MSN-2026-082",
-      type: "screening",
-      title: "Screen Participant Candidate: Strawberry Consolidator, Mahabaleshwar",
-      status: "pending",
-      actionTaken: "Awaiting telephone pre-qualification on vehicle ownership."
+      missionId: "MSN-2026-081",
+      type: "session_review",
+      title: "Review Participant Session SES-402 (Suresh Sharma, Mansarovar)",
+      status: "reviewed",
+      actionTaken: "Approved for Decision Brief inclusion; identified relationship trust as primary falsification factor."
     },
     {
       id: "OPS-903",

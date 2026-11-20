@@ -29,6 +29,10 @@ export class FirestoreStorageEngine {
     this.ensureDirectories();
   }
 
+  public getBaseDir(): string {
+    return this.baseDir;
+  }
+
   private ensureDirectories() {
     const collections = [
       'mission_inquiries',
@@ -144,23 +148,23 @@ export class FirestoreMissionRepository implements IMissionRepository {
   private seedIfEmpty() {
     const missions = this.storage.listDocs<Mission>('missions');
     if (missions.length === 0) {
-      const kisanDirect: Mission = {
+      const kiranaMission: Mission = {
         id: 'MSN-2026-081',
-        organizationId: 'ORG-KISANDIRECT-081',
-        orgName: 'KisanDirect Supply Logistics',
-        contactPerson: 'Arunav Sengupta',
-        contactEmail: 'a.sengupta@kisandirect-example.in',
-        role: 'VP Product & Rural Distribution',
-        sector: 'agritech',
-        decisionAtStake: 'Should we allocate $180,000 to engineer a direct-to-farmer B2C fertilizer e-commerce ordering mobile application, or will existing rural distribution channels make adoption non-viable?',
-        hypothesis: 'Smallholder farmers in Uttar Pradesh will purchase fertilizer online if offered real-time spot pricing that is 10-15% cheaper than village retail stores.',
-        falsificationCriteria: 'Falsified if farmers overpay at local retail shops due to harvest-linked informal credit relationships, emergency delivery lock-ins, or bag-opening inspection practices, rather than price discovery blindness.',
-        problemToInvestigate: 'Rural fertilizer spot-pricing, emergency delivery friction, and informal retail credit dependencies across peri-urban smallholder farming clusters.',
-        targetParticipantProfile: 'Active smallholders cultivating 2-8 acres in Western UP & Punjab, who personally purchase at least 20 fertilizer bags per season.',
-        industry: 'Agricultural Logistics & Input Supply',
-        geography: 'Western Uttar Pradesh (Meerut, Aligarh clusters)',
-        urgency: 'High (Board pilot review in 4 weeks)',
-        constraints: 'Must capture actual Hindi/Hinglish verbatim accounts and document current paper ledger workarounds.',
+        organizationId: 'ORG-RETAILFLOW-081',
+        orgName: 'RetailFlow Intelligence Labs',
+        contactPerson: 'Aditi Sharma',
+        contactEmail: 'aditi.sharma@retailflow.test',
+        role: 'VP Product',
+        sector: 'retail',
+        decisionAtStake: 'Deciding whether to allocate $95,000 to engineer an automated WhatsApp UPI credit collection bot for neighborhood kirana stores, or reframe toward physical vernacular receipt-book ledger workflows.',
+        hypothesis: 'We believe Jaipur neighborhood kirana store owners lose 8-12% of revenue because they forget to collect customer udhaar, and will adopt automated WhatsApp payment reminders to collect dues faster.',
+        falsificationCriteria: 'If retailers deliberately avoid automated digital reminders to preserve personal community trust and social relationships with neighbors, automated collection software will encounter severe resistance and rejection.',
+        problemToInvestigate: 'Customer credit tracking friction, notebook ledger page overflow, and community relationship trust dynamics among neighborhood kirana operators.',
+        targetParticipantProfile: 'Independent neighborhood kirana store owners in Jaipur operating for >5 years with at least 50 regular credit customers.',
+        industry: 'Neighborhood Retail & Vernacular Fintech',
+        geography: 'Jaipur, Rajasthan (Raja Park, Mansarovar, Malviya Nagar, Sanganer, Vaishali Nagar)',
+        urgency: 'High (Roadmapping review in 4 weeks)',
+        constraints: 'Interviews must capture actual Hindi/Hinglish verbatim accounts and document current paper ledger workarounds.',
         deliverables: ['Decision Intelligence Brief', 'Workflow Friction Map', 'Contradiction Audit'],
         status: 'Brief Ready',
         pricing: '₹49,000 (Experimental Pilot Scope)',
@@ -169,7 +173,7 @@ export class FirestoreMissionRepository implements IMissionRepository {
         completedSessionCount: 5,
         createdAt: '2026-03-01T08:30:00Z'
       };
-      this.storage.writeDoc('missions', kisanDirect.id, kisanDirect);
+      this.storage.writeDoc('missions', kiranaMission.id, kiranaMission);
     }
   }
 
@@ -445,38 +449,38 @@ export class FirestoreBriefRepository implements IBriefRepository {
       const sampleBrief: DecisionBrief = {
         id: 'BRF-2026-081',
         missionId: 'MSN-2026-081',
-        organizationId: 'ORG-KISANDIRECT-081',
-        title: 'Decision Intelligence Brief: Rural Fertilizer Procurement Workflows',
+        organizationId: 'ORG-RETAILFLOW-081',
+        title: 'Decision Intelligence Brief: Why Jaipur Kirana Retailers Struggle to Track Customer Credit',
         status: 'APPROVED',
         recommendation: 'REJECT_OR_REFRAME',
-        recommendationRationale: 'All 5 participants revealed that local retail purchase decisions are governed by harvest-linked credit (Khatabook) and physical bag-inspection trust rather than spot-pricing. An unbundled e-commerce app without localized credit underwriting will suffer acute adoption failure.',
-        executiveSummary: 'This research mission evaluated whether building a direct-to-farmer B2C fertilizer ordering app is commercially viable. Evidence indicates that price discounts of 10-15% are insufficient to overcome zero-interest seasonal credit extended by village retailers.',
-        researchQuestion: 'Do peri-urban smallholders prioritize upfront digital price discovery over entrenched village credit relationships?',
-        decisionAtStake: 'Should KisanDirect allocate $180,000 to engineer a direct-to-farmer fertilizer app?',
-        hypothesis: 'Smallholders will adopt online buying for 10-15% discounts.',
-        falsificationOutcome: 'FALSIFIED: 5 of 5 participants demonstrated that seasonal credit dependencies and immediate emergency replacement override price sensitivity.',
+        recommendationRationale: 'All 5 screened retailers demonstrated that customer credit (udhaar) is a customer retention mechanism rooted in neighborhood trust, not an accounting or debt-collection bottleneck. Automated WhatsApp collection reminders alienate customers and drive them to competing neighborhood stores. RetailFlow must halt planned development of automated collection bots and reframe toward physical vernacular duplicate ledger tools.',
+        executiveSummary: 'RetailFlow Intelligence Labs\' initial hypothesis—that neighborhood kirana store owners lose revenue from forgotten credit and will eagerly adopt an automated WhatsApp UPI collection bot—is FALSIFIED by firsthand field evidence across 5 Jaipur retail operators. Kirana owners deliberately avoid automated collection messages because debt badgering threatens their core competitive moat: personal relationship trust. Retailers prefer manual notebooks despite transcription errors because paper ledgers are socially non-intrusive.',
+        researchQuestion: 'Why do Jaipur kirana retailers struggle to track customer credit, and would an automated WhatsApp collection bot reduce credit default without customer churn?',
+        decisionAtStake: 'Deciding whether to allocate $95,000 to engineer an automated WhatsApp UPI credit collection bot, or reframe toward physical vernacular receipt-book ledger workflows.',
+        hypothesis: 'Kirana store owners lose 8-12% of revenue because they forget to collect customer udhaar, and will adopt automated WhatsApp payment reminders to collect dues faster.',
+        falsificationOutcome: 'FALSIFIED: 5 of 5 participants demonstrated that automated debt collection damages neighborhood trust and drives customer defection. The bottleneck is customer cash-flow timing, not retailer memory.',
         sampleContext: {
           totalSessions: 5,
-          participantRoles: ['Smallholder Cultivator (3 acres)', 'Medium Grower (7 acres)', 'Sharecropper (4 acres)', 'Farm Operator (6 acres)', 'Peri-urban Grower (5 acres)'],
-          geographies: ['Western Uttar Pradesh (Meerut, Aligarh, Bulandshahr)'],
-          limitationsDisclaimer: 'Small qualitative research sample (N=5). Does not establish statistical prevalence or national market size.'
+          participantRoles: ['Kirana Store Owner (18 yrs)', 'Provision Store Owner (12 yrs)', 'Daily Grocery Vendor (8 yrs)', 'Family Kirana Co-owner (15 yrs)', 'General Store Owner (22 yrs)'],
+          geographies: ['Jaipur, Rajasthan (Raja Park, Mansarovar, Sanganer, Malviya Nagar, Vaishali Nagar)'],
+          limitationsDisclaimer: 'Small qualitative research sample (N=5). Does not establish statistical prevalence or national market size. #DEMO_SYNTHETIC'
         },
         observedWorkflows: [
-          'Village retail shop visit during sowing window',
-          'Informal Khatabook ledger credit ledger entry',
-          'Physical bag-opening inspection for moisture clumping'
+          'Counter packing during peak evening rush (6 PM - 9 PM)',
+          'Manual handwriting of credit in single ruled paper notebook',
+          'Cordial in-person verbal balance mentions during morning milk visits'
         ],
         coreProblems: [
-          'Cash-flow timing mismatch between sowing expense and harvest income',
-          'High risk of counterfeit or sub-standard fertilizer bag delivery',
-          'Inability of digital delivery trucks to navigate village interior paths during monsoon'
+          'Notebook page overflow and human transcription errors across balance transfers',
+          'Third-party pickups (children/helpers) causing disputed totals at month-end',
+          'Acute social friction when digital collection apps send automated WhatsApp reminders'
         ],
         supportingEvidence: [
           {
-            claim: 'Local dealers provide 90-day interest-free harvest credit',
-            sourceSessionId: 'SES-401',
-            verbatimQuote: 'Hamare paas sowing ke time cash nahi hota. Sharmaji khata pe 3 mahine baad fasal bikne par payment lete hain.',
-            operatorRole: 'Smallholder Cultivator (3 acres)'
+            claim: 'Automated digital reminders insult customers and destroy neighborhood credit trust',
+            sourceSessionId: 'SES-402',
+            verbatimQuote: 'Agar main software se automated WhatsApp reminder bhejunga, toh mohalle wale naraz ho jayenge aur samne wali dukan pe chale jayenge. Udhaar vishwas pe chalta hai, machine pe nahi.',
+            operatorRole: 'Provision Store Owner (12 Years in Business)'
           }
         ],
         contradictoryFindings: [

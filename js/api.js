@@ -366,31 +366,80 @@
 
     /**
      * 4. Get Decision Intelligence Brief for a mission
+     * In Live Mode:
+     * - Returns real live data on 200 OK.
+     * - Returns exact errors on 401, 403, 404, 500 without falling back to synthetic fixtures.
+     * - Synthetic briefs are ONLY returned when in explicit demo mode (e.g. options.demo === true, ?demo=true, or mode === 'demo').
      * @param {string} missionId
+     * @param {object} options
      */
-    async getMissionBrief(missionId = 'MSN-2026-081') {
+    async getMissionBrief(missionId = 'MSN-2026-081', options = {}) {
+      const isExplicitDemo = options.demo === true || (typeof window !== 'undefined' && window.location.search.includes('demo=true'));
+      if (isExplicitDemo || this.getMode() === 'demo') {
+        return this.getDemoBrief(missionId);
+      }
+
       if (this.getMode() === 'live') {
         try {
           const res = await fetch(`${BACKEND_URL}/missions/${encodeURIComponent(missionId)}/brief`, {
             headers: this.getHeaders()
           });
-          const json = await res.json();
+          const json = await res.json().catch(() => ({}));
+
           if (res.ok && json.success) {
             return json;
           }
-          // If 401/404 or backend unavailable, fallback to showcase brief so example brief is always accessible
-          if (missionId === 'MSN-2026-081' || res.status === 401 || res.status === 404) {
-            return this.getDemoBrief(missionId);
+
+          // Strictly handle HTTP error states without silent synthetic fallback (Task 2)
+          if (res.status === 401) {
+            return {
+              success: false,
+              status: 401,
+              authRequired: true,
+              error: 'Authentication required. A valid Firebase ID token with organization access is required to inspect live research briefs.',
+              message: 'Authentication required (401)'
+            };
           }
           if (res.status === 403) {
-            return { success: false, error: 'Brief is under human research review or restricted to authorized organization.', status: 'PENDING_REVIEW' };
+            return {
+              success: false,
+              status: 403,
+              forbidden: true,
+              error: json.error?.message || 'Access denied. Cross-organization tenant boundary enforced or brief is still awaiting human review.',
+              message: 'Access denied (403)'
+            };
           }
-          return { success: false, error: json.error?.message || 'Brief not available' };
+          if (res.status === 404) {
+            return {
+              success: false,
+              status: 404,
+              notFound: true,
+              error: json.error?.message || `Decision Intelligence Brief not found for mission reference "${missionId}".`,
+              message: 'Brief not found (404)'
+            };
+          }
+          if (res.status >= 500) {
+            return {
+              success: false,
+              status: 500,
+              serverError: true,
+              error: json.error?.message || 'Backend server error encountered while retrieving the research brief.',
+              message: 'Backend error (500)'
+            };
+          }
+
+          return {
+            success: false,
+            status: res.status,
+            error: json.error?.message || 'Brief not available'
+          };
         } catch (err) {
-          if (missionId === 'MSN-2026-081') {
-            return this.getDemoBrief(missionId);
-          }
-          return { success: false, error: `Live API call failed: ${err.message}` };
+          return {
+            success: false,
+            status: 0,
+            networkError: true,
+            error: `API connection failed: unable to reach live backend at ${BACKEND_URL}. Check if the server is running.`
+          };
         }
       }
 
