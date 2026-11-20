@@ -14,6 +14,8 @@ export type MissionStatus = z.infer<typeof MissionStatusSchema>;
 
 export const CreateMissionSchema = z.object({
   orgName: z.string().trim().min(2, 'Organization / Company name is required.'),
+  organizationId: z.string().optional().default('ORG-DEFAULT'),
+  inquiryId: z.string().optional(),
   contactPerson: z.string().trim().min(2, 'Contact person name is required.'),
   contactEmail: z.string().trim().email('A valid business email address is required.'),
   role: z.string().trim().optional().default('Product Lead'),
@@ -37,6 +39,9 @@ export type CreateMissionInput = z.infer<typeof CreateMissionSchema>;
 
 export const MissionSchema = z.object({
   id: z.string(),
+  organizationId: z.string().default('ORG-DEFAULT'),
+  inquiryId: z.string().optional(),
+  invitationToken: z.string().optional(),
   orgName: z.string(),
   contactPerson: z.string(),
   contactEmail: z.string(),

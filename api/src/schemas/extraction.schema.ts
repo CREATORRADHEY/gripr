@@ -43,6 +43,14 @@ export const AnalysisStatusSchema = z.enum([
 
 export type AnalysisStatus = z.infer<typeof AnalysisStatusSchema>;
 
+export const ProcessingModeSchema = z.enum([
+  'LIVE_GEMINI',
+  'DEMO_SYNTHETIC',
+  'ERROR_UNAVAILABLE'
+]);
+
+export type ProcessingMode = z.infer<typeof ProcessingModeSchema>;
+
 export const ValidatedAnalysisSchema = z.object({
   id: z.string(),
   sessionId: z.string(),
@@ -50,6 +58,7 @@ export const ValidatedAnalysisSchema = z.object({
   sourceHash: z.string(),
   modelUsed: z.string(),
   promptVersion: z.string(),
+  processingMode: ProcessingModeSchema.default('LIVE_GEMINI'),
   timestamp: z.string(),
   status: AnalysisStatusSchema,
   validationOutcome: z.object({

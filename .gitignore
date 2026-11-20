@@ -6,6 +6,10 @@ api/node_modules/
 dist/
 api/dist/
 
+# Local database runtime files
+api/data/firestore/*
+!api/data/firestore/.gitkeep
+
 # Environment files
 .env
 .env.*

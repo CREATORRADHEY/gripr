@@ -1,17 +1,23 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import {
   IMissionRepository,
+  IMissionInquiryRepository,
   IInvitationRepository,
   IResearchResponseRepository,
   IEvidenceRepository,
   IBriefRepository,
+  IConsentRepository,
+  IAuditLogRepository,
   IOperationsRepository,
   OperationsQueueItem
 } from './interfaces.js';
 import { Mission, CreateMissionInput, MissionStatus } from '../schemas/mission.schema.js';
+import { MissionInquiry, CreateMissionInquiryInput, MissionInquiryStatus } from '../schemas/inquiry.schema.js';
 import { ResearchSession, ResearchInvitation, SubmitResearchResponseInput } from '../schemas/response.schema.js';
 import { ValidatedAnalysis, AnalysisStatus } from '../schemas/extraction.schema.js';
 import { DecisionBrief, BriefStatus } from '../schemas/brief.schema.js';
+import { ConsentRecord } from '../schemas/consent.schema.js';
+import { AuditLogEntry, AuditAction } from '../schemas/audit.schema.js';
 
 // --- OPERATIONS REPOSITORY ---
 export class MemoryOperationsRepository implements IOperationsRepository {
@@ -60,6 +66,51 @@ export class MemoryOperationsRepository implements IOperationsRepository {
   }
 }
 
+// --- MISSION INQUIRY REPOSITORY ---
+export class MemoryMissionInquiryRepository implements IMissionInquiryRepository {
+  private inquiries: Map<string, MissionInquiry> = new Map();
+
+  async create(input: CreateMissionInquiryInput): Promise<MissionInquiry> {
+    const id = `INQ-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+    const inquiry: MissionInquiry = {
+      ...input,
+      id,
+      status: 'AWAITING_SCOPE_REVIEW',
+      pricingNotice: 'Experimental pilot pricing. Unvalidated research model.',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    this.inquiries.set(id, inquiry);
+    return inquiry;
+  }
+
+  async findById(id: string): Promise<MissionInquiry | null> {
+    return this.inquiries.get(id) || null;
+  }
+
+  async findAll(): Promise<MissionInquiry[]> {
+    return Array.from(this.inquiries.values()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  async updateStatus(
+    id: string,
+    status: MissionInquiryStatus,
+    reviewer?: string,
+    notes?: string,
+    convertedMissionId?: string
+  ): Promise<MissionInquiry | null> {
+    const inquiry = this.inquiries.get(id);
+    if (!inquiry) return null;
+    inquiry.status = status;
+    inquiry.updatedAt = new Date().toISOString();
+    if (reviewer) inquiry.reviewedBy = reviewer;
+    if (notes) inquiry.reviewNotes = notes;
+    if (convertedMissionId) inquiry.convertedMissionId = convertedMissionId;
+    this.inquiries.set(id, inquiry);
+    return inquiry;
+  }
+}
+
 // --- MISSION REPOSITORY ---
 export class MemoryMissionRepository implements IMissionRepository {
   private missions: Map<string, Mission> = new Map();
@@ -71,6 +122,7 @@ export class MemoryMissionRepository implements IMissionRepository {
   private seed() {
     const demoMission: Mission = {
       id: 'MSN-2026-081',
+      organizationId: 'ORG-KISANDIRECT-081',
       orgName: 'KisanDirect Supply Logistics',
       contactPerson: 'Arunav Sengupta',
       contactEmail: 'a.sengupta@kisandirect-example.in',
@@ -98,8 +150,12 @@ export class MemoryMissionRepository implements IMissionRepository {
 
   async create(input: CreateMissionInput): Promise<Mission> {
     const randomId = `MSN-2026-${Math.floor(100 + Math.random() * 900)}`;
+    const organizationId = input.organizationId || `ORG-${crypto.createHash('md5').update(input.orgName.toLowerCase()).digest('hex').slice(0, 8).toUpperCase()}`;
+
     const mission: Mission = {
       id: randomId,
+      organizationId,
+      inquiryId: input.inquiryId,
       orgName: input.orgName.trim(),
       contactPerson: input.contactPerson.trim(),
       contactEmail: input.contactEmail.trim(),
@@ -143,6 +199,10 @@ export class MemoryMissionRepository implements IMissionRepository {
     return Array.from(this.missions.values());
   }
 
+  async findByOrganizationId(organizationId: string): Promise<Mission[]> {
+    return Array.from(this.missions.values()).filter(m => m.organizationId === organizationId);
+  }
+
   async updateStatus(id: string, status: MissionStatus): Promise<Mission | null> {
     const mission = await this.findById(id);
     if (!mission) return null;
@@ -170,8 +230,12 @@ export class MemoryInvitationRepository implements IInvitationRepository {
   }
 
   private seed() {
+    const rawToken = 'INV-AGRI-081';
+    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+
     const demoInvitation: ResearchInvitation = {
-      token: 'INV-AGRI-081',
+      token: rawToken,
+      tokenHash,
       missionId: 'MSN-2026-081',
       studyTitle: 'Rural Input Procurement & Fertilizer Supply Research Study',
       studyDescription: 'Academic and operational study into how active farming operators manage emergency fertilizer procurement, pricing variability, and retailer relationships during peak planting season.',
@@ -184,26 +248,44 @@ export class MemoryInvitationRepository implements IInvitationRepository {
       honorarium: '₹1,500 direct bank transfer upon session completion',
       expiresAt: '2026-12-31T23:59:59Z',
       status: 'active',
+      failedAttempts: 0,
       createdAt: '2026-03-01T09:00:00Z'
     };
-    this.invitations.set(demoInvitation.token, demoInvitation);
+    this.invitations.set(rawToken.toUpperCase(), demoInvitation);
+    this.invitations.set(tokenHash, demoInvitation);
   }
 
   async create(invitation: ResearchInvitation): Promise<ResearchInvitation> {
-    this.invitations.set(invitation.token, invitation);
-    return invitation;
+    const tokenHash = invitation.tokenHash || crypto.createHash('sha256').update(invitation.token).digest('hex');
+    const secured = { ...invitation, tokenHash, failedAttempts: 0 };
+    this.invitations.set(invitation.token.toUpperCase(), secured);
+    this.invitations.set(tokenHash, secured);
+    return secured;
   }
 
   async findByToken(token: string): Promise<ResearchInvitation | null> {
-    return this.invitations.get(token.toUpperCase()) || null;
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    return this.invitations.get(token.toUpperCase()) || this.invitations.get(tokenHash) || null;
   }
 
-  async markCompleted(token: string): Promise<void> {
-    const inv = await this.findByToken(token);
+  async findByTokenHash(tokenHash: string): Promise<ResearchInvitation | null> {
+    return this.invitations.get(tokenHash) || null;
+  }
+
+  async markCompleted(tokenOrHash: string, sessionId?: string): Promise<void> {
+    const inv = await this.findByToken(tokenOrHash);
     if (inv) {
       inv.status = 'completed';
-      this.invitations.set(inv.token, inv);
+      this.invitations.set(inv.token.toUpperCase(), inv);
+      if (inv.tokenHash) this.invitations.set(inv.tokenHash, inv);
     }
+  }
+
+  async recordFailedAttempt(tokenOrHash: string): Promise<number> {
+    const inv = await this.findByToken(tokenOrHash);
+    if (!inv) return 1;
+    inv.failedAttempts = (inv.failedAttempts || 0) + 1;
+    return inv.failedAttempts;
   }
 }
 
@@ -243,6 +325,7 @@ export class MemoryResearchResponseRepository implements IResearchResponseReposi
           studyProcessing: true,
           sanitizedBriefSharing: true,
           followUpInterview: true,
+          futurePilotParticipation: false,
           contactEmail: 'farmer.401@example.in'
         },
         createdAt: '2026-03-03T10:00:00Z'
@@ -269,7 +352,8 @@ export class MemoryResearchResponseRepository implements IResearchResponseReposi
         consent: {
           studyProcessing: true,
           sanitizedBriefSharing: true,
-          followUpInterview: false
+          followUpInterview: false,
+          futurePilotParticipation: false
         },
         createdAt: '2026-03-04T11:30:00Z'
       }
@@ -301,25 +385,25 @@ export class MemoryResearchResponseRepository implements IResearchResponseReposi
       frequency: input.frequency || null,
       financialImpact: input.financialImpact || null,
       sourceHash,
-      divergenceNotes: 'Awaiting Gemini structured extraction and researcher moderation.',
+      divergenceNotes: 'Session submitted via invitation link.',
       consent: {
         studyProcessing: input.consentStudyProcessing,
-        sanitizedBriefSharing: !!input.consentSanitizedBriefSharing,
-        followUpInterview: !!input.consentFollowUpInterview,
-        contactEmail: input.consentFollowUpInterview ? input.contactEmail : null
+        sanitizedBriefSharing: input.consentSanitizedBriefSharing || false,
+        followUpInterview: input.consentFollowUpInterview || false,
+        futurePilotParticipation: input.consentFuturePilotParticipation || false,
+        contactEmail: input.contactEmail || null
       },
       createdAt: new Date().toISOString()
     };
 
     this.sessions.set(session.id, session);
-    await this.missionRepo.incrementSessionCount(missionId);
 
     await this.opsRepo.enqueue({
-      missionId: session.missionId,
+      missionId: missionId.toUpperCase(),
       type: 'session_review',
-      title: `Participant Session Review: ${session.id} (${session.role})`,
+      title: `Participant Response: ${session.participantPseudonym} (${session.id})`,
       status: 'pending',
-      actionTaken: 'Awaiting moderation and Gemini extraction verification.'
+      actionTaken: 'Firsthand response recorded. Pending Gemini evidence extraction.'
     });
 
     return session;
@@ -330,39 +414,51 @@ export class MemoryResearchResponseRepository implements IResearchResponseReposi
   }
 
   async findByMissionId(missionId: string): Promise<ResearchSession[]> {
-    return Array.from(this.sessions.values()).filter(s => s.missionId.toUpperCase() === missionId.toUpperCase());
+    return Array.from(this.sessions.values()).filter(
+      s => s.missionId.toUpperCase() === missionId.toUpperCase()
+    );
   }
 
   async countByMissionId(missionId: string): Promise<number> {
-    return (await this.findByMissionId(missionId)).length;
+    const list = await this.findByMissionId(missionId);
+    return list.length;
   }
 }
 
 // --- EVIDENCE REPOSITORY ---
 export class MemoryEvidenceRepository implements IEvidenceRepository {
-  private analyses: Map<string, ValidatedAnalysis> = new Map();
+  private extractions: Map<string, ValidatedAnalysis> = new Map();
 
   async saveAnalysis(analysis: ValidatedAnalysis): Promise<ValidatedAnalysis> {
-    this.analyses.set(analysis.sessionId, analysis);
+    this.extractions.set(analysis.id, analysis);
     return analysis;
   }
 
   async findBySessionId(sessionId: string): Promise<ValidatedAnalysis | null> {
-    return this.analyses.get(sessionId.toUpperCase()) || null;
+    return Array.from(this.extractions.values()).find(
+      e => e.sessionId.toUpperCase() === sessionId.toUpperCase()
+    ) || null;
   }
 
   async findByMissionId(missionId: string): Promise<ValidatedAnalysis[]> {
-    return Array.from(this.analyses.values()).filter(a => a.missionId.toUpperCase() === missionId.toUpperCase());
+    return Array.from(this.extractions.values()).filter(
+      e => e.missionId.toUpperCase() === missionId.toUpperCase()
+    );
   }
 
-  async updateStatus(id: string, status: AnalysisStatus, reviewerNotes?: string, reviewer?: string): Promise<ValidatedAnalysis | null> {
-    const analysis = await this.findBySessionId(id) || Array.from(this.analyses.values()).find(a => a.id === id);
+  async updateStatus(
+    id: string,
+    status: AnalysisStatus,
+    reviewerNotes?: string,
+    reviewer?: string
+  ): Promise<ValidatedAnalysis | null> {
+    const analysis = this.extractions.get(id);
     if (!analysis) return null;
     analysis.status = status;
     if (reviewerNotes) analysis.reviewerNotes = reviewerNotes;
     if (reviewer) analysis.reviewedBy = reviewer;
     analysis.reviewedAt = new Date().toISOString();
-    this.analyses.set(analysis.sessionId, analysis);
+    this.extractions.set(id, analysis);
     return analysis;
   }
 }
@@ -376,129 +472,170 @@ export class MemoryBriefRepository implements IBriefRepository {
   }
 
   private seed() {
-    const demoBrief: DecisionBrief = {
+    const sampleBrief: DecisionBrief = {
       id: 'BRF-2026-081',
       missionId: 'MSN-2026-081',
-      title: 'Rural Fertilizer Spot-Pricing & Procurement Dynamics: Falsification Analysis',
+      organizationId: 'ORG-KISANDIRECT-081',
+      title: 'Decision Intelligence Brief: Rural Fertilizer Procurement Workflows',
       status: 'APPROVED',
       recommendation: 'REJECT_OR_REFRAME',
-      recommendationRationale: 'Primary business hypothesis falsified. Farmers do not pay retail price premiums out of spot-price ignorance; they overpay intentionally to secure un-collateralized harvest credit lines and immediate physical delivery guarantees.',
-      executiveSummary: 'This scoped 5-participant research mission investigated whether smallholder farmers in Western UP would adopt a B2C spot-pricing fertilizer procurement app. Across all 5 screened operators, price was secondary to harvest-credit lock-in and same-day physical inspection. An e-commerce app requiring advance digital payments would face near-total resistance.',
-      researchQuestion: 'Why do smallholders pay above-MRP premiums at village retail stores instead of seeking lower wholesale prices?',
-      decisionAtStake: 'Allocation of $180,000 engineering and customer acquisition budget for B2C rural e-commerce app.',
-      hypothesis: 'Farmers overpay due to lack of transparent real-time spot pricing.',
-      falsificationOutcome: 'FALSIFIED: Informal retail credit (Sharma ji khata) and tractor return guarantees completely override price discounts.',
+      recommendationRationale: 'All 5 participants revealed that local retail purchase decisions are governed by harvest-linked credit (Khatabook) and physical bag-inspection trust rather than spot-pricing. An unbundled e-commerce app without localized credit underwriting will suffer acute adoption failure.',
+      executiveSummary: 'This research mission evaluated whether building a direct-to-farmer B2C fertilizer ordering app is commercially viable. Evidence indicates that price discounts of 10-15% are insufficient to overcome zero-interest seasonal credit extended by village retailers.',
+      researchQuestion: 'Do peri-urban smallholders prioritize upfront digital price discovery over entrenched village credit relationships?',
+      decisionAtStake: 'Should KisanDirect allocate $180,000 to engineer a direct-to-farmer fertilizer app?',
+      hypothesis: 'Smallholders will adopt online buying for 10-15% discounts.',
+      falsificationOutcome: 'FALSIFIED: 5 of 5 participants demonstrated that seasonal credit dependencies and immediate emergency replacement override price sensitivity.',
       sampleContext: {
         totalSessions: 5,
-        participantRoles: ['Smallholder Farmer (Sugarcane)', 'Medium Farmer (Paddy)', 'Agri Retailer / Farm Owner'],
-        geographies: ['Meerut, UP', 'Aligarh, UP', 'Bulandshahr, UP'],
-        limitationsDisclaimer: 'Small qualitative research sample (N=5). Does not establish statistical prevalence or macro TAM.'
+        participantRoles: ['Smallholder Cultivator (3 acres)', 'Medium Grower (7 acres)', 'Sharecropper (4 acres)', 'Farm Operator (6 acres)', 'Peri-urban Grower (5 acres)'],
+        geographies: ['Western Uttar Pradesh (Meerut, Aligarh, Bulandshahr)'],
+        limitationsDisclaimer: 'Small qualitative research sample (N=5). Does not establish statistical prevalence or national market size.'
       },
       observedWorkflows: [
-        'Seasonal bulk procurement during 48-hour sowing window',
-        'Harvest-linked informal retailer credit extension (Khata ledger)',
-        'Physical bag inspection and moisture verification before acceptance'
+        'Village retail shop visit during sowing window',
+        'Informal Khatabook ledger credit ledger entry',
+        'Physical bag-opening inspection for moisture clumping'
       ],
       coreProblems: [
-        'Credit dependency: Fertilizer must be financed until post-harvest mandi payment',
-        'Logistical last-mile failure: Commercial parcel services cannot navigate rural lanes with 50kg bags',
-        'Counterfeit risk: Farmers demand immediate bag-level inspection'
+        'Cash-flow timing mismatch between sowing expense and harvest income',
+        'High risk of counterfeit or sub-standard fertilizer bag delivery',
+        'Inability of digital delivery trucks to navigate village interior paths during monsoon'
       ],
       supportingEvidence: [
         {
-          claim: 'Farmers intentionally overpay to preserve informal retailer credit line',
+          claim: 'Local dealers provide 90-day interest-free harvest credit',
           sourceSessionId: 'SES-401',
-          verbatimQuote: 'Dukan wale Sharma ji se udhaar milta hai fasal katne tak. Online agar 10% sasta bhi mile, par wo udhaar nahi dega...',
-          operatorRole: 'Smallholder Farmer (4 Acres)'
-        },
-        {
-          claim: 'Return logistics prevent adoption of contactless deliveries',
-          sourceSessionId: 'SES-402',
-          verbatimQuote: 'Hamare gaon me delivery truck nahi aata. Bori khud tractor se laani padti hai. Agar online order kiya aur bori phati nikli toh return kaun karega?',
-          operatorRole: 'Medium Farmer (7 Acres)'
+          verbatimQuote: 'Hamare paas sowing ke time cash nahi hota. Sharmaji khata pe 3 mahine baad fasal bikne par payment lete hain.',
+          operatorRole: 'Smallholder Cultivator (3 acres)'
         }
       ],
       contradictoryFindings: [
         {
-          aspect: 'Delivery Sensitivity vs Cost',
-          observationA: 'Participant 401 prioritizes retailer credit above all factors.',
-          observationB: 'Participant 402 can self-finance in cash but strictly refuses deliveries that cannot be inspected on-site.',
-          implication: 'A fintech credit-only solution would solve 401 but fail to satisfy 402 quality inspection demand.'
+          aspect: 'Emergency Delivery vs Transport Delay',
+          observationA: 'Participant 1 requires delivery within 2 hours of rain or crop risks yellowing.',
+          observationB: 'Participant 3 stores 10 bags in home shed and only replenishes monthly.',
+          implication: 'Delivery speed criticality varies drastically between rain-fed and canal-irrigated plots.'
         }
       ],
       existingWorkarounds: [
         {
-          workaround: 'Village retail khata ledger with 2-3% monthly embedded credit interest',
-          costOrFriction: '₹70-90 premium per bag over official MRP',
-          whyCurrentTechFails: 'Requires zero paperwork and flexible payback timed to irregular harvest sales.'
+          workaround: 'Khatabook ledger credit with village shopkeeper',
+          costOrFriction: 'Dealers charge 5-8% implicit markup on fertilizer price in exchange for credit',
+          whyCurrentTechFails: 'Digital apps demand immediate UPI or card payment, which smallholders lack prior to mandi payout'
         }
       ],
       knownImpacts: [
-        'Annual input financing overhead of ₹4,000-8,000 per smallholder',
-        'Tractor fuel and haulage time (4-6 hours per sowing cycle)'
+        'Operators willingly pay premium retail prices to preserve dealer credit lines'
       ],
       unknownInformation: [
-        'Exact default rates experienced by village retailers during bad monsoon years',
-        'Regulatory licensing requirements for digitizing fertilizer subsidy distributions'
+        'Default rates on informal dealer credit ledgers across UP'
       ],
       researchLimitations: [
-        'Conducted exclusively in Western UP; credit customs in South India differ markedly.',
-        'Sample size N=5 is qualitative discovery, not quantitative validation.'
+        'Study conducted exclusively in Western UP; credit customs in South India may differ'
       ],
       hypothesesGenerated: [
-        'H2: B2B SaaS for village agro-retailers (Khata digitization + distributor inventory) has higher willingness to adopt than farmer-facing B2C apps.'
+        'A dealer-enablement credit platform would achieve higher adoption than a B2C direct app'
       ],
       followUpQuestions: [
-        'What gross margin does a village retailer capture on fertilizer vs agrochemical pesticides?'
+        'What percentage of retail dealer margin is derived from interest charges vs manufacturer incentives?'
       ],
       decisionOptions: [
         {
           option: 'REJECT_OR_REFRAME',
-          headline: 'Cancel B2C Farmer App; Pivot to B2B Agro-Retailer SaaS',
-          description: 'Halt all consumer app development immediately. Re-frame research toward enabling existing village retailers with distributor inventory visibility.',
-          tradeOffs: 'Saves $180,000 in unviable consumer acquisition; requires pivoting product roadmap.'
-        },
-        {
-          option: 'INVESTIGATE_FURTHER',
-          headline: 'Study Agro-Dealer Working Capital Financing',
-          description: 'Investigate if partnering with rural NBFCs to provide credit directly through retail stores can unlock supply efficiency.',
-          tradeOffs: 'Delays product launch by 8-12 weeks; involves fintech compliance complexity.'
+          headline: 'Cancel B2C App Build — Reframe Around Dealer Credit Underwriting',
+          description: 'De-allocate the $180,000 B2C mobile app budget. Explore partnership with existing rural input retailers by providing digital inventory financing instead.',
+          tradeOffs: 'Avoids multi-million dollar customer acquisition failure; requires negotiating with fragmented retail distributors.'
         }
       ],
       createdAt: '2026-03-05T14:00:00Z',
-      approvedAt: '2026-03-05T16:30:00Z',
+      approvedAt: '2026-03-06T10:00:00Z',
       approvedBy: 'Lead Problem Intelligence Researcher'
     };
-    this.briefs.set(demoBrief.missionId, demoBrief);
+    this.briefs.set(sampleBrief.id, sampleBrief);
+    this.briefs.set(sampleBrief.missionId, sampleBrief);
   }
 
   async saveBrief(brief: DecisionBrief): Promise<DecisionBrief> {
-    this.briefs.set(brief.missionId.toUpperCase(), brief);
+    this.briefs.set(brief.id, brief);
+    this.briefs.set(brief.missionId, brief);
     return brief;
   }
 
   async findByMissionId(missionId: string): Promise<DecisionBrief | null> {
-    return this.briefs.get(missionId.toUpperCase()) || null;
+    return this.briefs.get(missionId) || null;
   }
 
   async findById(id: string): Promise<DecisionBrief | null> {
-    return Array.from(this.briefs.values()).find(b => b.id.toUpperCase() === id.toUpperCase()) || null;
+    return this.briefs.get(id) || null;
   }
 
-  async updateStatus(missionId: string, status: BriefStatus, approvedBy?: string): Promise<DecisionBrief | null> {
-    const brief = await this.findByMissionId(missionId);
+  async updateStatus(id: string, status: BriefStatus, approvedBy?: string): Promise<DecisionBrief | null> {
+    const brief = this.briefs.get(id);
     if (!brief) return null;
     brief.status = status;
-    if (approvedBy) {
-      brief.approvedBy = approvedBy;
-      brief.approvedAt = new Date().toISOString();
-    }
-    this.briefs.set(brief.missionId.toUpperCase(), brief);
+    if (approvedBy) brief.approvedBy = approvedBy;
+    if (status === 'APPROVED') brief.approvedAt = new Date().toISOString();
+    this.briefs.set(brief.id, brief);
+    this.briefs.set(brief.missionId, brief);
     return brief;
   }
 }
 
-// Instantiate and export standard instances
+// --- CONSENT REPOSITORY ---
+export class MemoryConsentRepository implements IConsentRepository {
+  private consents: Map<string, ConsentRecord> = new Map();
+
+  async recordConsent(record: Omit<ConsentRecord, 'id'>): Promise<ConsentRecord> {
+    const id = `CNS-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+    const consent: ConsentRecord = { ...record, id };
+    this.consents.set(id, consent);
+    return consent;
+  }
+
+  async findByParticipantRef(participantRef: string): Promise<ConsentRecord | null> {
+    return Array.from(this.consents.values()).find(c => c.participantRef === participantRef) || null;
+  }
+
+  async findAll(): Promise<ConsentRecord[]> {
+    return Array.from(this.consents.values());
+  }
+}
+
+// --- AUDIT LOG REPOSITORY ---
+export class MemoryAuditLogRepository implements IAuditLogRepository {
+  private logs: AuditLogEntry[] = [];
+
+  async log(
+    action: AuditAction,
+    actorId: string,
+    actorRole: string,
+    targetId: string,
+    targetType: string,
+    details?: Record<string, unknown>,
+    ipAddress?: string
+  ): Promise<AuditLogEntry> {
+    const id = `AUD-${Date.now().toString(36)}-${crypto.randomBytes(2).toString('hex')}`;
+    const entry: AuditLogEntry = {
+      id,
+      action,
+      actorId,
+      actorRole,
+      targetId,
+      targetType,
+      details,
+      ipAddress,
+      timestamp: new Date().toISOString()
+    };
+    this.logs.push(entry);
+    return entry;
+  }
+
+  async getLogs(limit = 100): Promise<AuditLogEntry[]> {
+    return [...this.logs].sort((a, b) => b.timestamp.localeCompare(a.timestamp)).slice(0, limit);
+  }
+}
+
+// Global in-memory singleton instances for transient test execution
 export const memoryOpsRepo = new MemoryOperationsRepository();
 export const memoryMissionRepo = new MemoryMissionRepository(memoryOpsRepo);
 export const memoryInvitationRepo = new MemoryInvitationRepository();

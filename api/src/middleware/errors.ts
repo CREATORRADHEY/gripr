@@ -80,7 +80,7 @@ export function errorHandler(error: FastifyError | Error, request: FastifyReques
     success: false,
     error: {
       code: 'INTERNAL_SERVER_ERROR',
-      message: statusCode === 500 ? 'An unexpected internal error occurred.' : error.message
+      message: (error as any).message || 'An unexpected internal error occurred.'
     }
   });
 }

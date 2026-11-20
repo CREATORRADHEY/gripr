@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { EvidenceService } from '../services/evidence.service.js';
 import { MatchingService } from '../services/matching.service.js';
-import { requireInternalAuth } from '../middleware/authorization.js';
+import { requireResearcherOrAdmin } from '../middleware/authorization.js';
 
 export async function evidenceRoutes(
   fastify: FastifyInstance,
@@ -11,11 +11,11 @@ export async function evidenceRoutes(
 
   // 1. TRIGGER GEMINI EXTRACTION FOR A PARTICIPANT RECORD
   fastify.post('/research/responses/:id/analyze', {
-    preHandler: [requireInternalAuth]
+    preHandler: [requireResearcherOrAdmin]
   }, async (request, reply) => {
     const { id } = request.params as { id: string };
 
-    const analysis = await evidenceService.analyzeSession(id);
+    const analysis = await evidenceService.analyzeSession(id, { allowMockFallback: true });
 
     return reply.status(200).send({
       success: true,
@@ -24,6 +24,7 @@ export async function evidenceRoutes(
       missionId: analysis.missionId,
       status: analysis.status,
       modelUsed: analysis.modelUsed,
+      processingMode: analysis.processingMode,
       validation: analysis.validationOutcome,
       extraction: analysis.extraction
     });
@@ -31,7 +32,7 @@ export async function evidenceRoutes(
 
   // 2. GET EXTRACTION ANALYSIS FOR A PARTICIPANT RECORD
   fastify.get('/research/responses/:id/analysis', {
-    preHandler: [requireInternalAuth]
+    preHandler: [requireResearcherOrAdmin]
   }, async (request, reply) => {
     const { id } = request.params as { id: string };
     const analysis = await evidenceService.getAnalysisBySessionId(id);
@@ -54,7 +55,7 @@ export async function evidenceRoutes(
 
   // 3. CROSS-PARTICIPANT CAUSAL COMPARISON
   fastify.post('/research/missions/:id/cross-analysis', {
-    preHandler: [requireInternalAuth]
+    preHandler: [requireResearcherOrAdmin]
   }, async (request, reply) => {
     const { id } = request.params as { id: string };
 

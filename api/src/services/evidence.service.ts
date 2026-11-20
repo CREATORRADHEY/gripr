@@ -1,7 +1,7 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { IEvidenceRepository, IResearchResponseRepository } from '../repositories/interfaces.js';
 import { GeminiService } from './gemini.service.js';
-import { ValidatedAnalysis, GeminiExtraction, AnalysisStatus } from '../schemas/extraction.schema.js';
+import { ValidatedAnalysis, GeminiExtraction, AnalysisStatus, ProcessingMode } from '../schemas/extraction.schema.js';
 import { ResearchSession } from '../schemas/response.schema.js';
 
 export class EvidenceService {
@@ -86,13 +86,13 @@ export class EvidenceService {
   /**
    * Run Gemini extraction and deterministic verification on a participant session
    */
-  async analyzeSession(sessionId: string): Promise<ValidatedAnalysis> {
+  async analyzeSession(sessionId: string, options?: { allowMockFallback?: boolean }): Promise<ValidatedAnalysis> {
     const session = await this.sessionRepo.findById(sessionId);
     if (!session) {
       throw new Error(`Participant session ${sessionId} not found`);
     }
 
-    // Check if analysis already exists
+    // Check if analysis already exists and is reviewed
     const existing = await this.evidenceRepo.findBySessionId(sessionId);
     if (existing && existing.status === 'reviewed') {
       return existing;
@@ -100,41 +100,84 @@ export class EvidenceService {
 
     const combinedSource = `${session.verbatim} ${session.workaround} ${session.impact || ''}`.trim();
 
-    // Call Gemini Service
-    const { extraction, modelUsed } = await this.geminiService.extractEvidence(
-      session.verbatim,
-      session.workaround,
-      session.role,
-      session.workflow
-    );
+    try {
+      // Call Gemini Service
+      const { extraction, modelUsed, processingMode } = await this.geminiService.extractEvidence(
+        session.verbatim,
+        session.workaround,
+        session.role,
+        session.workflow,
+        options
+      );
 
-    // Run deterministic verification
-    const verification = this.verifyQuotations(combinedSource, extraction);
+      // Run deterministic verification
+      const verification = this.verifyQuotations(combinedSource, extraction);
 
-    let status: AnalysisStatus = 'awaiting_review';
-    if (!verification.valid) {
-      status = 'flagged';
+      let status: AnalysisStatus = 'awaiting_review';
+      if (!verification.valid) {
+        status = 'flagged';
+      }
+
+      const validatedAnalysis: ValidatedAnalysis = {
+        id: `ANL-${sessionId.replace('SES-', '')}`,
+        sessionId: session.id,
+        missionId: session.missionId,
+        sourceHash: session.sourceHash,
+        modelUsed,
+        promptVersion: '1.0.0-evidence-first',
+        processingMode,
+        timestamp: new Date().toISOString(),
+        status,
+        validationOutcome: {
+          valid: verification.valid,
+          quotationVerificationErrors: verification.errors,
+          missingFields: extraction.missingInformation,
+          flags: verification.flags
+        },
+        extraction
+      };
+
+      return this.evidenceRepo.saveAnalysis(validatedAnalysis);
+    } catch (err: any) {
+      // Fail closed: record processing failure, DO NOT invent fake data
+      const failedAnalysis: ValidatedAnalysis = {
+        id: `ANL-${sessionId.replace('SES-', '')}`,
+        sessionId: session.id,
+        missionId: session.missionId,
+        sourceHash: session.sourceHash,
+        modelUsed: 'unavailable',
+        promptVersion: '1.0.0-evidence-first',
+        processingMode: 'ERROR_UNAVAILABLE',
+        timestamp: new Date().toISOString(),
+        status: 'analysis_failed',
+        validationOutcome: {
+          valid: false,
+          quotationVerificationErrors: [],
+          missingFields: [],
+          flags: [err.message || 'Gemini extraction failed']
+        },
+        extraction: {
+          affectedParticipant: { content: 'UNKNOWN', category: 'UNKNOWN', sourceQuote: null },
+          industryOrDomain: { content: 'UNKNOWN', category: 'UNKNOWN', sourceQuote: null },
+          operationalWorkflow: { content: 'UNKNOWN', category: 'UNKNOWN', sourceQuote: null },
+          reportedProblem: { content: 'UNKNOWN', category: 'UNKNOWN', sourceQuote: null },
+          triggeringEvent: { content: 'UNKNOWN', category: 'UNKNOWN', sourceQuote: null },
+          consequencesReported: [],
+          frequency: { content: 'UNKNOWN', category: 'UNKNOWN', sourceQuote: null },
+          financialImpact: { content: 'UNKNOWN', category: 'UNKNOWN', sourceQuote: null },
+          currentWorkaround: { content: 'UNKNOWN', category: 'UNKNOWN', sourceQuote: null },
+          contextualConstraints: [],
+          missingInformation: ['Analysis failed due to AI service unavailability'],
+          potentialResearchQuestions: [],
+          supportingQuotations: [],
+          alternativeInterpretations: []
+        },
+        reviewerNotes: `AI Extraction Failed: ${err.message}`
+      };
+
+      await this.evidenceRepo.saveAnalysis(failedAnalysis);
+      throw err;
     }
-
-    const validatedAnalysis: ValidatedAnalysis = {
-      id: `ANL-${sessionId.replace('SES-', '')}`,
-      sessionId: session.id,
-      missionId: session.missionId,
-      sourceHash: session.sourceHash,
-      modelUsed,
-      promptVersion: '1.0.0-evidence-first',
-      timestamp: new Date().toISOString(),
-      status,
-      validationOutcome: {
-        valid: verification.valid,
-        quotationVerificationErrors: verification.errors,
-        missingFields: extraction.missingInformation,
-        flags: verification.flags
-      },
-      extraction
-    };
-
-    return this.evidenceRepo.saveAnalysis(validatedAnalysis);
   }
 
   /**

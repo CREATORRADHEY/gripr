@@ -1,60 +1,185 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { env } from '../config/env.js';
+import { FirebaseAuthService, AuthUser, UserRole } from '../services/auth.service.js';
+import { IMissionRepository, IBriefRepository } from '../repositories/interfaces.js';
 
-/**
- * Authorization middleware for Phase 2.
- * 
- * In Phase 2:
- * - Internal operations routes (/api/operations/*) require the 'x-gripr-auth' secret header.
- * - Mission workspace retrieval (/api/missions/:id) requires authorization to prevent public data exposure.
- * - In local development mode, a clearly isolated dev adapter allows testing requests
- *   with an explicit dev header (or auto-authorizes localhost requests if DEMO_MODE=true).
- * - Outside dev mode, unauthorized calls are strictly rejected with 401/403.
- */
-
-export async function requireInternalAuth(request: FastifyRequest, reply: FastifyReply) {
-  const authHeader = request.headers['x-gripr-auth'] as string | undefined;
-
-  // In local test or development mode, allow explicitly configured dev secret
-  if (authHeader && authHeader === env.INTERNAL_AUTH_SECRET) {
-    return;
+declare module 'fastify' {
+  interface FastifyRequest {
+    user?: AuthUser;
   }
-
-  // Dev adapter: In development mode, allow if origin is localhost/127.0.0.1 and dev mode is explicitly active
-  if (env.isDev && (request.ip === '127.0.0.1' || request.ip === '::1' || request.hostname.includes('localhost'))) {
-    // In dev, if header is missing, log a warning but permit local developer workflow
-    request.log.warn({ ip: request.ip, path: request.url }, 'Dev authorization adapter: permitted local unauthenticated access for development');
-    return;
-  }
-
-  return reply.status(401).send({
-    success: false,
-    error: {
-      code: 'UNAUTHORIZED',
-      message: 'Access restricted: valid internal authorization credentials required.'
-    }
-  });
 }
 
-export async function requireMissionAccess(request: FastifyRequest, reply: FastifyReply) {
-  const authHeader = request.headers['x-gripr-auth'] as string | undefined;
+/**
+ * Validates the Authorization Bearer ID Token on protected routes.
+ * Never trusts client headers or unverified query params.
+ */
+export async function authenticate(request: FastifyRequest, reply: FastifyReply): Promise<AuthUser | undefined> {
+  let authHeader = request.headers.authorization;
 
-  // Permitted if valid internal secret provided
-  if (authHeader && authHeader === env.INTERNAL_AUTH_SECRET) {
-    return;
+  // Support test header in test environment only
+  if (!authHeader && request.headers['x-gripr-auth']) {
+    authHeader = `Bearer ${request.headers['x-gripr-auth']}`;
   }
 
-  // In development mode, allow local browser testing
-  if (env.isDev && (request.ip === '127.0.0.1' || request.ip === '::1' || request.hostname.includes('localhost'))) {
-    return;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    reply.status(401).send({
+      success: false,
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Authentication required. Bearer ID token is missing.'
+      }
+    });
+    return undefined;
   }
 
-  // Otherwise, private mission details are shielded until Phase 3 authentication
-  return reply.status(403).send({
-    success: false,
-    error: {
-      code: 'FORBIDDEN',
-      message: 'Private mission workspace access is disabled in public environments until Phase 3 authentication.'
+  try {
+    const user = await FirebaseAuthService.verifyToken(authHeader);
+    request.user = user;
+    return user;
+  } catch (err: any) {
+    reply.status(401).send({
+      success: false,
+      error: {
+        code: 'UNAUTHORIZED',
+        message: `Authentication failed: ${err.message || 'Invalid or expired credentials'}`
+      }
+    });
+    return undefined;
+  }
+}
+
+/**
+ * Enforces one or more specific user access roles.
+ */
+export function requireRoles(roles: UserRole[]) {
+  return async function (request: FastifyRequest, reply: FastifyReply) {
+    const user = await authenticate(request, reply);
+    if (!user) return; // Response already sent by authenticate
+
+    if (!roles.includes(user.role)) {
+      return reply.status(403).send({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: `Access denied. Role "${user.role}" does not have required permissions [${roles.join(', ')}].`
+        }
+      });
     }
-  });
+  };
+}
+
+/**
+ * Enforces Researcher or Administrator access for internal operations.
+ */
+export const requireResearcherOrAdmin = requireRoles(['RESEARCHER', 'ADMIN']);
+
+/**
+ * Enforces organization boundary isolation on mission retrieval.
+ */
+export function createMissionAccessGuard(missionRepo: IMissionRepository) {
+  return async function (request: FastifyRequest, reply: FastifyReply) {
+    const user = await authenticate(request, reply);
+    if (!user) return;
+
+    // Researchers and Admins can access all missions for scoping and review
+    if (user.role === 'RESEARCHER' || user.role === 'ADMIN') {
+      return;
+    }
+
+    const { id } = request.params as { id: string };
+    const mission = await missionRepo.findById(id);
+
+    if (!mission) {
+      return reply.status(404).send({
+        success: false,
+        error: {
+          code: 'MISSION_NOT_FOUND',
+          message: `Mission ${id} not found.`
+        }
+      });
+    }
+
+    // Organization users can ONLY access missions belonging to their organization
+    if (user.role === 'ORGANIZATION_USER') {
+      if (!user.organizationId || mission.organizationId !== user.organizationId) {
+        return reply.status(403).send({
+          success: false,
+          error: {
+            code: 'FORBIDDEN_CROSS_ORG',
+            message: 'Cross-organization data access violation. You do not own this mission workspace.'
+          }
+        });
+      }
+      return;
+    }
+
+    return reply.status(403).send({
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'Access restricted for current user role.'
+      }
+    });
+  };
+}
+
+/**
+ * Enforces that organization users can ONLY access approved briefs.
+ */
+export function createBriefAccessGuard(missionRepo: IMissionRepository, briefRepo: IBriefRepository) {
+  return async function (request: FastifyRequest, reply: FastifyReply) {
+    const user = await authenticate(request, reply);
+    if (!user) return;
+
+    const { id } = request.params as { id: string };
+    const brief = await briefRepo.findByMissionId(id) || await briefRepo.findById(id);
+
+    if (!brief) {
+      return reply.status(404).send({
+        success: false,
+        error: {
+          code: 'BRIEF_NOT_READY',
+          message: `Decision Intelligence Brief for mission ${id} is not yet available.`
+        }
+      });
+    }
+
+    const mission = await missionRepo.findById(brief.missionId);
+
+    // Researchers & Admins can access both DRAFT and APPROVED briefs
+    if (user.role === 'RESEARCHER' || user.role === 'ADMIN') {
+      return;
+    }
+
+    // Organization Users
+    if (user.role === 'ORGANIZATION_USER') {
+      // 1. Ownership check
+      if (!user.organizationId || (mission && mission.organizationId !== user.organizationId)) {
+        return reply.status(403).send({
+          success: false,
+          error: {
+            code: 'FORBIDDEN_CROSS_ORG',
+            message: 'Cross-organization data access violation.'
+          }
+        });
+      }
+
+      // 2. Human approval check
+      if (brief.status !== 'APPROVED') {
+        return reply.status(403).send({
+          success: false,
+          error: {
+            code: 'BRIEF_UNAPPROVED',
+            message: 'This Decision Intelligence Brief is currently in internal human researcher review and has not yet been approved for client access.'
+          }
+        });
+      }
+
+      return;
+    }
+
+    return reply.status(403).send({
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'Unauthorized role for brief access.' }
+    });
+  };
 }

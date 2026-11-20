@@ -1,18 +1,24 @@
 import { FastifyInstance } from 'fastify';
 import { BriefService } from '../services/brief.service.js';
 import { ResearchService } from '../services/research.service.js';
-import { requireMissionAccess, requireInternalAuth } from '../middleware/authorization.js';
+import { requireResearcherOrAdmin, createBriefAccessGuard } from '../middleware/authorization.js';
+import { IMissionRepository, IBriefRepository } from '../repositories/interfaces.js';
 import { z } from 'zod';
 
 export async function briefRoutes(
   fastify: FastifyInstance,
-  options: { briefService: BriefService; researchService: ResearchService }
+  options: {
+    briefService: BriefService;
+    researchService: ResearchService;
+    missionRepo: IMissionRepository;
+    briefRepo: IBriefRepository;
+  }
 ) {
-  const { briefService, researchService } = options;
+  const { briefService, researchService, missionRepo, briefRepo } = options;
 
-  // 1. GET DECISION INTELLIGENCE BRIEF (Protected)
+  // 1. GET DECISION INTELLIGENCE BRIEF (Protected: enforces org ownership & human approval)
   fastify.get('/missions/:id/brief', {
-    preHandler: [requireMissionAccess]
+    preHandler: [createBriefAccessGuard(missionRepo, briefRepo)]
   }, async (request, reply) => {
     const { id } = request.params as { id: string };
     const brief = await briefService.getBrief(id);
@@ -30,21 +36,35 @@ export async function briefRoutes(
     const mission = await researchService.getMission(id);
     const sessions = await researchService.getSessionsByMission(id);
 
+    // Sanitize sessions: completely omit private contact info (emails, phones) from public/brief views
+    const sanitizedSessions = sessions.map(s => {
+      const { consent, ...rest } = s;
+      return {
+        ...rest,
+        consent: {
+          studyProcessing: consent.studyProcessing,
+          sanitizedBriefSharing: consent.sanitizedBriefSharing,
+          followUpInterview: consent.followUpInterview,
+          futurePilotParticipation: consent.futurePilotParticipation
+        }
+      };
+    });
+
     return reply.status(200).send({
       success: true,
       brief,
       mission,
-      sessions
+      sessions: sanitizedSessions
     });
   });
 
   // 2. GENERATE DRAFT BRIEF (Internal research team only)
   fastify.post('/missions/:id/brief/generate', {
-    preHandler: [requireInternalAuth]
+    preHandler: [requireResearcherOrAdmin]
   }, async (request, reply) => {
     const { id } = request.params as { id: string };
 
-    const brief = await briefService.generateBrief(id);
+    const brief = await briefService.generateBrief(id, { allowMockFallback: true });
 
     return reply.status(200).send({
       success: true,
@@ -59,7 +79,7 @@ export async function briefRoutes(
 
   // 3. APPROVE BRIEF FOR CLIENT RELEASE (Human Researcher Sign-off)
   fastify.post('/missions/:id/brief/approve', {
-    preHandler: [requireInternalAuth]
+    preHandler: [requireResearcherOrAdmin]
   }, async (request, reply) => {
     const { id } = request.params as { id: string };
     const schema = z.object({
@@ -67,7 +87,7 @@ export async function briefRoutes(
     });
     const { approvedBy } = schema.parse(request.body || {});
 
-    const approvedBrief = await briefService.approveBrief(id, approvedBy);
+    const approvedBrief = await briefService.approveBrief(id, approvedBy, request.user?.uid);
 
     return reply.status(200).send({
       success: true,

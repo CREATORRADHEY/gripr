@@ -10,8 +10,23 @@ import {
   memoryInvitationRepo,
   memorySessionRepo,
   memoryEvidenceRepo,
-  memoryBriefRepo
+  memoryBriefRepo,
+  MemoryMissionInquiryRepository,
+  MemoryConsentRepository,
+  MemoryAuditLogRepository
 } from './repositories/memory.repository.js';
+import {
+  FirestoreStorageEngine,
+  FirestoreMissionInquiryRepository,
+  FirestoreMissionRepository,
+  FirestoreInvitationRepository,
+  FirestoreResearchResponseRepository,
+  FirestoreEvidenceRepository,
+  FirestoreBriefRepository,
+  FirestoreConsentRepository,
+  FirestoreAuditLogRepository,
+  FirestoreOperationsRepository
+} from './repositories/firestore.repository.js';
 import { geminiService } from './services/gemini.service.js';
 import { ResearchService } from './services/research.service.js';
 import { EvidenceService } from './services/evidence.service.js';
@@ -19,6 +34,7 @@ import { MatchingService } from './services/matching.service.js';
 import { BriefService } from './services/brief.service.js';
 
 import { healthRoutes } from './routes/health.js';
+import { inquiryRoutes } from './routes/inquiries.js';
 import { missionRoutes } from './routes/missions.js';
 import { researchRoutes } from './routes/research.js';
 import { evidenceRoutes } from './routes/evidence.js';
@@ -27,7 +43,11 @@ import { operationsRoutes } from './routes/operations.js';
 
 export interface AppOptions {
   logger?: boolean | object;
+  useMemoryRepo?: boolean;
 }
+
+// Global persistent storage engine for persistent server runtime
+export const globalFirestoreStorage = new FirestoreStorageEngine();
 
 export function buildApp(options: AppOptions = {}): FastifyInstance {
   const app = Fastify({
@@ -76,24 +96,46 @@ export function buildApp(options: AppOptions = {}): FastifyInstance {
     allowList: ['127.0.0.1', '::1']
   });
 
-  // Instantiate services with shared repository instances
-  const researchService = new ResearchService(memoryMissionRepo, memoryInvitationRepo, memorySessionRepo);
-  const evidenceService = new EvidenceService(memoryEvidenceRepo, memorySessionRepo, geminiService);
-  const matchingService = new MatchingService(memorySessionRepo, geminiService);
-  const briefService = new BriefService(memoryBriefRepo, memoryMissionRepo, memorySessionRepo, memoryEvidenceRepo, geminiService);
+  // Repository selection: in-memory (for isolated transient unit tests) vs persistent firestore
+  const useMemory = options.useMemoryRepo ?? (env.isTest ? true : false);
+
+  const missionRepo = useMemory ? memoryMissionRepo : new FirestoreMissionRepository(globalFirestoreStorage);
+  const inquiryRepo = useMemory ? new MemoryMissionInquiryRepository() : new FirestoreMissionInquiryRepository(globalFirestoreStorage);
+  const invitationRepo = useMemory ? memoryInvitationRepo : new FirestoreInvitationRepository(globalFirestoreStorage);
+  const sessionRepo = useMemory ? memorySessionRepo : new FirestoreResearchResponseRepository(globalFirestoreStorage);
+  const evidenceRepo = useMemory ? memoryEvidenceRepo : new FirestoreEvidenceRepository(globalFirestoreStorage);
+  const briefRepo = useMemory ? memoryBriefRepo : new FirestoreBriefRepository(globalFirestoreStorage);
+  const consentRepo = useMemory ? new MemoryConsentRepository() : new FirestoreConsentRepository(globalFirestoreStorage);
+  const auditRepo = useMemory ? new MemoryAuditLogRepository() : new FirestoreAuditLogRepository(globalFirestoreStorage);
+  const opsRepo = useMemory ? memoryOpsRepo : new FirestoreOperationsRepository(globalFirestoreStorage);
+
+  // Instantiate services with repositories
+  const researchService = new ResearchService(
+    missionRepo,
+    inquiryRepo,
+    invitationRepo,
+    sessionRepo,
+    consentRepo,
+    auditRepo
+  );
+  const evidenceService = new EvidenceService(evidenceRepo, sessionRepo, geminiService);
+  const matchingService = new MatchingService(sessionRepo, geminiService);
+  const briefService = new BriefService(briefRepo, missionRepo, sessionRepo, evidenceRepo, geminiService, auditRepo);
 
   // Register API routes
   app.register(healthRoutes, { prefix: '/api' });
   app.register(async (api) => {
-    await missionRoutes(api, { researchService, briefService });
-    await researchRoutes(api, { researchService });
+    await inquiryRoutes(api, { researchService });
+    await missionRoutes(api, { researchService, briefService, missionRepo });
+    await researchRoutes(api, { researchService, invitationRepo });
     await evidenceRoutes(api, { evidenceService, matchingService });
-    await briefRoutes(api, { briefService, researchService });
+    await briefRoutes(api, { briefService, researchService, missionRepo, briefRepo });
     await operationsRoutes(api, {
-      opsRepo: memoryOpsRepo,
-      missionRepo: memoryMissionRepo,
-      sessionRepo: memorySessionRepo,
-      evidenceService
+      opsRepo,
+      missionRepo,
+      sessionRepo,
+      evidenceService,
+      auditRepo
     });
   }, { prefix: '/api' });
 

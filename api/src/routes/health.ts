@@ -10,11 +10,13 @@ export async function healthRoutes(fastify: FastifyInstance) {
       version: '1.0.0',
       timestamp: new Date().toISOString(),
       environment: env.NODE_ENV,
+      persistence: 'firestore',
       gemini: {
         configured: geminiService.isAvailable(),
-        model: geminiService.getModelName()
+        model: geminiService.getModelName(),
+        processingMode: geminiService.getProcessingMode()
       },
-      commercialNotice: 'Phase 2 Development API. Experimental pilot research model.'
+      commercialNotice: 'Phase 3 Persistent API. Experimental pilot research model.'
     });
   });
 }

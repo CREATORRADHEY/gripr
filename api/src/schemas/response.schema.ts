@@ -18,6 +18,7 @@ export const SubmitResearchResponseSchema = z.object({
   // SEPARATE OPTIONAL CONSENTS:
   consentSanitizedBriefSharing: z.boolean().optional().default(false),
   consentFollowUpInterview: z.boolean().optional().default(false),
+  consentFuturePilotParticipation: z.boolean().optional().default(false),
   contactEmail: z.string().trim().email().nullable().optional()
 });
 
@@ -46,6 +47,7 @@ export const ResearchSessionSchema = z.object({
     studyProcessing: z.boolean(),
     sanitizedBriefSharing: z.boolean(),
     followUpInterview: z.boolean(),
+    futurePilotParticipation: z.boolean().default(false),
     contactEmail: z.string().nullable().optional()
   }),
   createdAt: z.string()
@@ -55,6 +57,7 @@ export type ResearchSession = z.infer<typeof ResearchSessionSchema>;
 
 export const ResearchInvitationSchema = z.object({
   token: z.string(),
+  tokenHash: z.string().optional(),
   missionId: z.string(),
   studyTitle: z.string(),
   studyDescription: z.string(),
@@ -63,6 +66,7 @@ export const ResearchInvitationSchema = z.object({
   honorarium: z.string().default('₹1,500 direct bank transfer upon session completion'),
   expiresAt: z.string(),
   status: z.enum(['active', 'completed', 'expired']).default('active'),
+  failedAttempts: z.number().default(0),
   createdAt: z.string()
 });
 

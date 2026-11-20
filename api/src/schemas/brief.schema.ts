@@ -18,6 +18,7 @@ export type BriefStatus = z.infer<typeof BriefStatusSchema>;
 export const DecisionBriefSchema = z.object({
   id: z.string(),
   missionId: z.string(),
+  organizationId: z.string().default('ORG-DEFAULT'),
   title: z.string(),
   status: BriefStatusSchema.default('DRAFT — REQUIRES HUMAN REVIEW'),
   recommendation: DecisionRecommendationSchema,

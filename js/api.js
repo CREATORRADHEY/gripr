@@ -1,23 +1,23 @@
 /**
- * GRIPR.STUDIO — B2B Problem Intelligence API Layer (Phase 2 Integration)
+ * GRIPR.STUDIO — B2B Problem Intelligence API Layer (Phase 3 Integration)
  * 
  * Provides a unified Promise-based API abstraction mapping to:
- * - B2B Research Missions
- * - Invitation-based qualitative participant sessions
+ * - Public B2B Mission Inquiries (POST /api/mission-inquiries)
+ * - Authenticated B2B Research Missions & Tenant-scoped retrieval
+ * - Cryptographically hashed participant invitations & 3-tier consent logging
  * - Gemini AI evidence extraction & verification
  * - Cross-participant causal comparison & contradiction detection
- * - Decision Intelligence Brief synthesis
- * - Internal Research Operations Desk
+ * - Decision Intelligence Brief synthesis (Human reviewed)
+ * - Internal Research Operations Desk (RBAC: Researcher / Admin)
  * 
- * Supports two distinct operational modes:
- * - LIVE API MODE: Real HTTP requests to the Fastify backend (http://127.0.0.1:3000/api).
- *   Real errors are NEVER silently swallowed or faked.
- * - DEMO MODE: Local storage with synthetic fixtures explicitly tagged #DEMO_SYNTHETIC.
+ * Security & Auth:
+ * - Bearer JWT Token authentication (Firebase Auth standard)
+ * - Strict tenant isolation: organizations can only retrieve their own research
+ * - Replay attack prevention on qualitative participant invitations
  */
 
 (function () {
   const BACKEND_URL = 'http://127.0.0.1:3000/api';
-  const DEV_AUTH_HEADER = 'gripr_dev_ops_secret_2026';
 
   const STORAGE_KEY_MISSIONS = 'gripr_b2b_missions_v2';
   const STORAGE_KEY_SESSIONS = 'gripr_b2b_sessions_v2';
@@ -25,6 +25,7 @@
   const STORAGE_KEY_BRIEFS = 'gripr_b2b_briefs_v2';
   const STORAGE_KEY_OPS = 'gripr_b2b_ops_v2';
   const STORAGE_KEY_MODE = 'gripr_api_mode'; // 'live' | 'demo'
+  const STORAGE_KEY_AUTH_TOKEN = 'gripr_auth_token';
 
   // Initialize demo fixtures in localStorage
   function initStore() {
@@ -128,11 +129,12 @@
     }
 
     const isLive = GriprAPI.getMode() === 'live';
+    const hasToken = !!localStorage.getItem(STORAGE_KEY_AUTH_TOKEN);
     if (isLive) {
       pill.style.background = '#064E3B';
       pill.style.color = '#ECFDF5';
       pill.style.border = '1px solid #059669';
-      pill.innerHTML = `<span style="width:7px; height:7px; border-radius:50%; background:#10B981; display:inline-block;"></span> LIVE API (Fastify:3000)`;
+      pill.innerHTML = `<span style="width:7px; height:7px; border-radius:50%; background:#10B981; display:inline-block;"></span> LIVE API (Fastify:3000)${hasToken ? ' 🔑' : ''}`;
     } else {
       pill.style.background = '#1E1E1E';
       pill.style.color = '#FEF3C7';
@@ -165,6 +167,39 @@
     },
 
     /**
+     * Auth Token Management (Bearer JWT)
+     */
+    getAuthToken() {
+      return localStorage.getItem(STORAGE_KEY_AUTH_TOKEN) || '';
+    },
+
+    setAuthToken(token) {
+      if (token) {
+        localStorage.setItem(STORAGE_KEY_AUTH_TOKEN, token.trim());
+      } else {
+        localStorage.removeItem(STORAGE_KEY_AUTH_TOKEN);
+      }
+      updateModePillUI();
+    },
+
+    clearAuthToken() {
+      localStorage.removeItem(STORAGE_KEY_AUTH_TOKEN);
+      updateModePillUI();
+    },
+
+    /**
+     * Helper to build standard request headers
+     */
+    getHeaders(extra = {}) {
+      const headers = { 'Content-Type': 'application/json', ...extra };
+      const token = this.getAuthToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      return headers;
+    },
+
+    /**
      * Check backend health
      */
     async checkHealth() {
@@ -178,31 +213,30 @@
     },
 
     /**
-     * 1. Submit a B2B Mission Scoping Request from an organization
+     * 1. Submit a Public B2B Mission Inquiry from an organization
+     * Calls POST /api/mission-inquiries
      * @param {Object} data
      */
-    async createMissionRequest(data) {
+    async submitMissionInquiry(data) {
       if (this.getMode() === 'live') {
         try {
-          const res = await fetch(`${BACKEND_URL}/missions`, {
+          const res = await fetch(`${BACKEND_URL}/mission-inquiries`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               orgName: data.orgName,
-              contactPerson: data.contactPerson,
+              contactPerson: data.contactPerson || data.contactName,
               contactEmail: data.contactEmail,
               role: data.role || 'Product Lead',
               sector: data.sector || 'general',
               decisionAtStake: data.decisionAtStake,
-              hypothesis: data.hypothesis,
-              falsificationCriteria: data.falsificationCriteria,
-              problemToInvestigate: data.problemToInvestigate,
-              targetParticipantProfile: data.targetParticipantProfile,
-              industry: data.industry,
-              geography: data.geography,
-              urgency: data.urgency,
-              constraints: data.constraints,
-              deliverables: data.deliverables,
+              hypothesis: data.hypothesis || 'Preliminary hypothesis under evaluation',
+              falsificationCriteria: data.falsificationCriteria || 'To be refined during scoping alignment',
+              targetParticipantProfile: data.targetParticipantProfile || data.problemToInvestigate,
+              industry: data.industry || 'B2B Workflow',
+              geography: data.geography || 'India (Regional clusters)',
+              constraints: data.constraints || 'None specified',
+              consentContact: true,
               consentPrivacy: true
             })
           });
@@ -218,9 +252,13 @@
             return { success: false, errors: errMap };
           }
 
-          return json;
+          return {
+            success: true,
+            inquiryId: json.inquiryId,
+            status: json.status || 'RECEIVED',
+            message: json.message || 'Scoping inquiry received. A research lead will review scope parameters within 1 business day.'
+          };
         } catch (err) {
-          // Never silently fake in live mode
           return {
             success: false,
             errors: { general: `Backend connection error: ${err.message}. Ensure Fastify API is running on ${BACKEND_URL}.` }
@@ -232,65 +270,50 @@
       await delay(180);
       const errors = {};
       if (!data.orgName || data.orgName.trim().length < 2) errors.orgName = 'Organization / Company name is required.';
-      if (!data.contactPerson || data.contactPerson.trim().length < 2) errors.contactPerson = 'Contact person name is required.';
+      if ((!data.contactName && !data.contactPerson) || ((data.contactName || data.contactPerson).trim().length < 2)) {
+        errors.contactPerson = 'Contact person name is required.';
+      }
       if (!data.contactEmail || !data.contactEmail.includes('@')) errors.contactEmail = 'A valid work email address is required.';
       if (!data.decisionAtStake || data.decisionAtStake.trim().length < 20) errors.decisionAtStake = 'Please describe the decision at stake in at least 20 characters.';
-      if (!data.problemToInvestigate || data.problemToInvestigate.trim().length < 20) errors.problemToInvestigate = 'Please describe the problem or workflow to investigate.';
-      if (!data.targetParticipantProfile || data.targetParticipantProfile.trim().length < 5) errors.targetParticipantProfile = 'Target operator or participant profile is required.';
+      if (!data.targetParticipantProfile && !data.problemToInvestigate) errors.problemToInvestigate = 'Please describe the problem or workflow to investigate.';
 
       if (Object.keys(errors).length > 0) return { success: false, errors };
 
       const randomNum = Math.floor(100 + Math.random() * 900);
-      const missionId = `MSN-2026-${randomNum}`;
-
-      const newMission = {
-        id: missionId,
-        orgName: data.orgName.trim(),
-        contactPerson: data.contactPerson.trim(),
-        contactEmail: data.contactEmail.trim(),
-        role: data.role || 'Product Lead',
-        sector: data.sector || 'general',
-        decisionAtStake: data.decisionAtStake.trim(),
-        hypothesis: data.hypothesis ? data.hypothesis.trim() : 'Preliminary hypothesis under evaluation',
-        falsificationCriteria: data.falsificationCriteria ? data.falsificationCriteria.trim() : 'To be refined during scoping alignment',
-        problemToInvestigate: data.problemToInvestigate.trim(),
-        targetParticipantProfile: data.targetParticipantProfile.trim(),
-        industry: data.industry || 'B2B Workflow',
-        geography: data.geography || 'India (Regional clusters)',
-        urgency: data.urgency || 'Standard (4-6 weeks)',
-        constraints: data.constraints || 'None specified',
-        deliverables: data.deliverables || ['Decision Intelligence Brief', 'Workflow Friction Map'],
-        status: 'Requested',
-        pricing: '₹49,000 (Experimental Pilot Scope)',
-        pricingDisclaimer: 'Experimental pilot pricing. Unvalidated research model. #DEMO_SYNTHETIC',
-        participantTargetCount: 5,
-        completedSessionCount: 0,
-        createdAt: new Date().toISOString()
-      };
-
-      const missions = getRaw(STORAGE_KEY_MISSIONS);
-      missions.unshift(newMission);
-      setRaw(STORAGE_KEY_MISSIONS, missions);
+      const inquiryId = `INQ-2026-${randomNum}`;
 
       return {
         success: true,
-        missionId: missionId,
-        status: 'Requested',
-        message: 'Demo mission request recorded locally. Our research team will review scoping parameters.'
+        inquiryId: inquiryId,
+        status: 'RECEIVED',
+        message: 'Demo inquiry recorded locally. Our research team will review scoping parameters.'
       };
     },
 
     /**
-     * 2. Get a mission by ID
+     * Backward-compatible alias for createMissionRequest
+     */
+    async createMissionRequest(data) {
+      return this.submitMissionInquiry(data);
+    },
+
+    /**
+     * 2. Get a mission by ID (Authenticated, Tenant-scoped)
      * @param {string} id
      */
     async getMission(id) {
       if (this.getMode() === 'live') {
         try {
           const res = await fetch(`${BACKEND_URL}/missions/${encodeURIComponent(id)}`, {
-            headers: { 'x-gripr-auth': DEV_AUTH_HEADER }
+            headers: this.getHeaders()
           });
           const json = await res.json();
+          if (res.status === 401) {
+            return { success: false, error: 'Authentication required. Please sign in to view this mission.', authRequired: true };
+          }
+          if (res.status === 403) {
+            return { success: false, error: 'Access forbidden. Your organization is not authorized to access this research mission.', forbidden: true };
+          }
           if (!res.ok) return { success: false, error: json.error?.message || `Mission ${id} not found.` };
           return json;
         } catch (err) {
@@ -317,15 +340,18 @@
     },
 
     /**
-     * 3. List all missions
+     * 3. List missions (Authenticated, Tenant-scoped)
      */
     async getMissionList() {
       if (this.getMode() === 'live') {
         try {
           const res = await fetch(`${BACKEND_URL}/missions`, {
-            headers: { 'x-gripr-auth': DEV_AUTH_HEADER }
+            headers: this.getHeaders()
           });
           const json = await res.json();
+          if (res.status === 401) {
+            return { success: false, error: 'Authentication required to list missions.', authRequired: true };
+          }
           if (!res.ok) return { success: false, error: json.error?.message || 'Failed to list missions' };
           return json;
         } catch (err) {
@@ -339,16 +365,22 @@
     },
 
     /**
-     * 4. Get Decision Intelligence Brief for a mission
+     * 4. Get Decision Intelligence Brief for a mission (Human approved only)
      * @param {string} missionId
      */
     async getMissionBrief(missionId = 'MSN-2026-081') {
       if (this.getMode() === 'live') {
         try {
           const res = await fetch(`${BACKEND_URL}/missions/${encodeURIComponent(missionId)}/brief`, {
-            headers: { 'x-gripr-auth': DEV_AUTH_HEADER }
+            headers: this.getHeaders()
           });
           const json = await res.json();
+          if (res.status === 401) {
+            return { success: false, error: 'Authentication required to inspect brief.', authRequired: true };
+          }
+          if (res.status === 403) {
+            return { success: false, error: 'Brief is under human research review or restricted to authorized organization.', status: 'PENDING_REVIEW' };
+          }
           if (!res.ok) return { success: false, error: json.error?.message || 'Brief not available' };
           return json;
         } catch (err) {
@@ -358,27 +390,30 @@
 
       await delay(100);
       const briefs = getRaw(STORAGE_KEY_BRIEFS);
-      const brief = briefs.find(b => b.missionId.toUpperCase() === missionId.toUpperCase()) || briefs[0];
-      if (!brief) return { success: false, error: 'Decision brief not yet generated for this mission.' };
+      const brief = briefs.find(b => b.missionId.toUpperCase() === (missionId || '').toUpperCase()) || briefs[0];
+      if (!brief) return { success: false, error: `No brief found for mission ${missionId}` };
 
-      const missions = getRaw(STORAGE_KEY_MISSIONS);
-      const mission = missions.find(m => m.id.toUpperCase() === brief.missionId.toUpperCase());
       const sessions = getRaw(STORAGE_KEY_SESSIONS);
-      const linkedSessions = sessions.filter(s => s.missionId.toUpperCase() === brief.missionId.toUpperCase());
+      const missionSessions = sessions.filter(s => s.missionId.toUpperCase() === (missionId || '').toUpperCase());
 
-      return { success: true, brief, mission, sessions: linkedSessions };
+      return {
+        success: true,
+        brief,
+        sessions: missionSessions,
+        mode: 'DEMO_SYNTHETIC'
+      };
     },
 
     /**
-     * 5. Get research invitation details for an invited participant
+     * 5. Get Research Invitation details by secure token
      * @param {string} token
      */
-    async getResearchInvitation(token = 'INV-AGRI-081') {
+    async getInvitation(token) {
       if (this.getMode() === 'live') {
         try {
           const res = await fetch(`${BACKEND_URL}/research/invitations/${encodeURIComponent(token)}`);
           const json = await res.json();
-          if (!res.ok) return { success: false, error: json.error?.message || 'Invalid or expired invitation token.' };
+          if (!res.ok) return { success: false, error: json.error?.message || 'Invitation invalid or expired' };
           return json;
         } catch (err) {
           return { success: false, error: `Live API call failed: ${err.message}` };
@@ -387,117 +422,119 @@
 
       await delay(70);
       const invitations = getRaw(STORAGE_KEY_INVITATIONS);
-      const invite = invitations.find(i => i.token.toUpperCase() === (token || '').toUpperCase()) || invitations[0];
-      if (!invite) return { success: false, error: 'Invitation token is invalid or has expired.' };
-      return { success: true, invitation: invite };
+      const inv = invitations.find(i => i.token === token || i.id === token);
+      if (!inv) return { success: false, error: 'Invitation not found or expired.' };
+      return { success: true, invitation: inv };
     },
 
     /**
-     * 6. Submit an invited research participant session
+     * 6. Submit qualitative participant session with 3-tier consent
+     * @param {string} token
      * @param {Object} data
      */
-    async submitResearchResponse(data) {
+    async submitParticipantSession(token, data) {
       if (this.getMode() === 'live') {
         try {
-          const token = data.invitationToken || 'INV-AGRI-081';
           const res = await fetch(`${BACKEND_URL}/research/invitations/${encodeURIComponent(token)}/responses`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              incidentNarrative: data.incidentNarrative,
-              affectedWorkflow: data.affectedWorkflow,
-              triggeringEvent: data.triggeringEvent,
-              operationalImpact: data.operationalImpact,
-              existingWorkaround: data.existingWorkaround,
-              frequency: data.frequency || null,
-              financialImpact: data.financialImpact || null,
-              role: data.role,
-              location: data.location,
-              language: data.language,
-              consentStudyProcessing: !!data.consentStudyProcessing,
-              consentSanitizedBriefSharing: !!data.consentSanitizedBriefSharing,
-              consentFollowUpInterview: !!data.consentFollowUpInterview,
-              contactEmail: data.contactEmail || null
-            })
+            body: JSON.stringify(data)
           });
-
           const json = await res.json();
+          if (res.status === 409) {
+            return { success: false, error: 'This research invitation has already been completed and cannot be resubmitted.' };
+          }
           if (!res.ok) {
             const errMap = {};
             if (json.error && Array.isArray(json.error.details)) {
               json.error.details.forEach(d => { errMap[d.field] = d.message; });
             } else {
-              errMap.general = json.error ? json.error.message : 'Submission failed.';
+              errMap.general = json.error ? json.error.message : 'Submission rejected by server.';
             }
             return { success: false, errors: errMap };
           }
-
           return json;
         } catch (err) {
-          return { success: false, errors: { general: `Live API submission failed: ${err.message}` } };
+          return {
+            success: false,
+            errors: { general: `Backend connection error: ${err.message}` }
+          };
         }
       }
 
-      await delay(180);
+      // DEMO MODE
+      await delay(220);
       const errors = {};
-      if (!data.incidentNarrative || data.incidentNarrative.trim().length < 20) {
-        errors.incidentNarrative = 'Please provide details of your recent experience (minimum 20 characters).';
+      if (!data.narrativeVerbatim || data.narrativeVerbatim.trim().length < 30) {
+        errors.narrativeVerbatim = 'Please share the detailed operational story (minimum 30 characters).';
+      }
+      if (!data.recentIncident || data.recentIncident.trim().length < 15) {
+        errors.recentIncident = 'Please describe a specific recent incident (minimum 15 characters).';
       }
       if (!data.existingWorkaround || data.existingWorkaround.trim().length < 5) {
-        errors.existingWorkaround = 'Please describe what workaround you used instead.';
+        errors.existingWorkaround = 'Please tell us how you currently handle this situation.';
       }
-      if (!data.consentStudyProcessing) {
-        errors.consentStudyProcessing = 'Research study processing consent is required to participate.';
+      if (!data.consent || !data.consent.internalResearch) {
+        errors.consent = 'Internal research consent is required to participate.';
       }
 
       if (Object.keys(errors).length > 0) return { success: false, errors };
 
-      const sessionId = `SES-${Math.floor(400 + Math.random() * 500)}`;
+      const invitations = getRaw(STORAGE_KEY_INVITATIONS);
+      const invIndex = invitations.findIndex(i => i.token === token || i.id === token);
+      const missionId = invIndex >= 0 ? invitations[invIndex].missionId : 'MSN-2026-081';
+
+      const randomNum = Math.floor(100 + Math.random() * 900);
+      const sessionId = `SES-2026-${randomNum}`;
+
       const newSession = {
         id: sessionId,
-        missionId: data.missionId || 'MSN-2026-081',
-        participantPseudonym: `Participant (${data.role || 'Operator'})`,
-        role: data.role || 'Screened Operator',
-        location: data.location || 'India (Regional)',
-        language: data.language || 'Hinglish / Vernacular',
-        sessionDate: new Date().toISOString().split('T')[0],
-        verbatim: data.incidentNarrative.trim(),
-        translation: data.incidentNarrative.trim(),
-        workflow: data.affectedWorkflow || 'Operational procurement workflow',
-        trigger: 'Firsthand incident reported during study session',
-        impact: data.operationalImpact || 'Unquantified friction',
-        workaround: data.existingWorkaround.trim(),
-        divergenceNotes: 'Fresh participant session awaiting research desk moderation.',
-        consent: {
-          studyProcessing: !!data.consentStudyProcessing,
-          sanitizedBriefSharing: !!data.consentSanitizedBriefSharing,
-          followUpInterview: !!data.consentFollowUpInterview,
-          contactEmail: data.consentFollowUpInterview ? (data.contactEmail || null) : null
-        }
+        missionId: missionId,
+        participantRole: data.participantRole || 'Fertilizer Retailer',
+        yearsExperience: data.yearsExperience || '8 years',
+        location: data.location || 'Rural Hub, MP',
+        language: data.language || 'Hinglish',
+        narrativeVerbatim: data.narrativeVerbatim.trim(),
+        recentIncident: data.recentIncident.trim(),
+        frequency: data.frequency || 'Weekly during sowing cycle',
+        financialImpact: data.financialImpact || '₹8,000 - ₹15,000 per delayed consignment',
+        existingWorkaround: data.existingWorkaround.trim(),
+        consent: data.consent,
+        submittedAt: new Date().toISOString()
       };
 
       const sessions = getRaw(STORAGE_KEY_SESSIONS);
       sessions.unshift(newSession);
       setRaw(STORAGE_KEY_SESSIONS, sessions);
 
+      if (invIndex >= 0) {
+        invitations[invIndex].status = 'completed';
+        invitations[invIndex].completedAt = new Date().toISOString();
+        setRaw(STORAGE_KEY_INVITATIONS, invitations);
+      }
+
       return {
         success: true,
         sessionId: sessionId,
-        message: 'Research session response recorded locally. Thank you for contributing your firsthand operational experience.'
+        status: 'awaiting_review',
+        message: 'Research session recorded. Thank you for contributing authentic operational evidence.'
       };
     },
 
     /**
-     * 7. Get internal research operations desk queue
+     * 7. Get internal research operations desk queue (Researcher / Admin only)
      */
     async getResearchOperationsQueue() {
       if (this.getMode() === 'live') {
         try {
           const res = await fetch(`${BACKEND_URL}/operations/queue`, {
-            headers: { 'x-gripr-auth': DEV_AUTH_HEADER }
+            headers: this.getHeaders()
           });
           const json = await res.json();
-          if (!res.ok) return { success: false, error: json.error?.message || 'Operations desk unauthorized' };
+          if (res.status === 401 || res.status === 403) {
+            return { success: false, error: 'Researcher or Admin authorization required for operations desk.', authRequired: true };
+          }
+          if (!res.ok) return { success: false, error: json.error?.message || 'Operations desk error' };
           return json;
         } catch (err) {
           return { success: false, error: `Live API call failed: ${err.message}` };
@@ -524,17 +561,14 @@
     },
 
     /**
-     * 8. Moderate or review an evidence session / ops task
+     * 8. Moderate or review an evidence session / ops task (Researcher / Admin only)
      */
     async reviewEvidence(opsId, decision, details = {}) {
       if (this.getMode() === 'live') {
         try {
           const res = await fetch(`${BACKEND_URL}/operations/evidence/${encodeURIComponent(opsId)}/review`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-gripr-auth': DEV_AUTH_HEADER
-            },
+            headers: this.getHeaders(),
             body: JSON.stringify({ decision, notes: details?.notes })
           });
           const json = await res.json();
@@ -558,17 +592,14 @@
     },
 
     /**
-     * 9. Update mission lifecycle state
+     * 9. Update mission lifecycle state (Researcher / Admin only)
      */
     async updateMissionStatus(missionId, newStatus) {
       if (this.getMode() === 'live') {
         try {
           const res = await fetch(`${BACKEND_URL}/missions/${encodeURIComponent(missionId)}/status`, {
             method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-gripr-auth': DEV_AUTH_HEADER
-            },
+            headers: this.getHeaders(),
             body: JSON.stringify({ status: newStatus })
           });
           const json = await res.json();
@@ -598,7 +629,7 @@
         try {
           const res = await fetch(`${BACKEND_URL}/research/responses/${encodeURIComponent(sessionId)}/analyze`, {
             method: 'POST',
-            headers: { 'x-gripr-auth': DEV_AUTH_HEADER }
+            headers: this.getHeaders()
           });
           const json = await res.json();
           if (!res.ok) return { success: false, error: json.error?.message || 'Analysis failed.' };
@@ -625,7 +656,7 @@
         try {
           const res = await fetch(`${BACKEND_URL}/missions/${encodeURIComponent(missionId)}/brief/generate`, {
             method: 'POST',
-            headers: { 'x-gripr-auth': DEV_AUTH_HEADER }
+            headers: this.getHeaders()
           });
           const json = await res.json();
           if (!res.ok) return { success: false, error: json.error?.message || 'Brief generation failed.' };

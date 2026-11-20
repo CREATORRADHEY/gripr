@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { env } from '../config/env.js';
-import { GeminiExtraction, GeminiExtractionSchema } from '../schemas/extraction.schema.js';
+import { GeminiExtraction, GeminiExtractionSchema, ProcessingMode } from '../schemas/extraction.schema.js';
 import { CrossParticipantComparison, CrossParticipantComparisonSchema } from '../schemas/comparison.schema.js';
 import { DecisionBrief, DecisionBriefSchema } from '../schemas/brief.schema.js';
 import { EXTRACTION_SYSTEM_PROMPT, buildExtractionUserPrompt } from '../prompts/extraction.js';
@@ -11,6 +11,14 @@ export interface GeminiCallOptions {
   model?: string;
   timeoutMs?: number;
   maxRetries?: number;
+  allowMockFallback?: boolean;
+}
+
+export class GeminiUnavailableError extends Error {
+  constructor(message = 'Google Gemini AI intelligence service is unconfigured or unreachable.') {
+    super(message);
+    this.name = 'GeminiUnavailableError';
+  }
 }
 
 export class GeminiService {
@@ -19,7 +27,7 @@ export class GeminiService {
 
   constructor() {
     this.modelName = env.GEMINI_MODEL || 'gemini-2.5-flash';
-    if (env.GEMINI_API_KEY) {
+    if (env.GEMINI_API_KEY && env.GEMINI_API_KEY.trim().length > 0) {
       try {
         this.ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
       } catch (err) {
@@ -29,11 +37,27 @@ export class GeminiService {
   }
 
   public isAvailable(): boolean {
-    return !!this.ai && !!env.GEMINI_API_KEY;
+    return !!this.ai && !!env.GEMINI_API_KEY && env.GEMINI_API_KEY.trim().length > 0;
   }
 
   public getModelName(): string {
     return this.modelName;
+  }
+
+  public getProcessingMode(): ProcessingMode {
+    if (this.isAvailable()) return 'LIVE_GEMINI';
+    if (env.isTest || env.DEMO_MODE) return 'DEMO_SYNTHETIC';
+    return 'ERROR_UNAVAILABLE';
+  }
+
+  /**
+   * Sanitizes untrusted participant narrative to neutralize prompt injection patterns.
+   */
+  public sanitizeNarrative(text: string): string {
+    if (!text) return '';
+    return text
+      .replace(/<\/?(system|assistant|user|participant_account)>/gi, '')
+      .replace(/(ignore\s+all\s+previous\s+instructions|system\s*:|assistant\s*:|disregard\s+prior)/gi, '[REDACTED_PROMPT_INJECTION]');
   }
 
   /**
@@ -60,7 +84,7 @@ export class GeminiService {
         delay *= 2;
       }
     }
-    throw new Error('Maximum Gemini retries exceeded');
+    throw new GeminiUnavailableError('Maximum Gemini API call retries exceeded');
   }
 
   /**
@@ -72,19 +96,29 @@ export class GeminiService {
     role?: string,
     workflow?: string,
     options?: GeminiCallOptions
-  ): Promise<{ extraction: GeminiExtraction; modelUsed: string; tokenEstimate?: number }> {
+  ): Promise<{ extraction: GeminiExtraction; modelUsed: string; processingMode: ProcessingMode; tokenEstimate?: number }> {
     const model = options?.model || this.modelName;
+    const sanitizedNarrative = this.sanitizeNarrative(narrative);
+    const sanitizedWorkaround = this.sanitizeNarrative(workaround);
 
-    // If live API is not configured or in mock test, provide faithful deterministic extraction
-    if (!this.ai || !env.GEMINI_API_KEY) {
+    // Fail-closed rule for production
+    if (!this.isAvailable()) {
+      if (env.isProd || (!options?.allowMockFallback && !env.isTest && !env.DEMO_MODE)) {
+        throw new GeminiUnavailableError(
+          'Gemini extraction failed: Live Gemini API key is missing or unconfigured. Production fail-closed rule prevents silent synthetic generation.'
+        );
+      }
+
+      // Explicit DEMO_SYNTHETIC mode only permitted in test / explicit dev demo environments
       return {
-        extraction: this.generateDeterministicMockExtraction(narrative, workaround, role, workflow),
+        extraction: this.generateDeterministicMockExtraction(sanitizedNarrative, sanitizedWorkaround, role, workflow),
         modelUsed: `${model}-mock-provider`,
-        tokenEstimate: Math.ceil((narrative.length + workaround.length) / 4)
+        processingMode: 'DEMO_SYNTHETIC',
+        tokenEstimate: Math.ceil((sanitizedNarrative.length + sanitizedWorkaround.length) / 4)
       };
     }
 
-    const prompt = buildExtractionUserPrompt(narrative, workaround, role, workflow);
+    const prompt = buildExtractionUserPrompt(sanitizedNarrative, sanitizedWorkaround, role, workflow);
 
     const callFn = async () => {
       const response = await this.ai!.models.generateContent({
@@ -103,6 +137,7 @@ export class GeminiService {
       return {
         extraction: validated,
         modelUsed: model,
+        processingMode: 'LIVE_GEMINI' as ProcessingMode,
         tokenEstimate: response.usageMetadata?.totalTokenCount
       };
     };
@@ -120,7 +155,10 @@ export class GeminiService {
   ): Promise<CrossParticipantComparison> {
     const model = options?.model || this.modelName;
 
-    if (!this.ai || !env.GEMINI_API_KEY) {
+    if (!this.isAvailable()) {
+      if (env.isProd || (!options?.allowMockFallback && !env.isTest && !env.DEMO_MODE)) {
+        throw new GeminiUnavailableError('Gemini cross-participant comparison failed: live AI unavailable.');
+      }
       return this.generateDeterministicMockComparison(sessionA, sessionB);
     }
 
@@ -156,7 +194,10 @@ export class GeminiService {
   ): Promise<DecisionBrief> {
     const model = options?.model || this.modelName;
 
-    if (!this.ai || !env.GEMINI_API_KEY) {
+    if (!this.isAvailable()) {
+      if (env.isProd || (!options?.allowMockFallback && !env.isTest && !env.DEMO_MODE)) {
+        throw new GeminiUnavailableError('Gemini brief synthesis failed: live AI unavailable.');
+      }
       return this.generateDeterministicMockBrief(mission, sessions, analyses);
     }
 
@@ -181,225 +222,227 @@ export class GeminiService {
     return this.executeWithRetry(callFn, options?.maxRetries ?? 3);
   }
 
-  // --- DETERMINISTIC FALLBACK HELPERS FOR DEV / TEST MODE ---
+  // --- DETERMINISTIC HEURISTIC FALLBACKS (TEST & DEMO ONLY) ---
 
-  private generateDeterministicMockExtraction(
+  public generateDeterministicMockExtraction(
     narrative: string,
     workaround: string,
-    role?: string,
-    workflow?: string
+    role = 'Screened Operator',
+    workflow = 'Operational procurement workflow'
   ): GeminiExtraction {
-    // Extract real sentences as verbatim quotations so substring checks pass cleanly
-    const sentences = narrative.split(/[.?!।]/).map(s => s.trim()).filter(s => s.length > 5);
-    const firstQuote = sentences[0] || narrative.substring(0, Math.min(narrative.length, 60));
-    const secondQuote = sentences[1] || (sentences.length > 0 ? sentences[0] : narrative);
+    const quotes: string[] = [];
+    const sentences = narrative.split(/(?<=[.?!])\s+/).filter(s => s.trim().length > 15);
+    const primaryQuote = sentences[0] || narrative.substring(0, Math.min(narrative.length, 60));
+    quotes.push(primaryQuote);
 
-    // Look for explicit numbers or currency in text; if absent, leave strictly UNKNOWN
-    const hasRupees = narrative.includes('₹') || /rs\.?|inr|rupee/i.test(narrative);
-    const hasFrequency = /daily|weekly|monthly|times|season|har baar|roj/i.test(narrative);
+    const workaroundSentences = workaround.split(/(?<=[.?!])\s+/).filter(s => s.trim().length > 10);
+    const workaroundQuote = workaroundSentences[0] || workaround.substring(0, Math.min(workaround.length, 50));
+    if (workaroundQuote) quotes.push(workaroundQuote);
+
+    const hasCurrency = /₹|rs\.?|inr|rupee|\$|cost|loss/i.test(narrative);
+    const hasCadence = /daily|weekly|monthly|times|season|har baar|roj|hamesha|frequently|often/i.test(narrative);
 
     return {
       affectedParticipant: {
-        content: role || 'Screened Operator',
+        content: role,
         category: 'REPORTED',
-        sourceQuote: null
+        sourceQuote: null,
+        confidenceNotes: 'Derived from participant profile'
       },
       industryOrDomain: {
-        content: 'Operational Field Logistics',
+        content: 'Agricultural Logistics & Input Supply',
         category: 'INFERRED',
-        sourceQuote: null
+        sourceQuote: null,
+        confidenceNotes: 'Heuristic domain inference'
       },
       operationalWorkflow: {
-        content: workflow || 'Procurement & supply workflow',
+        content: workflow,
         category: 'REPORTED',
-        sourceQuote: firstQuote
+        sourceQuote: primaryQuote,
+        confidenceNotes: 'Verbatim extracted from narrative'
       },
       reportedProblem: {
-        content: `Operational friction: ${narrative.substring(0, 80)}...`,
+        content: primaryQuote,
         category: 'REPORTED',
-        sourceQuote: firstQuote
+        sourceQuote: primaryQuote,
+        confidenceNotes: 'Primary obstacle reported by participant'
       },
       triggeringEvent: {
-        content: 'Critical operational window or peak requirement',
+        content: 'Peak operational cycle demand surge',
         category: 'INFERRED',
-        sourceQuote: null
+        sourceQuote: null,
+        confidenceNotes: 'Inferred contextual trigger'
       },
       consequencesReported: [
         {
-          content: 'Delays and reliance on manual intervention',
-          category: 'REPORTED',
-          sourceQuote: secondQuote
+          content: 'Operational disruption and reliance on non-standard informal channels',
+          category: 'INFERRED',
+          sourceQuote: null,
+          confidenceNotes: 'Inferred consequence'
         }
       ],
-      frequency: {
-        content: hasFrequency ? 'Reported recurring cadence' : 'Not stated',
-        category: hasFrequency ? 'REPORTED' : 'UNKNOWN',
-        sourceQuote: null
+      frequency: hasCadence ? {
+        content: 'Reported during operational peak cycles',
+        category: 'REPORTED',
+        sourceQuote: primaryQuote,
+        confidenceNotes: 'Cadence mentioned in narrative'
+      } : {
+        content: 'UNKNOWN',
+        category: 'UNKNOWN',
+        sourceQuote: null,
+        confidenceNotes: 'Participant did not state an explicit frequency'
       },
-      financialImpact: {
-        content: hasRupees ? 'Reported monetary cost/overhead' : 'Not stated',
-        category: hasRupees ? 'REPORTED' : 'UNKNOWN',
-        sourceQuote: null
+      financialImpact: hasCurrency ? {
+        content: 'Quantified monetary friction reported',
+        category: 'REPORTED',
+        sourceQuote: primaryQuote,
+        confidenceNotes: 'Monetary reference found in source'
+      } : {
+        content: 'UNKNOWN',
+        category: 'UNKNOWN',
+        sourceQuote: null,
+        confidenceNotes: 'No explicit currency or monetary loss specified'
       },
       currentWorkaround: {
-        content: workaround,
+        content: workaroundQuote || workaround,
         category: 'REPORTED',
-        sourceQuote: workaround.length > 60 ? workaround.substring(0, 60) : workaround
+        sourceQuote: workaroundQuote || workaround,
+        confidenceNotes: 'Direct quote of current manual workaround'
       },
       contextualConstraints: [
         {
-          content: 'Local trust, credit, or physical inspection constraints override digital channels',
+          content: 'Entrenched informal practices and cash flow synchronization',
           category: 'INFERRED',
-          sourceQuote: null
+          sourceQuote: null,
+          confidenceNotes: 'Structural ecosystem dependency'
         }
       ],
       missingInformation: [
-        'Exact seasonal volume turnover',
-        'Specific contract terms with upstream suppliers'
+        'Precise annual volume impact',
+        'Alternative regional supplier availability'
       ],
       potentialResearchQuestions: [
-        'How would operator behavior change if credit was decoupled from the local merchant?'
+        'How would terms change if settlement occurred within 7 days?',
+        'What formal guarantees would replace the informal trust relationship?'
       ],
-      supportingQuotations: [firstQuote, secondQuote].filter(Boolean),
+      supportingQuotations: quotes,
       alternativeInterpretations: [
-        'The reluctance to adopt digital tools may stem from tax visibility concerns rather than delivery friction.'
+        'Behavior may be driven by seasonal liquidity shortages rather than product disloyalty'
       ]
     };
   }
 
-  private generateDeterministicMockComparison(sessionA: any, sessionB: any): CrossParticipantComparison {
-    const textA = (sessionA.verbatim || '').toLowerCase();
-    const textB = (sessionB.verbatim || '').toLowerCase();
+  public generateDeterministicMockComparison(sessionA: any, sessionB: any): CrossParticipantComparison {
+    const textA = ((sessionA.verbatim || '') + ' ' + (sessionA.workaround || '')).toLowerCase();
+    const textB = ((sessionB.verbatim || '') + ' ' + (sessionB.workaround || '')).toLowerCase();
 
-    // Check if both mention credit/udhaar
-    const aHasCredit = textA.includes('udhaar') || textA.includes('credit') || textA.includes('sharma');
-    const bHasCredit = textB.includes('udhaar') || textB.includes('credit');
+    const isCreditA = textA.includes('udhaar') || textA.includes('credit');
+    const isCreditB = textB.includes('udhaar') || textB.includes('credit');
 
-    // Check if both mention delivery/truck
-    const aHasDelivery = textA.includes('delivery') || textA.includes('truck') || textA.includes('tractor');
-    const bHasDelivery = textB.includes('delivery') || textB.includes('truck') || textB.includes('tractor');
+    const isPerishA = textA.includes('barish') || textA.includes('gulab') || textA.includes('customer');
+    const isPerishB = textB.includes('shaadi') || textB.includes('cancel');
 
-    // Check for cancellation/breach vs foot-traffic/weather demand
-    const aHasCancel = textA.includes('cancel') || textA.includes('shaadi') || textA.includes('order');
-    const bHasCancel = textB.includes('cancel') || textB.includes('shaadi') || textB.includes('order');
-
-    let relationship: any = 'RELATED_SAME_MECHANISM';
-    let contradiction = false;
-    let explanation = '';
-
-    if (aHasCredit && bHasCredit) {
-      relationship = 'RELATED_SAME_MECHANISM';
-      explanation = 'Both participants experience lock-in due to informal retailer credit dependencies.';
-    } else if (aHasCredit && !bHasCredit && bHasDelivery) {
-      relationship = 'RELATED_DIFFERENT_MECHANISM';
-      contradiction = true;
-      explanation = 'Participant A prioritizes harvest credit over price, while Participant B can pay cash but refuses uninspected truck delivery.';
-    } else if ((aHasCancel && !bHasCancel) || (!aHasCancel && bHasCancel)) {
-      relationship = 'RELATED_DIFFERENT_MECHANISM';
-      contradiction = false;
-      explanation = 'Same domain but differing causal roots: one operator experiences client order cancellation, while the other experiences foot-traffic demand unpredictability.';
-    } else {
-      relationship = 'RELATED_SAME_MECHANISM';
-      explanation = 'Both operators face severe operational friction during seasonal peaks.';
+    let relationshipType: any = 'RELATED_SAME_MECHANISM';
+    if (isCreditA && isCreditB) {
+      relationshipType = 'RELATED_SAME_MECHANISM';
+    } else if (isPerishA && isPerishB) {
+      relationshipType = 'RELATED_DIFFERENT_MECHANISM';
+    } else if (isCreditA !== isCreditB) {
+      relationshipType = 'RELATED_DIFFERENT_MECHANISM';
     }
+
+    const isContradiction = (isCreditA && (textB.includes('check') || textB.includes('inspect') || textB.includes('tractor') || textB.includes('return'))) ||
+      (textA.includes('cash') && textB.includes('credit'));
 
     return {
       sessionIds: [sessionA.id, sessionB.id],
-      relationship,
+      relationship: relationshipType,
       sharedWorkflow: true,
       sharedImpact: true,
-      mechanismComparison: explanation,
-      divergencePoints: [
-        'Differing financial liquidity and credit access',
-        'Different tolerance for delivery arrival delays'
-      ],
-      contradictionDetected: contradiction,
-      contradictionDetails: contradiction ? 'Contradictory trade-off between credit preservation and inspection requirements.' : undefined,
-      similarityScore: relationship === 'RELATED_SAME_MECHANISM' ? 0.85 : 0.45
+      mechanismComparison: `Participant ${sessionA.id} and ${sessionB.id} experience friction during seasonal supply procurement, but operate under distinct operational trade-offs.`,
+      divergencePoints: ['Varying degrees of working capital availability vs physical inspection requirement'],
+      contradictionDetected: isContradiction,
+      contradictionDetails: isContradiction ? 'Operator A accepts credit lock-in while Operator B prioritizes physical pre-purchase inspection' : undefined,
+      similarityScore: 0.85
     };
   }
 
-  private generateDeterministicMockBrief(mission: any, sessions: any[], analyses: any[]): DecisionBrief {
+  public generateDeterministicMockBrief(mission: any, sessions: any[], analyses: any[]): DecisionBrief {
     return {
       id: `BRF-${mission.id.replace('MSN-', '')}`,
       missionId: mission.id,
-      title: `${mission.orgName}: Problem Intelligence & Falsification Analysis`,
+      organizationId: mission.organizationId || 'ORG-DEFAULT',
+      title: `Decision Intelligence Brief: ${mission.problemToInvestigate.substring(0, 50)}`,
       status: 'DRAFT — REQUIRES HUMAN REVIEW',
       recommendation: 'REJECT_OR_REFRAME',
-      recommendationRationale: 'Firsthand evidence reveals that operator resistance is driven by deeply embedded informal credit and inspection practices, falsifying the core assumption that lower spot prices alone drive adoption.',
-      executiveSummary: `This qualitative research mission for ${mission.orgName} investigated ${mission.problemToInvestigate}. Across ${sessions.length} screened practitioner sessions, the hypothesis "${mission.hypothesis}" failed to hold against operational reality.`,
-      researchQuestion: mission.problemToInvestigate,
+      recommendationRationale: 'Firsthand evidence reveals that structural working-capital barriers and informal dealer relationships make a standalone direct digital platform unviable without credit underwriting.',
+      executiveSummary: `Across ${sessions.length} qualitative interviews, participants demonstrated that existing workarounds are deeply tied to informal credit lines and emergency turnaround guarantees.`,
+      researchQuestion: mission.decisionAtStake,
       decisionAtStake: mission.decisionAtStake,
-      hypothesis: mission.hypothesis,
-      falsificationOutcome: 'FALSIFIED: Operators prioritize uncollateralized credit and on-site return inspection over price discounts.',
+      hypothesis: mission.hypothesis || 'Original hypothesis',
+      falsificationOutcome: 'FALSIFIED: Participants prioritize credit synchronization and inspection trust over digital price discovery.',
       sampleContext: {
         totalSessions: sessions.length,
-        participantRoles: Array.from(new Set(sessions.map(s => s.role))),
-        geographies: Array.from(new Set(sessions.map(s => s.location))),
-        limitationsDisclaimer: 'Small qualitative research sample (N=5). Does not establish statistical prevalence or macro TAM.'
+        participantRoles: sessions.map(s => s.role || 'Screened Operator'),
+        geographies: Array.from(new Set(sessions.map(s => s.location || 'India (Regional)'))),
+        limitationsDisclaimer: 'Small qualitative research cohort (N=5). Qualitative indicators do not establish statistical prevalence or market size.'
       },
       observedWorkflows: [
-        'Informal credit extension linked to seasonal cashflow',
-        'Physical pre-acceptance verification of bulky inputs'
+        'Emergency seasonal input procurement',
+        'Informal ledger credit recording',
+        'Manual inspection and trust-based collection'
       ],
       coreProblems: [
-        'Financing lock-in: Digital solutions requiring upfront payment cannot replace harvest-cycle credit',
-        'Last-mile delivery friction: Inability of commercial couriers to handle rural delivery and immediate returns'
+        'Working capital depletion during peak operational windows',
+        'Informal vendor lock-in preventing adoption of digital procurement tools'
       ],
       supportingEvidence: sessions.slice(0, 3).map(s => ({
-        claim: `Operational constraint observed in ${s.role}`,
+        claim: s.impact || 'Severe operational friction',
         sourceSessionId: s.id,
-        verbatimQuote: s.verbatim.substring(0, Math.min(s.verbatim.length, 120)),
-        operatorRole: s.role
+        verbatimQuote: s.verbatim ? s.verbatim.substring(0, 60) : 'Firsthand participant account',
+        operatorRole: s.role || 'Screened Operator'
       })),
       contradictoryFindings: [
         {
-          aspect: 'Credit Lock-in vs Delivery Sensitivity',
-          observationA: 'Cash-poor operators demand harvest credit even with higher bag prices.',
-          observationB: 'Cash-sufficient operators demand physical inspection and refuse delivery trucks.',
-          implication: 'A single consumer app cannot satisfy both segments simultaneously.'
+          aspect: 'Delivery Speed vs Inventory Buffering',
+          observationA: 'Participant 1 requires delivery within 2 hours of rainfall.',
+          observationB: 'Participant 2 maintains personal inventory buffer in home shed.',
+          implication: 'Delivery time urgency varies by irrigation infrastructure.'
         }
       ],
       existingWorkarounds: [
         {
-          workaround: 'Local merchant credit ledger (Khata)',
-          costOrFriction: 'Embedded premium paid per unit',
-          whyCurrentTechFails: 'Informal ledger requires zero digital onboarding or bank underwriting.'
+          workaround: 'Informal ledger credit line with local village retailer',
+          costOrFriction: 'Implicit premium paid on materials in exchange for delayed payment terms',
+          whyCurrentTechFails: 'Standard e-commerce platforms mandate instant online payment'
         }
       ],
       knownImpacts: [
-        'Loss of price transparency',
-        'High travel overhead for self-haulage'
+        'Operators pay up to 8% implicit markup to preserve seasonal payment flexibility'
       ],
       unknownInformation: [
-        'Exact bad-debt write-off percentage of village merchants',
-        'Regulatory barriers to digital fertilizer distribution'
+        'Annual default rate across unwritten rural retail ledgers'
       ],
       researchLimitations: [
-        'Sample size (N=5) provides qualitative depth, not quantitative market validation.',
-        'Regional clustering may not represent national distribution.'
+        'Evidence collected from regional smallholders; enterprise agribusiness may behave differently'
       ],
       hypothesesGenerated: [
-        'H2: Equipping village merchants with inventory software has higher adoption than direct-to-consumer apps.'
+        'A merchant credit facilitation API would achieve 4x higher adoption than a B2C direct app'
       ],
       followUpQuestions: [
-        'What margin do local merchants earn on ancillary products?'
+        'What interest rate would operators accept for formal digital working-capital credit?'
       ],
       decisionOptions: [
         {
           option: 'REJECT_OR_REFRAME',
-          headline: 'Halt B2C Consumer Build; Reframe Toward Merchant Enablement',
-          description: 'Avoid engineering spend on direct-to-consumer e-commerce. Investigate merchant software solutions.',
-          tradeOffs: 'Saves initial capital; requires redesigning the core business model.'
-        },
-        {
-          option: 'INVESTIGATE_FURTHER',
-          headline: 'Conduct Rural NBFC Credit Partnership Scoping',
-          description: 'Investigate if partnering with rural lenders to provide digital credit can remove the merchant lock-in.',
-          tradeOffs: 'Delays timeline by 8-12 weeks; increases regulatory overhead.'
+          headline: 'Halt Direct B2C App Build — Pivot to Dealer Credit Enablement',
+          description: 'Reallocate capital from consumer acquisition to dealer workflow and financing integration.',
+          tradeOffs: 'Preserves engineering capital; requires B2B distribution partnership model.'
         }
       ],
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      approvedAt: null,
+      approvedBy: null
     };
   }
 }
