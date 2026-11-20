@@ -1173,3 +1173,212 @@ footer .footer-location { color: var(--text-light-muted); font-weight: 500; }
   color: #10B981;
   font-weight: bold;
 }
+
+
+/* ==========================================================================
+   B2B RESEARCH MISSIONS & WORKSPACE EXTENSIONS
+   ========================================================================== */
+
+/* Scoping Step Tracker */
+.scoping-steps-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.step-indicator.active {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.step-indicator.completed {
+  color: #10B981;
+}
+
+.step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.step-indicator.active .step-num {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.step-indicator.completed .step-num {
+  background: #10B981;
+  color: #fff;
+  border-color: #10B981;
+}
+
+/* Mission Workspace Stages */
+.stage-timeline {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1.5rem 0 2rem;
+  flex-wrap: wrap;
+}
+
+.stage-pill {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+}
+
+.stage-pill.current {
+  background: rgba(234, 88, 12, 0.12);
+  color: var(--accent);
+  border-color: rgba(234, 88, 12, 0.3);
+}
+
+.stage-pill.past {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.demo-state-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(234, 88, 12, 0.08);
+  border: 1px solid rgba(234, 88, 12, 0.2);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.demo-state-switcher select {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid var(--accent);
+  background: #fff;
+  color: var(--text-dark);
+}
+
+/* Decision Brief Styles */
+.recommendation-banner {
+  border-radius: 14px;
+  padding: 2.5rem;
+  margin: 2.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rec-reject {
+  background: #FEF2F2;
+  border: 2px solid #EF4444;
+  color: #991B1B;
+}
+
+.rec-investigate {
+  background: #FFFBEB;
+  border: 2px solid #F59E0B;
+  color: #92400E;
+}
+
+.rec-pilot {
+  background: #ECFDF5;
+  border: 2px solid #10B981;
+  color: #065F46;
+}
+
+.rec-badge {
+  display: inline-block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
+  align-self: flex-start;
+}
+
+.rec-reject .rec-badge { background: #DC2626; color: #fff; }
+.rec-investigate .rec-badge { background: #D97706; color: #fff; }
+.rec-pilot .rec-badge { background: #059669; color: #fff; }
+
+.traceable-session-tag {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-dark);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.traceable-session-tag:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.divergence-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-left: 4px solid #F59E0B;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.ai-interpretation-box {
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 3rem 0;
+  position: relative;
+}
+
+.ai-badge {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: #475569;
+  color: #fff;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 0.75rem;
+}

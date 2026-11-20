@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Decision Intelligence Brief — GRIPR.STUDIO</title>
+  <meta name="description" content="Executive Decision Intelligence Brief: Rural Fertilizer Spot-Pricing & Procurement Dynamics. Evidence-first qualitative research deliverable.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/feed.css">
+</head>
+<body style="background:#FAF5F0; color:var(--text-body);">
+
+  <!-- NAV -->
+  <div class="nav-wrapper">
+    <nav>
+      <a href="index.html" class="nav-logo" aria-label="GRIPR Home">
+        GRIPR <span class="beta-badge">BRIEF</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="index.html#product" class="nav-link">Product</a>
+        <a href="index.html#how-it-works" class="nav-link">How It Works</a>
+        <a href="brief.html" class="nav-link active-nav-link">Example Research Brief</a>
+        <a href="missions.html" class="nav-link">Research Missions</a>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <a href="missions.html" class="btn-nav">Commission Similar Mission →</a>
+      </div>
+    </nav>
+  </div>
+
+  <main>
+    <article class="container" style="padding-top:4rem; padding-bottom:7rem; max-width:960px;">
+
+      <!-- HEADER BREADCRUMB & METADATA -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:2rem; border-bottom:1px solid var(--border); padding-bottom:1rem;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-size:0.8rem; color:var(--text-secondary);">
+          <a href="missions.html" style="color:var(--text-secondary); text-decoration:none;">Missions</a>
+          <span>/</span>
+          <span id="briefMissionRef" style="color:var(--accent); font-weight:700;">MSN-2026-081</span>
+          <span>/</span>
+          <span>Decision Intelligence Brief</span>
+        </div>
+
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <span class="evidence-badge badge-verified">● Firsthand Screened Cohort</span>
+          <span style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:var(--text-muted);">
+            Delivered: May 2026
+          </span>
+        </div>
+      </div>
+
+      <!-- TITLE & CLIENT DECISION -->
+      <div style="margin-bottom:2.5rem;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--accent); margin-bottom:0.75rem;">
+          EXECUTIVE RESEARCH DELIVERABLE · COMMISSIONED BY BHARATAGRITECH LABS
+        </div>
+        <h1 style="font-family:'DM Serif Display',serif; font-size:clamp(2.4rem, 5vw, 3.8rem); line-height:1.15; color:var(--text-dark); margin-bottom:1.5rem;" id="briefTitle">
+          Rural Fertilizer Spot-Pricing & Procurement Dynamics
+        </h1>
+      </div>
+
+      <!-- SECTION 15: EXECUTIVE DECISION RECOMMENDATION BANNER (TOP-LINE SUMMARY) -->
+      <div class="recommendation-banner rec-reject" id="recBanner">
+        <div class="rec-badge">PRIMARY RECOMMENDATION: REJECT / REFRAME HYPOTHESIS</div>
+        <h2 style="font-family:'DM Serif Display',serif; font-size:1.8rem; color:#991B1B; margin:0;">
+          Cancel planned $180,000 B2C Price-Comparison App Build
+        </h2>
+        <p style="font-size:1rem; line-height:1.6; color:#7F1D1D; margin:0;" id="executiveSummaryText">
+          Loading brief synthesis...
+        </p>
+      </div>
+
+      <!-- MAIN BRIEF BODY RENDERED VIA JS FROM GriprAPI -->
+      <div id="briefContent">
+        <!-- Rendered dynamically -->
+        <div style="padding:3rem 0;">
+          <div class="skeleton-box" style="height:32px; width:40%; margin-bottom:1.5rem;"></div>
+          <div class="skeleton-box" style="height:100px; width:100%; margin-bottom:2rem;"></div>
+          <div class="skeleton-box" style="height:250px; width:100%;"></div>
+        </div>
+      </div>
+
+    </article>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="container">
+    <div class="footer-left">
+      <div class="footer-logo">GRIPR <span class="beta-badge" style="font-size:0.55rem; padding:0.15rem 0.4rem;">BETA</span></div>
+      <div class="footer-tagline">AI-Powered Problem Intelligence Platform.</div>
+      <p class="copyright">© 2026 GRIPR.STUDIO. All rights reserved.</p>
+    </div>
+    <div class="footer-right">
+      <div class="footer-links">
+        <a href="index.html#product">Product</a>
+        <a href="index.html#how-it-works">How It Works</a>
+        <a href="brief.html">Example Research Brief</a>
+        <a href="missions.html">Research Missions</a>
+        <a href="participate.html">Participant Desk</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/fixtures.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const missionId = urlParams.get('id') || 'MSN-2026-081';
+
+      const res = await window.GriprAPI.getMissionBrief(missionId);
+      const container = document.getElementById('briefContent');
+
+      if (!res.success || !res.brief) {
+        container.innerHTML = `
+          <div class="empty-feed">
+            <div class="empty-feed-icon">⚠️</div>
+            <h3>Decision Brief Not Found</h3>
+            <p>No completed Decision Intelligence Brief exists for mission reference "${missionId}".</p>
+            <a href="missions.html" class="btn-cta-solid" style="display:inline-block; margin-top:1rem;">Back to Missions</a>
+          </div>
+        `;
+        return;
+      }
+
+      const b = res.brief;
+      const m = res.mission || {};
+      const sessions = res.sessions || [];
+
+      document.getElementById('briefTitle').textContent = b.briefTitle;
+      document.getElementById('briefMissionRef').textContent = b.missionId;
+      document.getElementById('executiveSummaryText').textContent = b.executiveSummary;
+      document.title = `${b.briefTitle} — GRIPR.STUDIO`;
+
+      container.innerHTML = `
+        <!-- 1 & 2: RESEARCH QUESTION & DECISION AT STAKE -->
+        <section style="background:#fff; border:1px solid var(--border); border-radius:12px; padding:2rem; margin:2.5rem 0; box-shadow:0 2px 12px rgba(0,0,0,0.02);">
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:0.75rem;">
+            01 / RESEARCH QUESTION & DECISION AT STAKE
+          </div>
+          <h3 style="font-family:'DM Serif Display',serif; font-size:1.6rem; color:var(--text-dark); margin-bottom:1rem;">
+            ${b.researchQuestion}
+          </h3>
+          <div style="font-size:0.95rem; color:var(--text-secondary); line-height:1.6; border-left:3px solid var(--accent); padding-left:1rem;">
+            <strong>Decision Context:</strong> ${b.clientDecisionAtStake}
+          </div>
+        </section>
+
+        <!-- 3: PARTICIPANT / SAMPLE CONTEXT -->
+        <section style="background:#fff; border:1px solid var(--border); border-radius:12px; padding:2rem; margin:2.5rem 0;">
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:0.75rem;">
+            02 / PARTICIPANT COHORT & SAMPLE CONTEXT
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1.25rem; font-size:0.9rem;">
+            <div>
+              <div style="color:var(--text-muted); font-size:0.75rem; text-transform:uppercase;">Screened Cohort</div>
+              <strong>${b.sampleCohort.totalParticipants} Participants</strong> (${b.sampleCohort.breakdown})
+            </div>
+            <div>
+              <div style="color:var(--text-muted); font-size:0.75rem; text-transform:uppercase;">Geographic Focus</div>
+              <strong>${b.sampleCohort.geographicCluster}</strong>
+            </div>
+            <div>
+              <div style="color:var(--text-muted); font-size:0.75rem; text-transform:uppercase;">Data Collection Method</div>
+              <strong>${b.sampleCohort.methodology}</strong>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4: KEY OBSERVATIONS -->
+        <section style="margin:3.5rem 0;">
+          <div class="section-label"><span class="dot"></span> 03 / SYNTHESIZED FIELD OBSERVATIONS</div>
+          <h3 style="font-family:'DM Serif Display',serif; font-size:2rem; margin-bottom:1.5rem;">
+            What the evidence proves in reality.
+          </h3>
+          <div style="display:flex; flex-direction:column; gap:1.25rem;">
+            ${b.keyObservations.map((obs, i) => `
+              <div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:1.75rem; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.5rem;">
+                  <h4 style="font-family:'DM Serif Display',serif; font-size:1.3rem; color:var(--text-dark); margin:0;">
+                    ${i + 1}. ${obs.title}
+                  </h4>
+                  <div style="display:flex; gap:0.4rem;">
+                    ${obs.traceableSessionIds.map(id => `
+                      <a href="#session-${id}" class="traceable-session-tag">Cite: ${id}</a>
+                    `).join('')}
+                  </div>
+                </div>
+                <p style="font-size:0.95rem; color:var(--text-body); line-height:1.6; margin:0;">
+                  ${obs.description}
+                </p>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+
+        <!-- 5: TRACEABLE SOURCE EVIDENCE -->
+        <section style="margin:4rem 0;" id="traceableEvidence">
+          <div class="section-label"><span class="dot"></span> 04 / ORIGINAL FIRSTHAND EVIDENCE (ANONYMIZED)</div>
+          <h3 style="font-family:'DM Serif Display',serif; font-size:2rem; margin-bottom:0.75rem;">
+            Verbatim Practitioner Records
+          </h3>
+          <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:1.75rem;">
+            Each citation in this brief resolves directly to one of the five permissioned participant sessions below.
+          </p>
+
+          <div style="display:flex; flex-direction:column; gap:1.5rem;">
+            ${sessions.map(s => `
+              <div style="background:#fff; border:1px solid var(--border); border-radius:12px; padding:1.75rem;" id="session-${s.id}">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+                  <div style="display:flex; align-items:center; gap:0.6rem;">
+                    <span style="font-family:'Space Grotesk',sans-serif; font-size:0.78rem; font-weight:700; background:rgba(234,88,12,0.1); color:var(--accent); padding:0.2rem 0.5rem; border-radius:4px;">
+                      ${s.id}
+                    </span>
+                    <strong style="font-size:0.95rem; color:var(--text-dark);">${s.participantPseudonym || s.role}</strong>
+                  </div>
+                  <span style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:var(--text-muted);">
+                    ${s.location} · ${s.language}
+                  </span>
+                </div>
+
+                <div style="background:var(--bg-light); border-left:3px solid var(--accent); padding:1.25rem; border-radius:0 8px 8px 0; margin-bottom:1rem;">
+                  <p style="font-family:'DM Serif Display',serif; font-size:1.15rem; font-style:italic; color:var(--text-dark); line-height:1.5; margin-bottom:0.5rem;">
+                    "${s.verbatim}"
+                  </p>
+                  ${s.translation && s.translation !== s.verbatim ? `
+                    <p style="font-size:0.85rem; color:var(--text-secondary); margin:0; line-height:1.4;">
+                      <strong>English Translation:</strong> "${s.translation}"
+                    </p>
+                  ` : ''}
+                </div>
+
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; font-size:0.85rem; color:var(--text-body); border-top:1px solid var(--border); padding-top:0.75rem;">
+                  <div><strong>Trigger:</strong> ${s.trigger}</div>
+                  <div><strong>Reported Impact:</strong> ${s.impact}</div>
+                  <div><strong>Workaround:</strong> ${s.workaround}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+
+        <!-- 6 & 7: OPERATIONAL WORKFLOW FRICTION MAP -->
+        <section style="background:#fff; border:1px solid var(--border); border-radius:12px; padding:2rem; margin:3.5rem 0;">
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:0.75rem;">
+            05 / OPERATIONAL WORKFLOW FRICTION MAP
+          </div>
+          <h3 style="font-family:'DM Serif Display',serif; font-size:1.6rem; margin-bottom:1.25rem;">
+            Where the workflow actually breaks.
+          </h3>
+          <div style="display:flex; flex-direction:column; gap:0.85rem;">
+            ${b.operationalWorkflowFriction.map((f, idx) => `
+              <div style="display:flex; gap:1rem; align-items:flex-start; padding:0.75rem 0; border-bottom:1px solid var(--border);">
+                <div style="font-family:'Space Grotesk',sans-serif; font-size:0.8rem; font-weight:700; color:var(--accent); min-width:180px;">
+                  ${f.step}
+                </div>
+                <div style="font-size:0.9rem; color:var(--text-secondary); line-height:1.5;">
+                  ${f.friction}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+
+        <!-- 10: CONTRADICTORY EVIDENCE (CRUCIAL B2B RIGOR) -->
+        <section style="margin:3.5rem 0;">
+          <div class="section-label"><span class="dot"></span> 06 / CONTRADICTION & DIVERGENCE AUDIT</div>
+          <h3 style="font-family:'DM Serif Display',serif; font-size:2rem; margin-bottom:0.75rem;">
+            Where participant experiences diverged.
+          </h3>
+          <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:1.5rem;">
+            Real markets are complex. We report where field evidence conflicted rather than smoothing over divergence.
+          </p>
+
+          ${b.contradictionsAndDivergences.map(c => `
+            <div class="divergence-card">
+              <h4 style="font-family:'Space Grotesk',sans-serif; font-size:0.95rem; font-weight:700; color:#92400E; margin-bottom:0.5rem;">
+                ⚖️ Divergence Point: ${c.pointOfDivergence}
+              </h4>
+              <p style="font-size:0.9rem; color:var(--text-body); line-height:1.6; margin:0;">
+                ${c.details}
+              </p>
+            </div>
+          `).join('')}
+        </section>
+
+        <!-- 11 & 12: RESEARCH GAPS & LIMITATIONS -->
+        <section style="background:#FFFBEB; border:1px solid #F59E0B; border-radius:12px; padding:2rem; margin:3.5rem 0;">
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#B45309; margin-bottom:0.75rem;">
+            07 / UNKNOWNS, RESEARCH GAPS & SAMPLE BOUNDARIES
+          </div>
+          <h3 style="font-family:'DM Serif Display',serif; font-size:1.5rem; color:#92400E; margin-bottom:1rem;">
+            What this evidence does NOT prove.
+          </h3>
+          <ul style="list-style:none; display:flex; flex-direction:column; gap:0.6rem; font-size:0.9rem; color:#78350F; padding:0; margin-bottom:1.5rem;">
+            ${b.missingInformationAndGaps.map(g => `<li style="padding-left:1.2rem; position:relative;"><span style="position:absolute; left:0;">⚠️</span> ${g}</li>`).join('')}
+          </ul>
+          <div style="border-top:1px solid rgba(245,158,11,0.3); padding-top:1rem; font-size:0.85rem; color:#92400E;">
+            <strong>Sample Boundary:</strong> ${b.researchLimitations.join(' ')}
+          </div>
+        </section>
+
+        <!-- 13: AI-ASSISTED INTERPRETATION (DISCLOSED & REVIEWED) -->
+        <section class="ai-interpretation-box">
+          <span class="ai-badge">${b.aiAssistedInterpretation.modelBadge}</span>
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:0.72rem; color:var(--text-muted); margin-bottom:0.75rem;">
+            ${b.aiAssistedInterpretation.interpretationNotice}
+          </div>
+          <h4 style="font-family:'DM Serif Display',serif; font-size:1.4rem; color:var(--text-dark); margin-bottom:0.75rem;">
+            Analytical Pattern Synthesis
+          </h4>
+          <p style="font-size:0.95rem; color:var(--text-body); line-height:1.7; margin:0;">
+            ${b.aiAssistedInterpretation.synthesis}
+          </p>
+        </section>
+
+        <!-- 14 & 15: ACTIONABLE DECISION OPTIONS -->
+        <section style="background:#fff; border:2px solid var(--accent); border-radius:14px; padding:2.5rem; margin:3.5rem 0;">
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:0.5rem;">
+            08 / STRATEGIC DECISION OPTIONS & NEXT STEPS
+          </div>
+          <h3 style="font-family:'DM Serif Display',serif; font-size:1.8rem; margin-bottom:1rem;">
+            Leadership Decision Framework
+          </h3>
+          <p style="font-size:0.95rem; line-height:1.6; margin-bottom:1.5rem;">
+            <strong>Primary Pivot Direction:</strong> ${b.decisionRecommendation.pivotOption}
+          </p>
+          <div style="background:var(--bg-light); border-radius:8px; padding:1.25rem; margin-bottom:1.5rem;">
+            <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-dark); margin-bottom:0.5rem;">
+              RECOMMENDED NEXT ACTIONS:
+            </div>
+            <ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:0.5rem; font-size:0.88rem; color:var(--text-body);">
+              ${b.decisionRecommendation.suggestedNextSteps.map(step => `<li>${step}</li>`).join('')}
+            </ul>
+          </div>
+          <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+            <a href="missions.html" class="btn-cta-solid">Commission Next Cohort Investigation →</a>
+            <a href="mission-workspace.html?id=${b.missionId}" class="btn-cta-ghost">View Mission Workspace</a>
+          </div>
+        </section>
+      `;
+    });
+  </script>
+</body>
+</html>

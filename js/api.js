@@ -1,375 +1,380 @@
 /**
- * GRIPR.STUDIO — Frontend API Service Abstraction (Phase 1)
+ * GRIPR.STUDIO — B2B Problem Intelligence API Layer (Phase 1 Refactor)
  * 
- * Provides a clean Promise-based API layer decoupling UI components from data storage.
- * In Phase 1, it reads and updates synthetic fixtures (seeded from js/fixtures.js and
- * persisted in localStorage). In Phase 2, these methods will point to Cloud Run / Firestore / Gemini API
- * without modifying UI templates or interaction code.
+ * Provides a Promise-based API abstraction mapping directly to B2B Research Missions,
+ * invitation-based participant sessions, Decision Intelligence Briefs, and internal Research Operations.
+ * 
+ * All data in Phase 1 is stored in localStorage with synthetic fixtures, fully isolated
+ * and ready for Phase 2 backend (Cloud Run + Firestore + Gemini) integration.
  */
 
 (function () {
-  const STORAGE_KEY_SIGNALS = 'gripr_signals_store_v1';
-  const STORAGE_KEY_QUEUE = 'gripr_admin_queue_v1';
-  const STORAGE_KEY_MISSIONS = 'gripr_missions_store_v1';
+  const STORAGE_KEY_MISSIONS = 'gripr_b2b_missions_v2';
+  const STORAGE_KEY_SESSIONS = 'gripr_b2b_sessions_v2';
+  const STORAGE_KEY_INVITATIONS = 'gripr_b2b_invitations_v2';
+  const STORAGE_KEY_BRIEFS = 'gripr_b2b_briefs_v2';
+  const STORAGE_KEY_OPS = 'gripr_b2b_ops_v2';
 
-  // Seed storage if empty
   function initStore() {
-    if (!localStorage.getItem(STORAGE_KEY_SIGNALS)) {
-      const initialSignals = window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.signals : [];
-      localStorage.setItem(STORAGE_KEY_SIGNALS, JSON.stringify(initialSignals));
-    }
-    if (!localStorage.getItem(STORAGE_KEY_QUEUE)) {
-      const initialQueue = window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.adminQueue : [];
-      localStorage.setItem(STORAGE_KEY_QUEUE, JSON.stringify(initialQueue));
-    }
     if (!localStorage.getItem(STORAGE_KEY_MISSIONS)) {
-      const initialMissions = window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.sampleMissions : [];
-      localStorage.setItem(STORAGE_KEY_MISSIONS, JSON.stringify(initialMissions));
+      const initial = window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.missions : [];
+      localStorage.setItem(STORAGE_KEY_MISSIONS, JSON.stringify(initial));
+    }
+    if (!localStorage.getItem(STORAGE_KEY_SESSIONS)) {
+      const initial = window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.participantSessions : [];
+      localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(initial));
+    }
+    if (!localStorage.getItem(STORAGE_KEY_INVITATIONS)) {
+      const initial = window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.invitations : [];
+      localStorage.setItem(STORAGE_KEY_INVITATIONS, JSON.stringify(initial));
+    }
+    if (!localStorage.getItem(STORAGE_KEY_BRIEFS)) {
+      const initial = window.GRIPR_FIXTURES ? [window.GRIPR_FIXTURES.decisionBrief] : [];
+      localStorage.setItem(STORAGE_KEY_BRIEFS, JSON.stringify(initial));
+    }
+    if (!localStorage.getItem(STORAGE_KEY_OPS)) {
+      const initial = window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.opsQueue : [];
+      localStorage.setItem(STORAGE_KEY_OPS, JSON.stringify(initial));
     }
   }
 
   initStore();
 
-  function getRawSignals() {
+  function getRaw(key, fallback = []) {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY_SIGNALS)) || [];
+      return JSON.parse(localStorage.getItem(key)) || fallback;
     } catch (e) {
-      return window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.signals : [];
+      return fallback;
     }
   }
 
-  function getRawQueue() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY_QUEUE)) || [];
-    } catch (e) {
-      return window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.adminQueue : [];
-    }
+  function setRaw(key, val) {
+    localStorage.setItem(key, JSON.stringify(val));
   }
 
-  function getRawMissions() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY_MISSIONS)) || [];
-    } catch (e) {
-      return window.GRIPR_FIXTURES ? window.GRIPR_FIXTURES.sampleMissions : [];
-    }
-  }
-
-  // Simulated async latency for realistic skeleton and transition validation
-  function delay(ms = 120) {
+  function delay(ms = 100) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   window.GriprAPI = {
     /**
-     * Fetch list of verified signals with optional filters
-     * @param {Object} options
-     * @param {string} options.category - e.g. 'all', 'agriculture', 'healthcare'
-     * @param {string} options.search - search keyword
-     * @param {string} options.evidenceStatus - 'all', 'Verified Firsthand', 'Triangulated', 'Emerging'
-     */
-    async getSignals({ category = 'all', search = '', evidenceStatus = 'all' } = {}) {
-      await delay(100);
-      let list = getRawSignals();
-
-      if (category && category !== 'all') {
-        const catLower = category.toLowerCase();
-        list = list.filter(s => (s.category || '').toLowerCase() === catLower);
-      }
-
-      if (evidenceStatus && evidenceStatus !== 'all') {
-        list = list.filter(s => s.evidenceStatus === evidenceStatus);
-      }
-
-      if (search && search.trim() !== '') {
-        const query = search.toLowerCase().trim();
-        list = list.filter(s => {
-          const matchTitle = (s.title || '').toLowerCase().includes(query);
-          const matchQuote = (s.quote || '').toLowerCase().includes(query);
-          const matchTrans = (s.translation || '').toLowerCase().includes(query);
-          const matchRegion = (s.region || '').toLowerCase().includes(query);
-          const matchWorkaround = (s.workaround || '').toLowerCase().includes(query);
-          const matchId = (s.id || '').toLowerCase().includes(query);
-          return matchTitle || matchQuote || matchTrans || matchRegion || matchWorkaround || matchId;
-        });
-      }
-
-      return {
-        success: true,
-        count: list.length,
-        totalInStore: getRawSignals().length,
-        signals: list
-      };
-    },
-
-    /**
-     * Fetch full case file for a single signal
-     * @param {string} id - e.g. 'SIG-019'
-     */
-    async getSignalById(id) {
-      await delay(80);
-      if (!id) return { success: false, error: 'No signal ID provided' };
-
-      const list = getRawSignals();
-      const signal = list.find(s => s.id.toUpperCase() === id.toUpperCase());
-
-      if (!signal) {
-        return { success: false, error: `Signal ${id} not found in intelligence registry.` };
-      }
-
-      // Populate related signals
-      let related = [];
-      if (signal.relatedSignalIds && signal.relatedSignalIds.length > 0) {
-        related = list.filter(s => signal.relatedSignalIds.includes(s.id));
-      }
-
-      return {
-        success: true,
-        signal,
-        related
-      };
-    },
-
-    /**
-     * Submit a firsthand problem report from a contributor
+     * Submit a B2B Mission Scoping Request from an organization
      * @param {Object} data
      */
-    async submitSignal(data) {
-      await delay(250);
-
-      // Validate required fields
-      if (!data.frustration || data.frustration.trim().length < 20) {
-        return {
-          success: false,
-          errors: { frustration: 'Please describe the frustration in at least 20 characters.' }
-        };
-      }
-
-      if (!data.workaround || data.workaround.trim().length < 5) {
-        return {
-          success: false,
-          errors: { workaround: 'Please describe how people currently deal with this problem.' }
-        };
-      }
-
-      if (!data.consentPublic) {
-        return {
-          success: false,
-          errors: { consentPublic: 'Publication consent is required to log this problem.' }
-        };
-      }
-
-      if (data.consentContact && (!data.email || !data.email.includes('@'))) {
-        return {
-          success: false,
-          errors: { email: 'Please provide a valid email if you choose to allow builder contact.' }
-        };
-      }
-
-      // Generate a synthetic intake ID
-      const timestamp = new Date().toISOString();
-      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-      const trackingId = `SIG-INTAKE-${randomSuffix}`;
-
-      // Create new intake record for the admin review queue
-      const newQueueItem = {
-        id: `REV-${randomSuffix}`,
-        trackingId: trackingId,
-        submittedAt: timestamp,
-        contributorMeta: `${data.role || 'Unspecified Operator'}, ${data.region || 'India'}`,
-        category: data.category || 'other',
-        region: data.region || 'Unspecified Region',
-        language: data.language || 'Vernacular / Mixed',
-        verbatim: data.frustration.trim(),
-        workaround: data.workaround.trim(),
-        consent: {
-          publicAnonymized: true,
-          allowBuilderContact: !!data.consentContact,
-          contactEmail: data.consentContact ? data.email.trim() : null
-        },
-        extracted: {
-          actor: data.role || 'Observed Operator',
-          trigger: 'Reported workflow friction',
-          impact: 'Awaiting human review & extraction verification',
-          workaround: data.workaround.trim(),
-          flaggedUnknowns: 'Preliminary intake — verification pending'
-        },
-        candidateMatches: [],
-        reviewStatus: 'pending'
-      };
-
-      const queue = getRawQueue();
-      queue.unshift(newQueueItem);
-      localStorage.setItem(STORAGE_KEY_QUEUE, JSON.stringify(queue));
-
-      return {
-        success: true,
-        trackingId: trackingId,
-        status: 'queued_for_review',
-        message: 'Your report has been queued for human verification and extraction.'
-      };
-    },
-
-    /**
-     * Submit an organization research mission scoping request
-     * @param {Object} missionData
-     */
-    async createMission(missionData) {
-      await delay(250);
+    async createMissionRequest(data) {
+      await delay(200);
 
       const errors = {};
-      if (!missionData.orgName || missionData.orgName.trim().length < 2) {
-        errors.orgName = 'Organization / Team name is required.';
+      if (!data.orgName || data.orgName.trim().length < 2) {
+        errors.orgName = 'Organization / Company name is required.';
       }
-      if (!missionData.contactEmail || !missionData.contactEmail.includes('@')) {
-        errors.contactEmail = 'Valid work email is required.';
+      if (!data.contactPerson || data.contactPerson.trim().length < 2) {
+        errors.contactPerson = 'Contact person name is required.';
       }
-      if (!missionData.problemToInvestigate || missionData.problemToInvestigate.trim().length < 20) {
-        errors.problemToInvestigate = 'Please describe the problem or sector to investigate in at least 20 characters.';
+      if (!data.contactEmail || !data.contactEmail.includes('@')) {
+        errors.contactEmail = 'A valid work email address is required.';
       }
-      if (!missionData.targetAudience || missionData.targetAudience.trim().length < 5) {
-        errors.targetAudience = 'Please specify the target operator or audience profile.';
+      if (!data.decisionAtStake || data.decisionAtStake.trim().length < 20) {
+        errors.decisionAtStake = 'Please describe the decision at stake in at least 20 characters.';
+      }
+      if (!data.problemToInvestigate || data.problemToInvestigate.trim().length < 20) {
+        errors.problemToInvestigate = 'Please describe the problem or workflow to investigate.';
+      }
+      if (!data.targetParticipantProfile || data.targetParticipantProfile.trim().length < 5) {
+        errors.targetParticipantProfile = 'Target operator or participant profile is required.';
       }
 
       if (Object.keys(errors).length > 0) {
         return { success: false, errors };
       }
 
-      const randomCode = Math.floor(100 + Math.random() * 900);
-      const missionRef = `MSN-2026-${randomCode}`;
+      const randomNum = Math.floor(100 + Math.random() * 900);
+      const missionId = `MSN-2026-${randomNum}`;
 
       const newMission = {
-        id: missionRef,
-        createdAt: new Date().toISOString(),
-        orgName: missionData.orgName.trim(),
-        contactEmail: missionData.contactEmail.trim(),
-        role: missionData.role || 'Product Lead',
-        sector: missionData.sector || 'General Workflow',
-        problemToInvestigate: missionData.problemToInvestigate.trim(),
-        targetAudience: missionData.targetAudience.trim(),
-        primaryDecision: missionData.primaryDecision ? missionData.primaryDecision.trim() : 'Unspecified',
-        deliverables: missionData.deliverables || ['Decision Brief', 'Workflow Friction Map'],
-        status: 'Scoping Submitted',
-        price: '₹49,000 (Pilot Scope)'
+        id: missionId,
+        orgName: data.orgName.trim(),
+        contactPerson: data.contactPerson.trim(),
+        contactEmail: data.contactEmail.trim(),
+        role: data.role || 'Product Lead',
+        sector: data.sector || 'general',
+        decisionAtStake: data.decisionAtStake.trim(),
+        hypothesis: data.hypothesis ? data.hypothesis.trim() : 'Preliminary hypothesis under evaluation',
+        falsificationCriteria: data.falsificationCriteria ? data.falsificationCriteria.trim() : 'To be refined during scoping alignment',
+        problemToInvestigate: data.problemToInvestigate.trim(),
+        targetParticipantProfile: data.targetParticipantProfile.trim(),
+        industry: data.industry || 'B2B Workflow',
+        geography: data.geography || 'India (Regional clusters)',
+        urgency: data.urgency || 'Standard (4-6 weeks)',
+        constraints: data.constraints || 'None specified',
+        deliverables: data.deliverables || ['Decision Intelligence Brief', 'Workflow Friction Map'],
+        status: 'Requested',
+        pricing: '₹49,000 (Experimental Pilot Scope)',
+        pricingDisclaimer: 'Experimental pilot pricing. Unvalidated research model.',
+        participantTargetCount: 5,
+        completedSessionCount: 0,
+        createdAt: new Date().toISOString()
       };
 
-      const missions = getRawMissions();
+      const missions = getRaw(STORAGE_KEY_MISSIONS);
       missions.unshift(newMission);
-      localStorage.setItem(STORAGE_KEY_MISSIONS, JSON.stringify(missions));
+      setRaw(STORAGE_KEY_MISSIONS, missions);
+
+      // Add to ops desk
+      const ops = getRaw(STORAGE_KEY_OPS);
+      ops.unshift({
+        id: `OPS-${Math.floor(1000 + Math.random() * 9000)}`,
+        missionId: missionId,
+        type: 'scope_review',
+        title: `New Scope Request: ${data.orgName} (${missionId})`,
+        status: 'pending',
+        actionTaken: 'Awaiting research team scoping review.'
+      });
+      setRaw(STORAGE_KEY_OPS, ops);
 
       return {
         success: true,
-        missionRef: missionRef,
-        status: 'Scoping Confirmed',
-        sla: '24 business hours for researcher review and mutual NDA dispatch.'
+        missionId: missionId,
+        status: 'Requested',
+        message: 'Demo mission request recorded locally. Our research team will review scoping parameters.'
       };
     },
 
     /**
-     * Fetch intake queue for Admin review desk
+     * Get a mission by ID
+     * @param {string} id - e.g. 'MSN-2026-081'
      */
-    async getAdminQueue() {
+    async getMission(id) {
       await delay(80);
-      const queue = getRawQueue();
-      const signals = getRawSignals();
+      const missions = getRaw(STORAGE_KEY_MISSIONS);
+      const mission = missions.find(m => m.id.toUpperCase() === (id || '').toUpperCase());
+
+      if (!mission) {
+        return { success: false, error: `Mission ${id} not found.` };
+      }
+
+      // Check for brief availability
+      const briefs = getRaw(STORAGE_KEY_BRIEFS);
+      const brief = briefs.find(b => b.missionId.toUpperCase() === mission.id.toUpperCase());
+
+      // Get completed sessions for this mission
+      const sessions = getRaw(STORAGE_KEY_SESSIONS);
+      const missionSessions = sessions.filter(s => s.missionId.toUpperCase() === mission.id.toUpperCase());
+
       return {
         success: true,
-        pendingCount: queue.filter(q => q.reviewStatus === 'pending').length,
-        approvedCount: signals.length,
-        flaggedCount: queue.filter(q => q.reviewStatus === 'needs_info').length,
-        queue: queue
+        mission,
+        briefAvailable: !!brief,
+        sessions: missionSessions
       };
     },
 
     /**
-     * Process an admin moderation decision on an intake item
-     * @param {string} id - e.g. 'REV-104'
-     * @param {'approve'|'reject'|'flag'} decision
-     * @param {Object} [details]
+     * List all missions
      */
-    async reviewSignal(id, decision, details = {}) {
-      await delay(150);
-      const queue = getRawQueue();
-      const itemIndex = queue.findIndex(q => q.id === id);
-
-      if (itemIndex === -1) {
-        return { success: false, error: 'Queue item not found.' };
-      }
-
-      const item = queue[itemIndex];
-
-      if (decision === 'approve') {
-        item.reviewStatus = 'approved';
-
-        // Add to public verified signals
-        const signals = getRawSignals();
-        const nextIdNumber = signals.length + 1;
-        const newSigId = `SIG-${String(nextIdNumber).padStart(3, '0')}`;
-
-        const newSignal = {
-          id: newSigId,
-          title: details.title || `Operational Inefficiency in ${item.category.toUpperCase()}`,
-          quote: item.verbatim,
-          translation: item.verbatim,
-          category: item.category,
-          region: item.region,
-          month: 'May 2026',
-          language: item.language,
-          evidenceStatus: 'Verified Firsthand',
-          actor: item.extracted.actor || item.contributorMeta,
-          incident: item.extracted.trigger || 'Firsthand reported operational friction',
-          impact: item.extracted.impact || 'Verified firsthand operational friction',
-          workaround: item.workaround || 'Manual workaround documented',
-          researchGaps: [
-            'Newly approved firsthand signal; corroborating independent reports requested',
-            'Pilot market willingness-to-pay unverified'
-          ],
-          limitations: 'Newly accepted firsthand report from field intake desk.',
-          relatedSignalIds: []
-        };
-
-        signals.unshift(newSignal);
-        localStorage.setItem(STORAGE_KEY_SIGNALS, JSON.stringify(signals));
-        localStorage.setItem(STORAGE_KEY_QUEUE, JSON.stringify(queue));
-
-        return {
-          success: true,
-          action: 'approved',
-          assignedSignalId: newSigId,
-          message: `Submission ${id} approved and published as ${newSigId} to Problem Explorer.`
-        };
-      } else if (decision === 'reject') {
-        item.reviewStatus = 'rejected';
-        item.rejectReason = details.reason || 'Insufficient verifiable firsthand detail';
-        localStorage.setItem(STORAGE_KEY_QUEUE, JSON.stringify(queue));
-        return {
-          success: true,
-          action: 'rejected',
-          message: `Submission ${id} marked out of scope.`
-        };
-      } else if (decision === 'flag') {
-        item.reviewStatus = 'needs_info';
-        item.flagNote = details.note || 'Requires corroborating operator evidence';
-        localStorage.setItem(STORAGE_KEY_QUEUE, JSON.stringify(queue));
-        return {
-          success: true,
-          action: 'flagged',
-          message: `Submission ${id} flagged for evidence follow-up.`
-        };
-      }
-
-      return { success: false, error: 'Invalid decision action.' };
+    async getMissionList() {
+      await delay(60);
+      const missions = getRaw(STORAGE_KEY_MISSIONS);
+      return { success: true, count: missions.length, missions };
     },
 
     /**
-     * Reset store back to clean initial fixtures (useful for testing)
+     * Get Decision Intelligence Brief for a mission
+     * @param {string} missionId
+     */
+    async getMissionBrief(missionId = 'MSN-2026-081') {
+      await delay(100);
+      const briefs = getRaw(STORAGE_KEY_BRIEFS);
+      const brief = briefs.find(b => b.missionId.toUpperCase() === missionId.toUpperCase()) || briefs[0];
+
+      if (!brief) {
+        return { success: false, error: 'Decision brief not yet generated for this mission.' };
+      }
+
+      // Fetch linked mission metadata
+      const missions = getRaw(STORAGE_KEY_MISSIONS);
+      const mission = missions.find(m => m.id.toUpperCase() === brief.missionId.toUpperCase());
+
+      // Fetch linked participant sessions
+      const sessions = getRaw(STORAGE_KEY_SESSIONS);
+      const linkedSessions = sessions.filter(s => s.missionId.toUpperCase() === brief.missionId.toUpperCase());
+
+      return {
+        success: true,
+        brief,
+        mission,
+        sessions: linkedSessions
+      };
+    },
+
+    /**
+     * Get research invitation details for an invited participant
+     * @param {string} token - e.g. 'INV-AGRI-081'
+     */
+    async getResearchInvitation(token = 'INV-AGRI-081') {
+      await delay(70);
+      const invitations = getRaw(STORAGE_KEY_INVITATIONS);
+      const invite = invitations.find(i => i.token.toUpperCase() === (token || '').toUpperCase()) || invitations[0];
+
+      if (!invite) {
+        return { success: false, error: 'Invitation token is invalid or has expired.' };
+      }
+
+      return { success: true, invitation: invite };
+    },
+
+    /**
+     * Submit an invited research participant session
+     * @param {Object} data
+     */
+    async submitResearchResponse(data) {
+      await delay(200);
+
+      const errors = {};
+      if (!data.incidentNarrative || data.incidentNarrative.trim().length < 20) {
+        errors.incidentNarrative = 'Please provide details of your recent experience (minimum 20 characters).';
+      }
+      if (!data.existingWorkaround || data.existingWorkaround.trim().length < 5) {
+        errors.existingWorkaround = 'Please describe what workaround you used instead.';
+      }
+      if (!data.consentStudyProcessing) {
+        errors.consentStudyProcessing = 'Research study processing consent is required to participate.';
+      }
+
+      if (Object.keys(errors).length > 0) {
+        return { success: false, errors };
+      }
+
+      const sessionId = `SES-${Math.floor(400 + Math.random() * 500)}`;
+      const newSession = {
+        id: sessionId,
+        missionId: data.missionId || 'MSN-2026-081',
+        participantPseudonym: `Participant (${data.role || 'Operator'})`,
+        role: data.role || 'Screened Operator',
+        location: data.location || 'India (Regional)',
+        language: data.language || 'Hinglish / Vernacular',
+        sessionDate: new Date().toISOString().split('T')[0],
+        verbatim: data.incidentNarrative.trim(),
+        translation: data.incidentNarrative.trim(),
+        workflow: data.affectedWorkflow || 'Operational procurement workflow',
+        trigger: 'Firsthand incident reported during study session',
+        impact: data.operationalImpact || 'Unquantified friction',
+        workaround: data.existingWorkaround.trim(),
+        divergenceNotes: 'Fresh participant session awaiting research desk moderation.',
+        consent: {
+          studyProcessing: !!data.consentStudyProcessing,
+          sanitizedBriefSharing: !!data.consentSanitizedBriefSharing,
+          followUpInterview: !!data.consentFollowUpInterview,
+          contactEmail: data.consentFollowUpInterview ? (data.contactEmail || null) : null
+        }
+      };
+
+      const sessions = getRaw(STORAGE_KEY_SESSIONS);
+      sessions.unshift(newSession);
+      setRaw(STORAGE_KEY_SESSIONS, sessions);
+
+      // Queue in ops
+      const ops = getRaw(STORAGE_KEY_OPS);
+      ops.unshift({
+        id: `OPS-${Math.floor(1000 + Math.random() * 9000)}`,
+        missionId: newSession.missionId,
+        type: 'session_review',
+        title: `Review New Participant Session: ${sessionId} (${newSession.role})`,
+        status: 'pending',
+        actionTaken: 'Awaiting moderation for brief synthesis.'
+      });
+      setRaw(STORAGE_KEY_OPS, ops);
+
+      return {
+        success: true,
+        sessionId: sessionId,
+        message: 'Research session response recorded locally. Thank you for contributing your firsthand operational experience.'
+      };
+    },
+
+    /**
+     * Get internal research operations desk queue
+     */
+    async getResearchOperationsQueue() {
+      await delay(80);
+      const ops = getRaw(STORAGE_KEY_OPS);
+      const missions = getRaw(STORAGE_KEY_MISSIONS);
+      const sessions = getRaw(STORAGE_KEY_SESSIONS);
+
+      return {
+        success: true,
+        opsQueue: ops,
+        missions,
+        sessions,
+        metrics: {
+          activeMissions: missions.filter(m => m.status !== 'Closed').length,
+          pendingReviews: ops.filter(o => o.status === 'pending').length,
+          completedBriefs: missions.filter(m => m.status === 'Brief Ready').length,
+          totalParticipantsScreened: sessions.length
+        }
+      };
+    },
+
+    /**
+     * Moderate or review an evidence session / ops task
+     */
+    async reviewEvidence(opsId, decision, details = {}) {
+      await delay(120);
+      const ops = getRaw(STORAGE_KEY_OPS);
+      const item = ops.find(o => o.id === opsId);
+
+      if (!item) {
+        return { success: false, error: 'Operations record not found.' };
+      }
+
+      item.status = decision === 'approve' ? 'reviewed' : (decision === 'flag' ? 'flagged' : 'rejected');
+      item.actionTaken = details.notes || `Moderated as ${decision}`;
+      setRaw(STORAGE_KEY_OPS, ops);
+
+      return {
+        success: true,
+        action: decision,
+        message: `Task ${opsId} updated to ${item.status}.`
+      };
+    },
+
+    /**
+     * Toggle or update mission lifecycle state (useful for UI state switching & testing)
+     * @param {string} missionId
+     * @param {string} newStatus
+     */
+    async updateMissionStatus(missionId, newStatus) {
+      await delay(100);
+      const missions = getRaw(STORAGE_KEY_MISSIONS);
+      const mission = missions.find(m => m.id.toUpperCase() === missionId.toUpperCase());
+
+      if (!mission) {
+        return { success: false, error: 'Mission not found.' };
+      }
+
+      mission.status = newStatus;
+      setRaw(STORAGE_KEY_MISSIONS, missions);
+
+      return {
+        success: true,
+        missionId,
+        newStatus,
+        message: `Mission ${missionId} status transitioned to "${newStatus}".`
+      };
+    },
+
+    /**
+     * Re-seed synthetic fixtures
      */
     resetFixtures() {
       if (window.GRIPR_FIXTURES) {
-        localStorage.setItem(STORAGE_KEY_SIGNALS, JSON.stringify(window.GRIPR_FIXTURES.signals));
-        localStorage.setItem(STORAGE_KEY_QUEUE, JSON.stringify(window.GRIPR_FIXTURES.adminQueue));
-        localStorage.setItem(STORAGE_KEY_MISSIONS, JSON.stringify(window.GRIPR_FIXTURES.sampleMissions));
+        setRaw(STORAGE_KEY_MISSIONS, window.GRIPR_FIXTURES.missions);
+        setRaw(STORAGE_KEY_SESSIONS, window.GRIPR_FIXTURES.participantSessions);
+        setRaw(STORAGE_KEY_INVITATIONS, window.GRIPR_FIXTURES.invitations);
+        setRaw(STORAGE_KEY_BRIEFS, [window.GRIPR_FIXTURES.decisionBrief]);
+        setRaw(STORAGE_KEY_OPS, window.GRIPR_FIXTURES.opsQueue);
       }
-      return { success: true, message: 'Synthetic fixtures re-initialized.' };
+      return { success: true, message: 'B2B Synthetic demo fixtures re-initialized.' };
     }
   };
 })();

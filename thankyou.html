@@ -3,41 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Signal Received — GRIPR.STUDIO</title>
+  <title>Mission Scope Received — GRIPR.STUDIO</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
   <style>
-    body { background: var(--bg-light); }
-    .ty-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-    .ty-box { width: 100%; max-width: 580px; text-align: center; }
-    .ty-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; font-size: 1.75rem; font-weight: bold; }
-    .ty-box h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2.4rem, 6vw, 3.2rem); font-weight: 400; color: var(--text-dark); margin-bottom: 1rem; line-height: 1.15; }
-    .ty-sub { font-size: 1.05rem; color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.6; }
-    .ty-actions { display: flex; flex-direction: column; gap: 0.75rem; max-width: 400px; margin: 0 auto; }
+    body { background: var(--bg-light); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+    .ty-box { width: 100%; max-width: 600px; text-align: center; background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 3rem; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+    .ty-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 1.75rem; font-weight: bold; }
   </style>
 </head>
 <body>
-  <div class="ty-wrap">
-    <div class="ty-box">
-      <div class="ty-icon">✓</div>
-      <h1>Firsthand Reality Received.</h1>
-      <p class="ty-sub">
-        Thank you for contributing to the ground economy intelligence registry. Your observation helps builders focus on what is actually broken.
-      </p>
+  <div class="ty-box">
+    <div class="ty-icon">✓</div>
+    <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:var(--accent); font-weight:700; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.75rem;">
+      DEMO MISSION RECORDED
+    </div>
+    <h1 style="font-family:'DM Serif Display',serif; font-size:2.4rem; color:var(--text-dark); margin-bottom:1rem;">
+      Research Scope Registered.
+    </h1>
+    <p style="font-size:0.95rem; color:var(--text-secondary); line-height:1.6; margin-bottom:2rem;">
+      Your problem research mission specification has been recorded in your local browser session. You can now access your organization mission workspace or inspect our example deliverable.
+    </p>
 
-      <div class="ty-actions">
-        <a href="feed.html" class="btn-cta-solid" style="text-align:center;">
-          Explore Problem Intelligence Explorer →
-        </a>
-        <a href="missions.html" class="btn-cta-ghost" style="text-align:center;">
-          Learn About Research Missions
-        </a>
-        <a href="index.html" style="font-family:'Space Grotesk',sans-serif; font-size:0.85rem; color:var(--text-secondary); margin-top:0.5rem; text-decoration:none;">
-          ← Return to Homepage
-        </a>
-      </div>
+    <div style="display:flex; flex-direction:column; gap:0.75rem;">
+      <a href="mission-workspace.html?id=MSN-2026-081" class="btn-cta-solid" style="text-align:center;">
+        Open Mission Workspace →
+      </a>
+      <a href="brief.html" class="btn-cta-ghost" style="text-align:center;">
+        Inspect Example Decision Brief (MSN-2026-081)
+      </a>
+      <a href="index.html" style="font-family:'Space Grotesk',sans-serif; font-size:0.85rem; color:var(--text-muted); margin-top:0.75rem; text-decoration:none;">
+        ← Return to Homepage
+      </a>
     </div>
   </div>
 </body>

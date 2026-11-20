@@ -1,116 +1,97 @@
-# GRIPR.STUDIO — Evidence-First Problem Intelligence Platform
+# GRIPR.STUDIO — AI-Powered Problem Intelligence Platform
 
-> **"Don't start with ideas. Start with reality."**  
-> GRIPR collects firsthand operator experiences and transforms them into evidence-linked problem intelligence for builders, founders, and research organizations.
-
----
-
-## 1. Overview & Product Principle
-
-Most product teams begin by guessing user problems or following social media trends. The cost: investing capital and engineering effort into solutions before understanding the underlying people, workflows, and evidence.
-
-GRIPR reverses this paradigm through an **evidence-first discovery pipeline**:
-1. **COLLECT:** Operators and field observers report recent incidents, workflows, and workarounds with explicit 2-tier consent.
-2. **STRUCTURE:** Extracted facts, affected actors, and friction costs are isolated while unknown variables and sample limitations are clearly flagged.
-3. **CONNECT:** Possible recurring issues are suggested as candidate clusters without prematurely merging distinct root causes.
-4. **INVESTIGATE:** Builders inspect detailed Problem Case Files; organizations commission focused, buyer-funded GRIPR Research Missions.
+> **"Better products begin with better problem understanding."**  
+> GRIPR turns firsthand operational experiences into evidence-backed research that helps organizations make better product decisions.
 
 ---
 
-## 2. Product Areas & Page Map
+## 1. Product Overview
 
-| Product Area | File | Description | Key Features |
+GRIPR.STUDIO is a **B2B Problem Intelligence Platform**. Its primary commercial product is **GRIPR Missions** — fixed-scope, buyer-funded research investigations commissioned by product teams, startup founders, and research organizations.
+
+Instead of building products on guesswork, Twitter/Reddit echo chambers, or surface-level surveys, organizations commission GRIPR to:
+1. **Define the Critical Decision:** Frame the specific product roadmap choice and define falsification conditions.
+2. **Recruit Screened Practitioners:** Source genuine field operators (not professional survey respondents) matching the exact workflow context.
+3. **Capture Permissioned Evidence:** Conduct structured qualitative research sessions recording incidents, costs, and existing manual workarounds under 3-tier granular consent.
+4. **Synthesize with Gemini + Human Review:** Structure findings, audit contradictions, and isolate research gaps under human researcher oversight.
+5. **Deliver Decision Intelligence Briefs:** Deliver an executive deliverable recommending whether to **Reject / Reframe**, **Investigate More**, or **Proceed to a Pilot**.
+
+---
+
+## 2. Platform Architecture & Screen Map
+
+| Experience | Route | Role / Purpose | Key Features |
 |---|---|---|---|
-| **Landing Page** | `index.html` | Editorial homepage introducing the problem discovery pipeline. | Editorial hero, entry points for contributors/builders/organizations, curated preview cards, 4-step workflow, mission pilot offer, builder dispatch signup. |
-| **Contributor Experience** | `submit.html` | Firsthand problem reporting desk. | Natural-language incident input, context questions (sector, region, role), current workaround description, 2-tier consent controls (public brief vs. builder contact), live validation, confirmation card with tracking ID. |
-| **Builder Experience** | `feed.html` | Problem Explorer registry. | Real-time search across quotes/workarounds/IDs, sector filtering, explicit evidence grade badges (*Verified Firsthand*, *Triangulated*, *Emerging*), zero synthetic upvote counts, loading skeletons, responsive grid. |
-| **Problem Case File** | `case-file.html` | In-depth case investigation view. | Verbatim quote with translation, structured intelligence matrix (actor, trigger, impact, workaround), responsible unknowns and research gaps, sample limitations, mission request triggers. |
-| **Research Missions** | `missions.html` | Commercial scoping desk for product teams. | ₹49,000 test pilot offer (5 screened operator interviews, workflow friction map, decision brief, 10-day SLA), interactive scoping form, reactive scope summary. |
-| **Admin Review Desk** | `admin.html` | Internal moderation workbench. | Submission review queue, side-by-side candidate match comparison, extraction review, moderation decisions (*Approve & Publish*, *Flag Missing Evidence*, *Reject*), synthetic fixture reset. |
+| **Editorial Homepage** | `index.html` | B2B product positioning and discovery pipeline overview. | Editorial hero, problem with guesswork, 4-step discovery workflow, mission pilot offer, illustrative brief teaser. |
+| **Mission Scoping Wizard** | `missions.html` | Client acquisition & research scoping desk. | 4-step wizard: Organization info -> Objective & Falsification -> Target Participants -> Review & Submit. Saves to local demo store. |
+| **Mission Workspace** | `mission-workspace.html` | Client tracking portal for commissioned missions. | Lifecycle tracker (`Requested` to `Brief Ready`), scope summary, recorded evidence preview, demo state switcher. |
+| **Participant Portal** | `participate.html` | Invitation-based research session desk. | Study briefing, ₹1,500 honorarium notice, incident narrative prompts, granular 3-tier consent controls. |
+| **Decision Intelligence Brief** | `brief.html` | Executive research deliverable (MSN-2026-081). | 15-section brief with executive recommendation banner, traceable session citations, contradiction audit, workflow friction map, and limitations. |
+| **Research Operations Desk** | `ops.html` | Internal operational workbench for research team. | Intake queue, scope review, participant screening, session verification, and AI interpretation approval. |
 
 ---
 
-## 3. Design System & Typography
+## 3. Design System & Visual Identity
 
-Preserving the authentic editorial GRIPR visual identity:
-
-### Color Palette
-- **Warm Cream (`--bg-light`):** `#FAF5F0` (Editorial landing, submit, missions)
-- **Near-Black (`--bg-dark`):** `#141414` (Dark problem explorer, case files, admin)
-- **Dark Card (`--bg-dark-card`):** `#1E1E1E` (Explorer card surfaces)
-- **Pure White (`--bg-white`):** `#FFFFFF` (Forms, content cards)
-- **Accent Orange (`--accent`):** `#EA580C` (Primary highlights & interactive actions)
-- **Accent Hover (`--accent-hover`):** `#F97316`
-- **Accent Light Tint (`--accent-light`):** `#FFF3EB`
-
-### Typography Hierarchy
-- **Editorial Headings:** `DM Serif Display`, serif (400, italic accents)
-- **Navigation, Buttons, Badges, Labels:** `Space Grotesk`, sans-serif (500, 600, 700)
-- **Body & Explanatory Text:** `DM Sans`, sans-serif (400, 500)
-
-### Visual Characteristics
-- Premium editorial aesthetic without generic AI dashboard gradients
-- High contrast, dark-mode problem explorer
-- Warm cream contributor and commercial intake experiences
-- Clean typography and minimal visual clutter
-- Full keyboard focus visibility (`:focus-visible`)
-- Fully responsive across mobile (375px), tablet (768px), and desktop (1140px)
+GRIPR preserves its signature editorial visual identity:
+- **Warm Cream (`#FAF5F0`):** Base light background for homepage, scoping flow, and decision briefs.
+- **Near-Black (`#141414` / `#0F0F0F`):** Deep dark surfaces for problem deep-dives and operations desk.
+- **Accent Orange (`#EA580C`, Hover `#F97316`):** Primary action buttons, badges, and focus indicators.
+- **Typography:**
+  - `DM Serif Display`: Editorial headlines and quote displays.
+  - `Space Grotesk`: Navigation, badges, codes, and interactive labels.
+  - `DM Sans`: Body text and narrative descriptions.
+- **Focus Visibility:** Standardized accessible focus outlines (`*:focus-visible`) across all interactive elements.
 
 ---
 
-## 4. Frontend Architecture & API Abstraction
+## 4. Frontend Data Architecture
 
-To ensure that backend integration in Phase 2 (Cloud Run, Firestore, Gemini API) does not require rewriting frontend screens, the UI is decoupled via a lightweight API service layer:
+The user interface is completely decoupled via a Promise-based API layer (`js/api.js`), enabling seamless drop-in integration with Phase 2 backend microservices:
 
-- **`js/api.js` (`window.GriprAPI`):**
-  - `getSignals({ category, search, evidenceStatus })`: Queries verified signals.
-  - `getSignalById(id)`: Fetches a single case file with related signals.
-  - `submitSignal(formData)`: Validates input and creates an intake record in the admin queue.
-  - `createMission(missionData)`: Registers a scoped organization research mission.
-  - `getAdminQueue()`: Retrieves pending and reviewed submissions for the desk.
-  - `reviewSignal(id, decision, details)`: Processes moderation decisions (*Approve & Publish*, *Flag*, *Reject*).
-  - `resetFixtures()`: Re-initializes synthetic fixtures in `localStorage`.
-- **`js/fixtures.js` (`window.GRIPR_FIXTURES`):** High-fidelity synthetic fixtures representing real Indian ground-reality problems across 8 sectors. Explicitly tagged `#DEMO_SYNTHETIC`.
-- **`js/nav.js`:** Shared navigation controller managing mobile drawer state, active page links, ARIA accessibility, and global toast notifications (`window.GriprUI.showToast`).
+- `GriprAPI.createMissionRequest(data)`: Scopes and registers a new organization mission.
+- `GriprAPI.getMission(id)`: Fetches mission details and lifecycle stages.
+- `GriprAPI.getMissionList()`: Retrieves all active missions.
+- `GriprAPI.getMissionBrief(missionId)`: Loads the complete 15-section Decision Intelligence Brief.
+- `GriprAPI.getResearchInvitation(inviteToken)`: Fetches study metadata for invited practitioners.
+- `GriprAPI.submitResearchResponse(data)`: Validates and saves participant qualitative responses.
+- `GriprAPI.getResearchOperationsQueue()`: Powers the internal research ops desk.
+- `GriprAPI.reviewEvidence(id, decision, details)`: Moderates sessions and extractions.
+- `GriprAPI.updateMissionStatus(id, newStatus)`: Advances mission lifecycle state.
+- `GriprAPI.resetFixtures()`: Re-initializes synthetic fixtures in `localStorage`.
+
+All seed fixtures are stored in `js/fixtures.js` and explicitly tagged `#DEMO_SYNTHETIC`.
 
 ---
 
-## 5. Responsible Evidence & Ethics Manifesto
+## 5. Commercial Disclaimers & Ethics
 
-1. **Zero Synthetic Engagement:** No artificial upvote counts, fake popularity ranks, or simulated active user counts.
-2. **Explicit Evidence Grades:** Every problem statement is explicitly badged as *Verified Firsthand*, *Triangulated*, or *Emerging*.
-3. **No Automatic Market Claims:** Problem case files explicitly document *Research Gaps* and *Limitations* to prevent premature TAM assumptions.
-4. **Consent Decoupling:** Contributors independently grant or withhold permission for public feed brief publication versus confidential builder follow-up.
-5. **No Data Brokerage:** We do not scrape or sell raw personal contact data. Field investigations are conducted with informed operator consent and direct honorariums.
+1. **Unvalidated Pilot Pricing:** The ₹49,000 pilot price for 5 participants is an exploratory commercial hypothesis, not confirmed customer traction.
+2. **Voluntary Informed Consent:** Field participants participate under separate permissions for study analysis, brief citation, and future contact.
+3. **Traceability:** AI-assisted interpretations are strictly isolated from source statements, which remain traceable to participant fixture IDs.
+4. **No Automated TAM Claims:** Qualitative samples do not claim statistical market sizing or automatic macro trend extrapolation.
 
 ---
 
 ## 6. Running Locally
 
-GRIPR.STUDIO is built using vanilla HTML5, CSS3, and modern ES6 JavaScript. No build step, bundling, or node dependencies are required.
-
-To run locally with any local static HTTP server:
+No build step or Node dependencies are required. Use any static HTTP server:
 
 ```bash
-# Using Python 3
+# Using Python
 python3 -m http.server 8080
 
 # Or using Node npx
 npx serve .
 ```
 
-Open `http://localhost:8080` in any modern web browser.
+Navigate to `http://localhost:8080` in your web browser.
 
 ---
 
-## 7. Phase 1 Verification Checklist
+## 7. Documentation Index
 
-- [x] Wireframe specifications documented in `docs/wireframes.md`.
-- [x] Landing page (`index.html`) introduces the 4-step workflow, missions, and verified signal previews.
-- [x] Contributor intake (`submit.html`) implements natural language narrative, context, workaround, and 2-tier consent.
-- [x] Problem Explorer (`feed.html`) features real-time search, category filtering, evidence grade filtering, and case file deep-links.
-- [x] Problem Case File (`case-file.html`) dynamically renders structured extraction, raw quotes, research gaps, and investigation actions.
-- [x] Research Missions (`missions.html`) allows B2B teams to scope a ₹49,000 test pilot investigation.
-- [x] Admin Desk (`admin.html`) supports intake review, candidate match comparison, and moderation decisions.
-- [x] Responsive layout verified for mobile (375px), tablet (768px), and desktop (1140px).
-- [x] Accessible focus indicators and keyboard navigation tested.
+- [docs/product-architecture.md](file:///Users/divyanshdusad/Downloads/GRIPR.STUDIO/docs/product-architecture.md) — Product architecture, entities, and B2B safeguards.
+- [docs/business-flow.md](file:///Users/divyanshdusad/Downloads/GRIPR.STUDIO/docs/business-flow.md) — End-to-end Mermaid operational flow and stage specifications.
+- [docs/wireframes.md](file:///Users/divyanshdusad/Downloads/GRIPR.STUDIO/docs/wireframes.md) — Low-fidelity wireframes for all 6 core screens.
+- [docs/phase-1-correction-report.md](file:///Users/divyanshdusad/Downloads/GRIPR.STUDIO/docs/phase-1-correction-report.md) — Complete migration, change log, and testing report.

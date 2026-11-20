@@ -1,12 +1,19 @@
 /**
- * GRIPR.STUDIO — Universal Navigation & UI Helpers
+ * GRIPR.STUDIO — Universal Navigation Controller (B2B Refactor)
  * 
- * Manages responsive navigation, mobile drawers, active states,
- * keyboard accessibility, and global UI toasts.
+ * Rebuilds navigation around:
+ * - Product (index.html#product)
+ * - How It Works (index.html#how-it-works)
+ * - Example Research Brief (brief.html)
+ * - Research Missions (missions.html)
+ * - Start a Mission (CTA -> missions.html)
+ * 
+ * Manages responsive mobile drawers, focus outline visibility, active links,
+ * and global toasts.
  */
 
 (function () {
-  // Global Toast Utility
+  // Global Toast Notification Utility
   window.GriprUI = {
     showToast(message, type = 'info', duration = 3800) {
       let toastContainer = document.getElementById('griprToastContainer');
@@ -45,10 +52,9 @@
   };
 
   document.addEventListener('DOMContentLoaded', () => {
-    // 1. Mobile Menu Toggle Setup
+    // 1. Mobile Menu Drawer Setup
     const nav = document.querySelector('nav');
     if (nav) {
-      // Check if hamburger toggle already exists
       let toggleBtn = nav.querySelector('.nav-mobile-toggle');
       const navLinks = nav.querySelector('.nav-links');
 
@@ -110,7 +116,7 @@
       }
     });
 
-    // 3. Nav Scroll Glassmorphism
+    // 3. Nav Scroll State
     window.addEventListener('scroll', () => {
       const navWrapper = document.querySelector('.nav-wrapper');
       if (navWrapper) {

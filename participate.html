@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research Participation Session — GRIPR.STUDIO</title>
+  <meta name="description" content="Confidential research participation session. Share firsthand operational experiences to help product teams understand real-world workflows.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/feed.css">
+</head>
+<body class="submit-page">
+
+  <!-- NAV -->
+  <div class="nav-wrapper">
+    <nav>
+      <a href="index.html" class="nav-logo" aria-label="GRIPR Home">
+        GRIPR <span class="beta-badge">RESEARCH DESK</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="index.html#product" class="nav-link">Product</a>
+        <a href="index.html#how-it-works" class="nav-link">How It Works</a>
+        <a href="brief.html" class="nav-link">Example Brief</a>
+      </div>
+
+      <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:var(--text-secondary);">
+        Session: <strong id="navInviteToken">INV-AGRI-081</strong>
+      </div>
+    </nav>
+  </div>
+
+  <main>
+    <!-- STUDY BRIEFING BANNER -->
+    <section class="submit-hero" style="padding:3.5rem 0 2rem;">
+      <div class="container">
+        <div style="max-width:760px; margin:0 auto; text-align:left;">
+          <div class="submit-prompt-label">
+            <span class="dot"></span>
+            CONFIDENTIAL RESEARCH PARTICIPATION
+          </div>
+          <h1 id="studyTitle" style="font-family:'DM Serif Display',serif; font-size:clamp(2rem, 4vw, 2.8rem); line-height:1.2; margin:0.5rem 0 1rem; color:var(--text-dark);">
+            Loading Research Study...
+          </h1>
+          <p id="studyDescription" style="font-size:0.95rem; color:var(--text-secondary); line-height:1.6; margin-bottom:1.5rem;">
+            You have received an invitation link to participate in a structured qualitative research session.
+          </p>
+
+          <!-- STUDY META CARDS -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; background:#fff; border:1px solid var(--border); border-radius:10px; padding:1.25rem; font-family:'Space Grotesk',sans-serif; font-size:0.8rem;">
+            <div>
+              <div style="color:var(--text-muted); font-size:0.7rem; text-transform:uppercase;">Facilitator</div>
+              <strong id="studyFacilitator">GRIPR Research Operations</strong>
+            </div>
+            <div>
+              <div style="color:var(--text-muted); font-size:0.7rem; text-transform:uppercase;">Estimated Time</div>
+              <strong id="studyDuration">12-15 minutes</strong>
+            </div>
+            <div>
+              <div style="color:var(--text-muted); font-size:0.7rem; text-transform:uppercase;">Participant Honorarium</div>
+              <strong id="studyHonorarium" style="color:#10B981;">₹1,500 Honorarium</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESEARCH PARTICIPATION FORM -->
+    <section class="submit-body" style="padding-top:1.5rem; padding-bottom:6rem;">
+      <div class="container">
+        <div style="max-width:760px; margin:0 auto;" id="participantFormCol">
+          
+          <div style="background:#fff; border:1px solid var(--border); border-radius:16px; padding:2.5rem; box-shadow:0 6px 30px rgba(0,0,0,0.02);">
+            
+            <form id="participantSessionForm" novalidate>
+
+              <!-- 1. OPERATOR CONTEXT -->
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:1rem;">
+                SECTION 1 / YOUR OPERATIONAL CONTEXT
+              </div>
+
+              <div class="two-col">
+                <div class="form-group" id="group-role">
+                  <label class="form-label" for="participantRole">Your Role / Occupation *</label>
+                  <input class="submit-input" type="text" id="participantRole" placeholder="e.g. Smallholder Farmer (3 Acres), PACS Secretary, Retail Dealer" required>
+                  <span class="form-error-text" id="participantRoleError" style="display:none;"></span>
+                </div>
+
+                <div class="form-group" id="group-location">
+                  <label class="form-label" for="participantLocation">Location / District *</label>
+                  <input class="submit-input" type="text" id="participantLocation" placeholder="e.g. Sehore District, Madhya Pradesh" required>
+                  <span class="form-error-text" id="participantLocationError" style="display:none;"></span>
+                </div>
+              </div>
+
+              <!-- 2. ACTUAL RECENT EXPERIENCE -->
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin:2rem 0 1rem;">
+                SECTION 2 / FIRSTHAND OPERATIONAL EXPERIENCE
+              </div>
+
+              <div class="form-group" id="group-incidentNarrative">
+                <label class="form-label" for="incidentNarrative">
+                  A. Describe a specific recent incident or breakdown in this workflow *
+                </label>
+                <textarea 
+                  class="submit-textarea" 
+                  id="incidentNarrative" 
+                  rows="5" 
+                  placeholder="Describe in detail what happened during your last experience. What failed? Who was involved? What was demanded vs expected? (English, Hindi, Hinglish, or any regional language)"
+                  required
+                ></textarea>
+                <div class="form-hint">Focus on what actually occurred rather than generalized opinions. Minimum 20 characters.</div>
+                <span class="form-error-text" id="incidentNarrativeError" style="display:none;"></span>
+              </div>
+
+              <div class="two-col">
+                <div class="form-group">
+                  <label class="form-label" for="affectedWorkflow">B. What specific operational workflow was interrupted?</label>
+                  <input class="submit-input" type="text" id="affectedWorkflow" placeholder="e.g. Sowing fertilizer purchase, cold storage booking, delivery challan reconciliation">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="operationalImpact">C. What was the impact? (Time lost, extra cost paid, spoilage)</label>
+                  <input class="submit-input" type="text" id="operationalImpact" placeholder="e.g. Paid ₹300/bag premium; delayed planting by 3 days; lost 20% produce">
+                </div>
+              </div>
+
+              <div class="form-group" id="group-existingWorkaround">
+                <label class="form-label" for="existingWorkaround">
+                  D. What did you and your team do instead? (Existing Workaround) *
+                </label>
+                <textarea 
+                  class="submit-textarea" 
+                  id="existingWorkaround" 
+                  rows="3" 
+                  placeholder="How did you cope with this breakdown? (e.g. borrowed from moneylender at 3%/month, hired a private tempo, used paper notebook ledger)"
+                  required
+                ></textarea>
+                <div class="form-hint">Tell us your practical workaround. There are no right or wrong answers.</div>
+                <span class="form-error-text" id="existingWorkaroundError" style="display:none;"></span>
+              </div>
+
+              <!-- 3. GRANULAR 3-TIER CONSENT CONTROLS -->
+              <div style="background:var(--bg-light); border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin:2.5rem 0 1.5rem;">
+                <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-dark); margin-bottom:1rem;">
+                  SECTION 3 / GRANULAR CONSENT & PERMISSION CONTROLS
+                </div>
+
+                <!-- Consent 1: Study Processing (Mandatory) -->
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                  <label class="notify-row" style="align-items:flex-start;">
+                    <input type="checkbox" id="consentStudyProcessing" required style="margin-top:0.25rem;">
+                    <span class="notify-label" style="font-size:0.85rem; line-height:1.5;">
+                      <strong>Study Analysis Consent:</strong> I agree to allow GRIPR Research Operations to analyze my responses confidentially for this specific research study. *
+                    </span>
+                  </label>
+                  <span class="form-error-text" id="consentStudyProcessingError" style="display:none;"></span>
+                </div>
+
+                <!-- Consent 2: Sanitized Brief Sharing (Optional) -->
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                  <label class="notify-row" style="align-items:flex-start;">
+                    <input type="checkbox" id="consentSanitizedBriefSharing" checked style="margin-top:0.25rem;">
+                    <span class="notify-label" style="font-size:0.85rem; line-height:1.5;">
+                      <strong>Sanitized Quote Permission (Optional):</strong> I allow an anonymized excerpt of my experience (with names, exact shops, and personal details removed) to be cited in the client's executive Decision Intelligence Brief.
+                    </span>
+                  </label>
+                </div>
+
+                <!-- Consent 3: Follow-up Contact (Optional) -->
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="notify-row" style="align-items:flex-start;">
+                    <input type="checkbox" id="consentFollowUpInterview" style="margin-top:0.25rem;">
+                    <span class="notify-label" style="font-size:0.85rem; line-height:1.5;">
+                      <strong>Follow-up Contact Permission (Optional):</strong> I am open to being contacted confidentially by the research lead for an in-depth 30-minute follow-up session or pilot evaluation.
+                    </span>
+                  </label>
+                  
+                  <div id="followUpEmailRow" style="display:none; margin-top:1rem; padding-left:1.75rem;">
+                    <label class="form-label" for="contactEmail" style="font-size:0.8rem;">Your Phone Number or Email</label>
+                    <input class="submit-input" type="text" id="contactEmail" placeholder="Phone or email for confidential follow-up">
+                  </div>
+                </div>
+              </div>
+
+              <!-- SUBMIT -->
+              <button class="btn-cta-full" id="submitSessionBtn" type="submit">
+                Submit Research Session Responses →
+              </button>
+
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:var(--text-muted); text-align:center; margin-top:1rem;">
+                🔒 Redacted before research delivery · Direct honorarium upon verification
+              </div>
+
+            </form>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="container">
+    <div class="footer-left">
+      <div class="footer-logo" style="color:var(--text-dark);">GRIPR <span class="beta-badge" style="font-size:0.55rem; padding:0.15rem 0.4rem;">RESEARCH DESK</span></div>
+      <div class="footer-tagline" style="color:var(--text-secondary);">Participant Research Portal.</div>
+      <p class="copyright" style="color:var(--text-muted);">© 2026 GRIPR.STUDIO. All rights reserved.</p>
+    </div>
+    <div class="footer-right">
+      <div class="footer-links">
+        <a href="index.html" style="color:var(--text-secondary);">Home</a>
+        <a href="privacy.html" style="color:var(--text-secondary);">Privacy Policy</a>
+        <a href="terms.html" style="color:var(--text-secondary);">Terms of Research</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/fixtures.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const inviteToken = urlParams.get('invite') || 'INV-AGRI-081';
+
+      document.getElementById('navInviteToken').textContent = inviteToken;
+
+      // Load invitation study metadata
+      const res = await window.GriprAPI.getResearchInvitation(inviteToken);
+      let linkedMissionId = 'MSN-2026-081';
+
+      if (res.success && res.invitation) {
+        const inv = res.invitation;
+        linkedMissionId = inv.missionId;
+        document.getElementById('studyTitle').textContent = inv.studyTitle;
+        document.getElementById('studyDescription').textContent = `${inv.targetProfile} — Facilitated by ${inv.facilitator} for ${inv.commissioningOrgType}.`;
+        document.getElementById('studyFacilitator').textContent = inv.facilitator;
+        document.getElementById('studyDuration').textContent = inv.estimatedDuration;
+        document.getElementById('studyHonorarium').textContent = inv.honorarium;
+      }
+
+      // Toggle follow-up contact input
+      const followUpCheck = document.getElementById('consentFollowUpInterview');
+      const followUpRow = document.getElementById('followUpEmailRow');
+      if (followUpCheck && followUpRow) {
+        followUpCheck.addEventListener('change', () => {
+          followUpRow.style.display = followUpCheck.checked ? 'block' : 'none';
+        });
+      }
+
+      // Handle form submit
+      const form = document.getElementById('participantSessionForm');
+      const btn = document.getElementById('submitSessionBtn');
+
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          // Clear errors
+          document.querySelectorAll('.form-group').forEach(el => el.classList.remove('has-error'));
+          document.querySelectorAll('.form-error-text').forEach(el => { el.style.display = 'none'; el.textContent = ''; });
+
+          const role = document.getElementById('participantRole').value.trim();
+          const location = document.getElementById('participantLocation').value.trim();
+          const incident = document.getElementById('incidentNarrative').value.trim();
+          const workflow = document.getElementById('affectedWorkflow').value.trim();
+          const impact = document.getElementById('operationalImpact').value.trim();
+          const workaround = document.getElementById('existingWorkaround').value.trim();
+          const consentStudyProcessing = document.getElementById('consentStudyProcessing').checked;
+          const consentSanitizedBriefSharing = document.getElementById('consentSanitizedBriefSharing').checked;
+          const consentFollowUpInterview = followUpCheck.checked;
+          const contactEmail = document.getElementById('contactEmail').value.trim();
+
+          let valid = true;
+
+          if (role.length < 2) {
+            setError('participantRole', 'Please state your role or occupation.');
+            valid = false;
+          }
+          if (location.length < 2) {
+            setError('participantLocation', 'Please state your district or region.');
+            valid = false;
+          }
+          if (incident.length < 20) {
+            setError('incidentNarrative', 'Please describe your recent experience in at least 20 characters.');
+            valid = false;
+          }
+          if (workaround.length < 5) {
+            setError('existingWorkaround', 'Please describe what you did instead.');
+            valid = false;
+          }
+          if (!consentStudyProcessing) {
+            setError('consentStudyProcessing', 'Study analysis consent is required to participate.');
+            valid = false;
+          }
+
+          if (!valid) {
+            window.GriprUI.showToast('Please correct the highlighted fields.', 'error');
+            return;
+          }
+
+          btn.disabled = true;
+          btn.textContent = 'Submitting Research Session...';
+
+          try {
+            const submitRes = await window.GriprAPI.submitResearchResponse({
+              missionId: linkedMissionId,
+              role,
+              location,
+              incidentNarrative: incident,
+              affectedWorkflow: workflow,
+              operationalImpact: impact,
+              existingWorkaround: workaround,
+              consentStudyProcessing,
+              consentSanitizedBriefSharing,
+              consentFollowUpInterview,
+              contactEmail: consentFollowUpInterview ? contactEmail : null
+            });
+
+            if (submitRes.success) {
+              const col = document.getElementById('participantFormCol');
+              col.innerHTML = `
+                <div class="confirmation-card fade-in">
+                  <div class="conf-icon">✓</div>
+                  <h2>Research Session Complete</h2>
+                  <p style="color:var(--text-secondary); max-width:540px; margin:0 auto 1.5rem; line-height:1.6;">
+                    Thank you for contributing your firsthand operational experience. Your submission has been securely recorded under session identifier:
+                  </p>
+                  <div class="conf-tracking-badge">${submitRes.sessionId}</div>
+                  
+                  <div style="background:var(--bg-light); border-radius:10px; padding:1.5rem; text-align:left; max-width:540px; margin:1.5rem auto; font-size:0.85rem; color:var(--text-body); line-height:1.6;">
+                    <strong style="color:var(--text-dark); display:block; margin-bottom:0.4rem;">What happens next:</strong>
+                    • Our research desk will verify domain tenure and redact any remaining personal identifiers.<br>
+                    • Verified honorarium will be processed according to your study protocol.<br>
+                    • Your observations help product teams understand and build for genuine ground reality.
+                  </div>
+
+                  <div class="conf-actions">
+                    <a href="index.html" class="btn-cta-solid">Return to GRIPR.STUDIO Homepage →</a>
+                  </div>
+                </div>
+              `;
+              window.GriprUI.showToast('Research session submitted successfully.', 'success');
+              window.scrollTo({ top: 120, behavior: 'smooth' });
+            } else {
+              window.GriprUI.showToast('Failed to record session.', 'error');
+              btn.disabled = false;
+              btn.textContent = 'Submit Research Session Responses →';
+            }
+          } catch (err) {
+            window.GriprUI.showToast('Unexpected error submitting session.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Submit Research Session Responses →';
+          }
+        });
+      }
+
+      function setError(fieldId, msg) {
+        const group = document.getElementById(`group-${fieldId}`);
+        if (group) group.classList.add('has-error');
+        const err = document.getElementById(`${fieldId}Error`);
+        if (err) {
+          err.textContent = msg;
+          err.style.display = 'block';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
