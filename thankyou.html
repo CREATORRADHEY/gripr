@@ -3,240 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Signal Received — GRIPR</title>
+  <title>Signal Received — GRIPR.STUDIO</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
   <style>
     body { background: var(--bg-light); }
-
-    .ty-wrap {
-      min-height: 100vh;
-      display: flex; align-items: center; justify-content: center;
-      padding: 2rem;
-    }
-
-    .ty-box {
-      width: 100%; max-width: 560px; text-align: center;
-    }
-
-    .ty-icon {
-      width: 64px; height: 64px; border-radius: 50%;
-      background: var(--accent-light);
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 2rem;
-      font-size: 1.75rem;
-    }
-
-    .ty-label {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.14em;
-      color: var(--accent); margin-bottom: 1rem;
-    }
-
-    .ty-box h1 {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(2.4rem, 6vw, 3.2rem);
-      font-weight: 400; color: var(--text-dark);
-      margin-bottom: 1rem; line-height: 1.1;
-    }
-
-    .ty-sub {
-      font-size: 1.05rem; color: var(--text-secondary);
-      margin-bottom: 0.4rem; line-height: 1.6;
-    }
-
-    .ty-note {
-      font-size: 0.85rem; color: var(--text-muted);
-      font-family: 'Space Grotesk', sans-serif;
-      margin-bottom: 3rem;
-    }
-
-    /* Primary CTA */
-    .ty-primary-cta {
-      display: inline-flex; align-items: center; gap: 0.6rem;
-      background: var(--bg-dark); color: var(--text-light);
-      padding: 1rem 2rem; border-radius: 10px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 600; font-size: 0.95rem;
-      text-decoration: none;
-      transition: all 0.25s;
-      margin-bottom: 0.75rem;
-      width: 100%; justify-content: center;
-    }
-    .ty-primary-cta:hover { background: #333; transform: translateY(-2px); }
-
-    .ty-secondary-cta {
-      display: inline-flex; align-items: center; gap: 0.6rem;
-      background: transparent; color: var(--text-secondary);
-      padding: 0.9rem 2rem; border-radius: 10px;
-      border: 1px solid var(--border);
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 500; font-size: 0.9rem;
-      text-decoration: none;
-      transition: all 0.25s;
-      width: 100%; justify-content: center;
-    }
-    .ty-secondary-cta:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* Waitlist mini-form (shown only for submit flow) */
-    .ty-waitlist-section {
-      margin-top: 3rem;
-      padding-top: 2.5rem;
-      border-top: 1px solid var(--border);
-    }
-    .ty-waitlist-label {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em;
-      color: var(--text-muted); margin-bottom: 0.75rem;
-    }
-    .ty-waitlist-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.3rem; color: var(--text-dark);
-      margin-bottom: 0.5rem;
-    }
-    .ty-waitlist-sub {
-      font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;
-    }
-    .ty-waitlist-form {
-      display: flex; gap: 0.5rem;
-    }
-    .ty-waitlist-form input {
-      flex: 1; padding: 0.8rem 1rem;
-      font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
-      border: 1px solid var(--border); border-radius: 8px;
-      background: var(--bg-white); color: var(--text-dark);
-    }
-    .ty-waitlist-form input:focus { outline: none; border-color: var(--accent); }
-    .ty-waitlist-form button {
-      padding: 0.8rem 1.25rem;
-      background: var(--accent); color: #fff;
-      border: none; border-radius: 8px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 600; font-size: 0.85rem;
-      cursor: pointer; white-space: nowrap;
-      transition: background 0.2s;
-    }
-    .ty-waitlist-form button:hover { background: var(--accent-hover); }
-
-    /* Share */
-    .ty-share {
-      margin-top: 2rem;
-    }
-    .ty-share-label {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;
-      color: var(--text-muted); margin-bottom: 0.75rem;
-    }
-    .ty-share-btns { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
-    .ty-share-btn {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.82rem; font-weight: 600;
-      padding: 0.7rem 1.25rem;
-      border: 1px solid var(--border); border-radius: 8px;
-      color: var(--text-dark); background: var(--bg-white);
-      cursor: pointer; transition: all 0.2s;
-    }
-    .ty-share-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    @media (max-width: 480px) {
-      .ty-waitlist-form { flex-direction: column; }
-      .ty-share-btn { width: 100%; }
-    }
+    .ty-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .ty-box { width: 100%; max-width: 580px; text-align: center; }
+    .ty-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; font-size: 1.75rem; font-weight: bold; }
+    .ty-box h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2.4rem, 6vw, 3.2rem); font-weight: 400; color: var(--text-dark); margin-bottom: 1rem; line-height: 1.15; }
+    .ty-sub { font-size: 1.05rem; color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.6; }
+    .ty-actions { display: flex; flex-direction: column; gap: 0.75rem; max-width: 400px; margin: 0 auto; }
   </style>
 </head>
 <body>
-
-  <!-- NAV -->
-  <div class="nav-wrapper">
-    <nav>
-      <a href="index.html" class="nav-logo">GRIPR</a>
-      <div class="nav-links">
-        <a href="feed.html" class="nav-link">Signal Feed</a>
-        <a href="submit.html" class="nav-link">Submit a Problem</a>
-      </div>
-      <a href="index.html#waitlist" class="btn-nav">Join Waitlist</a>
-    </nav>
-  </div>
-
   <div class="ty-wrap">
     <div class="ty-box">
-      <div class="ty-icon" id="tyIcon">✓</div>
-      <div class="ty-label" id="tyLabel">Signal Received</div>
-      <h1 id="tyHeadline">Your signal is in.</h1>
-      <p class="ty-sub" id="tySub">We review every submission by hand.</p>
-      <p class="ty-note" id="tyNote">If it's build-worthy, it goes on the feed — and thousands of builders will see it.</p>
+      <div class="ty-icon">✓</div>
+      <h1>Firsthand Reality Received.</h1>
+      <p class="ty-sub">
+        Thank you for contributing to the ground economy intelligence registry. Your observation helps builders focus on what is actually broken.
+      </p>
 
-      <div id="tyActions">
-        <a href="feed.html" class="ty-primary-cta" id="tyPrimary">
-          Explore the Signal Feed →
+      <div class="ty-actions">
+        <a href="feed.html" class="btn-cta-solid" style="text-align:center;">
+          Explore Problem Intelligence Explorer →
         </a>
-        <a href="submit.html" class="ty-secondary-cta" id="tySecondary">
-          Submit another frustration
+        <a href="missions.html" class="btn-cta-ghost" style="text-align:center;">
+          Learn About Research Missions
         </a>
-      </div>
-
-      <!-- Waitlist mini form — shown only for submit flow -->
-      <div class="ty-waitlist-section" id="tyWaitlist" style="display:none;">
-        <div class="ty-waitlist-label">While you're here</div>
-        <div class="ty-waitlist-title">Get notified when new signals drop.</div>
-        <p class="ty-waitlist-sub">Weekly digest. Real problems. No noise.</p>
-        <form class="ty-waitlist-form" id="tyWaitlistForm">
-          <input type="email" id="tyEmail" placeholder="your@email.com" required>
-          <button type="submit" id="tyWaitlistBtn">Join →</button>
-        </form>
-      </div>
-
-      <!-- Share -->
-      <div class="ty-share">
-        <div class="ty-share-label">Know a builder who should see this feed?</div>
-        <div class="ty-share-btns">
-          <a href="https://wa.me/?text=GRIPR%20is%20a%20live%20feed%20of%20real%20problems%20worth%20building%20for.%20https%3A%2F%2Fgripr.studio%2Ffeed" class="ty-share-btn" target="_blank">Share on WhatsApp</a>
-          <a href="https://twitter.com/intent/tweet?text=Just%20found%20GRIPR%20%E2%80%94%20a%20live%20feed%20of%20real%20human%20frustrations%20for%20builders.%20Oddly%20compelling.%20https%3A%2F%2Fgripr.studio%2Ffeed" class="ty-share-btn" target="_blank">Share on X</a>
-        </div>
+        <a href="index.html" style="font-family:'Space Grotesk',sans-serif; font-size:0.85rem; color:var(--text-secondary); margin-top:0.5rem; text-decoration:none;">
+          ← Return to Homepage
+        </a>
       </div>
     </div>
   </div>
-
-  <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJiG9VIuSmvUnNwEyKKeBJ2nA5LHvA0wdZDp-GiucRndrMyV-O8RfuqQ3eH9jwWy-0rg/exec';
-
-    const from = new URLSearchParams(location.search).get('from') || 'waitlist';
-
-    if (from === 'waitlist') {
-      document.getElementById('tyIcon').textContent = '✉';
-      document.getElementById('tyLabel').textContent = 'You\'re on the list';
-      document.getElementById('tyHeadline').textContent = 'Request received.';
-      document.getElementById('tySub').textContent = 'We review every signup manually.';
-      document.getElementById('tyNote').textContent = 'If it\'s a fit, you\'ll hear from us. In the meantime — explore the feed.';
-      document.getElementById('tySecondary').textContent = 'Submit a frustration →';
-      document.getElementById('tySecondary').href = 'submit.html';
-    } else {
-      // From submit flow — show waitlist mini-form
-      document.getElementById('tyWaitlist').style.display = 'block';
-    }
-
-    // Waitlist mini-form handler
-    document.getElementById('tyWaitlistForm')?.addEventListener('submit', e => {
-      e.preventDefault();
-      const email = document.getElementById('tyEmail').value;
-      const btn = document.getElementById('tyWaitlistBtn');
-      btn.disabled = true;
-      btn.textContent = '✓ Done';
-
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `type=waitlist&email=${encodeURIComponent(email)}`
-      });
-    });
-
-    // Nav scroll
-    window.addEventListener('scroll', () => {
-      document.querySelector('.nav-wrapper')?.classList.toggle('scrolled', window.scrollY > 20);
-    });
-  </script>
 </body>
 </html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Problem Case File — GRIPR.STUDIO</title>
+  <meta name="description" content="Verified firsthand evidence, structured extraction, current workarounds, and documented research gaps.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/feed.css">
+</head>
+<body class="case-file-page">
+
+  <!-- NAV -->
+  <div class="nav-wrapper nav-dark">
+    <nav>
+      <a href="index.html" class="nav-logo" aria-label="GRIPR Home">
+        GRIPR <span class="beta-badge">BETA</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="feed.html" class="nav-link active-nav-link">Problem Explorer</a>
+        <a href="submit.html" class="nav-link">Report a Problem</a>
+        <a href="missions.html" class="nav-link">Research Missions</a>
+        <a href="admin.html" class="nav-admin-pill">Admin Desk</a>
+      </div>
+
+      <div>
+        <a href="feed.html" class="btn-nav btn-nav-outline">← Back to Explorer</a>
+      </div>
+    </nav>
+  </div>
+
+  <main>
+    <section class="container" style="padding-top:4rem; padding-bottom:6rem;">
+
+      <!-- BREADCRUMB -->
+      <div class="case-breadcrumb">
+        <a href="feed.html">Problem Explorer</a>
+        <span>/</span>
+        <span id="breadcrumbId">Loading Case...</span>
+      </div>
+
+      <!-- MAIN CONTAINER FOR DYNAMIC CASE CONTENT -->
+      <div id="caseFileContent">
+        <!-- Rendered by GriprAPI -->
+        <div style="padding:4rem 0;">
+          <div class="skeleton-box" style="height:32px; width:30%; margin-bottom:1.5rem;"></div>
+          <div class="skeleton-box" style="height:64px; width:80%; margin-bottom:2rem;"></div>
+          <div class="skeleton-box" style="height:140px; width:100%; margin-bottom:2rem;"></div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="container" style="border-top-color:rgba(255,255,255,0.06); padding: 3rem 0;">
+    <div class="footer-left">
+      <div class="footer-logo">GRIPR <span class="beta-badge" style="font-size:0.55rem; padding:0.15rem 0.4rem;">BETA</span></div>
+      <div class="footer-tagline">Evidence-first Problem Intelligence Platform.</div>
+      <p class="copyright">© 2026 GRIPR.STUDIO. Built for the India Ground Economy 🇮🇳</p>
+    </div>
+    <div class="footer-right">
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="feed.html">Problem Explorer</a>
+        <a href="submit.html">Report a Problem</a>
+        <a href="missions.html">Research Missions</a>
+        <a href="admin.html">Admin Desk</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/fixtures.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const signalId = urlParams.get('id') || 'SIG-019'; // Default to representative flagship case
+
+      const breadcrumbId = document.getElementById('breadcrumbId');
+      const container = document.getElementById('caseFileContent');
+
+      try {
+        const res = await window.GriprAPI.getSignalById(signalId);
+
+        if (!res.success || !res.signal) {
+          breadcrumbId.textContent = 'Record Not Found';
+          container.innerHTML = `
+            <div class="empty-feed">
+              <div class="empty-feed-icon">⚠️</div>
+              <h3>Problem Case File Not Found</h3>
+              <p>Signal ID "${signalId}" could not be located in our verified intelligence registry.</p>
+              <a href="feed.html" class="btn-cta-solid" style="display:inline-block; margin-top:1rem;">Back to Problem Explorer</a>
+            </div>
+          `;
+          return;
+        }
+
+        const s = res.signal;
+        breadcrumbId.textContent = `${s.id} (${s.category.toUpperCase()})`;
+        document.title = `${s.id}: ${s.title || 'Problem Case File'} — GRIPR.STUDIO`;
+
+        const badgeClass = s.evidenceStatus === 'Verified Firsthand' 
+          ? 'badge-verified' 
+          : (s.evidenceStatus === 'Triangulated' ? 'badge-triangulated' : 'badge-emerging');
+
+        container.innerHTML = `
+          <!-- HEADER STRIP -->
+          <div class="case-header-meta">
+            <span class="evidence-badge ${badgeClass}" style="font-size:0.75rem; padding:0.35rem 0.75rem;">
+              ● ${s.evidenceStatus || 'Verified'} Evidence
+            </span>
+            <span style="font-family:'Space Grotesk',sans-serif; font-size:0.8rem; color:var(--text-light-muted); letter-spacing:0.05em;">
+              ID: ${s.id}
+            </span>
+            <span style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; background:rgba(255,255,255,0.08); padding:0.25rem 0.6rem; border-radius:4px; text-transform:uppercase;">
+              ${s.category}
+            </span>
+            <span style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; color:var(--text-light-muted);">
+              Region: <strong>${s.region}</strong>
+            </span>
+            ${s.language ? `<span style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; background:rgba(255,255,255,0.06); padding:0.25rem 0.5rem; border-radius:4px;">${s.language}</span>` : ''}
+          </div>
+
+          <h1 class="case-title">${s.title || s.quote}</h1>
+
+          <!-- VERBATIM EVIDENCE QUOTE -->
+          <div class="case-quote-box">
+            <div style="font-family:'Space Grotesk',sans-serif; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--accent); margin-bottom:0.75rem;">
+              ORIGINAL FIRSTHAND OBSERVATION (ANONYMIZED)
+            </div>
+            <div class="case-quote-verbatim">
+              "${s.quote}"
+            </div>
+            ${s.translation && s.translation !== s.quote ? `
+              <div class="case-quote-translation">
+                <strong>English Meaning:</strong> "${s.translation}"
+              </div>
+            ` : ''}
+            <div class="case-quote-author">
+              Reported by: ${s.actor || 'Firsthand Field Operator'} · ${s.region} (${s.month || '2026'})
+            </div>
+          </div>
+
+          <!-- STRUCTURED EXTRACTION MATRIX -->
+          <div style="margin-top:3rem;">
+            <div class="section-label" style="color:rgba(255,255,255,0.4); margin-bottom:1rem;">
+              <span class="dot" style="background:var(--accent);"></span>
+              STRUCTURED PROBLEM INTELLIGENCE
+            </div>
+            <div class="case-matrix-grid">
+              
+              <div class="matrix-tile">
+                <div class="matrix-tile-label">01 / AFFECTED ACTOR & CONTEXT</div>
+                <div class="matrix-tile-content">
+                  ${s.actor || 'Independent operators within this sector.'}
+                </div>
+              </div>
+
+              <div class="matrix-tile">
+                <div class="matrix-tile-label">02 / TRIGGER EVENT & BREAKDOWN</div>
+                <div class="matrix-tile-content">
+                  ${s.incident || 'Operational failure occurring during regular workflow execution.'}
+                </div>
+              </div>
+
+              <div class="matrix-tile">
+                <div class="matrix-tile-label">03 / REPORTED IMPACT & FRICTION COST</div>
+                <div class="matrix-tile-content">
+                  ${s.impact || 'Lost time, unrecovered margins, and friction incurred due to lack of tooling.'}
+                </div>
+              </div>
+
+              <div class="matrix-tile">
+                <div class="matrix-tile-label">04 / CURRENT WORKAROUND (HOW THEY COPE)</div>
+                <div class="matrix-tile-content">
+                  ${s.workaround || 'Manual fallback processes (paper ledgers, middlemen, informal channels).'}
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- RESEARCH GAPS & UNKNOWNS (RESPONSIBLE DISCLOSURE) -->
+          <div class="research-gaps-card">
+            <h4>
+              <span>⚠️</span>
+              RESPONSIBLE EVIDENCE DISCLOSURE · UNKNOWNS & RESEARCH GAPS
+            </h4>
+            <p style="font-size:0.85rem; color:rgba(255,255,255,0.7); margin-bottom:1rem; line-height:1.5;">
+              In accordance with GRIPR core principles, this platform does NOT fabricate market size (TAM), assume universal willingness-to-pay, or convert isolated reports into automatic macro trends.
+            </p>
+            <ul>
+              ${(s.researchGaps || [
+                'Prevalence across adjacent geographic districts requires further field interviews.',
+                'Willingness-to-pay for standalone digital tooling has not been experimentally tested.'
+              ]).map(gap => `<li>${gap}</li>`).join('')}
+            </ul>
+            ${s.limitations ? `
+              <div style="margin-top:1.25rem; padding-top:1rem; border-top:1px solid rgba(245,158,11,0.15); font-size:0.8rem; color:rgba(255,255,255,0.65);">
+                <strong>Sample Boundary:</strong> ${s.limitations}
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- ACTION BAR -->
+          <div class="case-actions-bar">
+            <a href="missions.html?signal=${s.id}" class="btn-cta-solid">
+              Commission Research Mission on this Problem (₹49,000) →
+            </a>
+            <a href="submit.html?ref=${s.id}" class="btn-cta-ghost" style="border-color:rgba(255,255,255,0.25); color:#fff;">
+              I have firsthand evidence on this workflow
+            </a>
+            <button class="btn-cta-ghost" style="border-color:rgba(255,255,255,0.25); color:#fff;" onclick="copyCaseUrl()">
+              Share Case File ↗
+            </button>
+          </div>
+
+          <!-- RELATED CANDIDATE SIGNALS -->
+          ${res.related && res.related.length > 0 ? `
+            <div style="margin-top:5rem; padding-top:3rem; border-top:1px solid rgba(255,255,255,0.08);">
+              <div class="section-label" style="color:rgba(255,255,255,0.4); margin-bottom:1.5rem;">
+                <span class="dot" style="background:var(--accent);"></span>
+                RELATED PROBLEM SIGNALS IN THIS CLUSTER
+              </div>
+              <div class="signal-grid" style="grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));">
+                ${res.related.map(rel => `
+                  <div class="signal-card">
+                    <div class="signal-meta">
+                      <span class="signal-category">${rel.category}</span>
+                      <span class="signal-region">${rel.region}</span>
+                    </div>
+                    <p class="signal-quote" style="font-size:0.95rem;">"${rel.quote}"</p>
+                    <div style="margin-top:auto; padding-top:1rem;">
+                      <a href="case-file.html?id=${rel.id}" class="btn-inspect-case">Inspect ${rel.id} →</a>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+        `;
+
+        window.copyCaseUrl = () => {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(window.location.href);
+            window.GriprUI.showToast(`Case File link copied to clipboard: ${s.id}`, 'info');
+          }
+        };
+
+      } catch (e) {
+        container.innerHTML = `
+          <div class="empty-feed">
+            <div class="empty-feed-icon">⚠️</div>
+            <h3>Error loading Case File</h3>
+            <p>An unexpected error occurred while loading this record.</p>
+          </div>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

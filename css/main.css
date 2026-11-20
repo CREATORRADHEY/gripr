@@ -812,3 +812,364 @@ footer .footer-location { color: var(--text-light-muted); font-weight: 500; }
   .stat-number { font-size: 1.8rem; }
   .btn-cta-round { width: 100%; text-align: center; }
 }
+
+
+/* ==========================================================================
+   GRIPR EXTENSIONS — Evidence-First Platform System (Phase 1)
+   ========================================================================== */
+
+/* Universal Focus Visibility */
+*:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 3px !important;
+}
+
+/* Nav Mobile Toggle & Responsive Navigation */
+.nav-mobile-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 105;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.nav-mobile-toggle .burger-bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: var(--text-dark);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.nav-dark .nav-mobile-toggle .burger-bar {
+  background-color: var(--text-light);
+}
+
+.nav-link {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.nav-link:hover {
+  color: var(--accent);
+}
+
+.nav-link.active-nav-link {
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+.nav-dark .nav-link {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.nav-dark .nav-link:hover,
+.nav-dark .nav-link.active-nav-link {
+  color: #ffffff;
+}
+
+.nav-admin-pill {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-dark);
+  transition: all 0.2s;
+}
+
+.nav-dark .nav-admin-pill {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.nav-admin-pill:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .nav-mobile-toggle {
+    display: flex;
+  }
+
+  .nav-links {
+    position: fixed;
+    top: 65px;
+    left: 0;
+    right: 0;
+    background: var(--bg-light);
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2rem 2rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.08);
+    display: none;
+    z-index: 99;
+  }
+
+  .nav-dark .nav-links {
+    background: #181818;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .nav-links.nav-links-open {
+    display: flex;
+  }
+}
+
+/* Evidence Verification Badges */
+.evidence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+}
+
+.badge-verified {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.badge-triangulated {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3B82F6;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.badge-emerging {
+  background: rgba(245, 158, 11, 0.12);
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+/* UI Toast System */
+.gripr-toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.gripr-toast {
+  pointer-events: auto;
+  min-width: 280px;
+  max-width: 440px;
+  padding: 0.9rem 1.2rem;
+  border-radius: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.25s, transform 0.25s;
+}
+
+.toast-fade-out {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.toast-success {
+  background: #064E3B;
+  color: #ECFDF5;
+  border: 1px solid #059669;
+}
+
+.toast-error {
+  background: #7F1D1D;
+  color: #FEF2F2;
+  border: 1px solid #DC2626;
+}
+
+.toast-info {
+  background: #1E1E1E;
+  color: #F3F4F6;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 1.2rem;
+  cursor: pointer;
+  margin-left: auto;
+  line-height: 1;
+}
+
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Accessible Form Errors & Cues */
+.form-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.form-group.has-error .submit-input,
+.form-group.has-error .submit-textarea,
+.form-group.has-error .submit-select {
+  border-color: #DC2626 !important;
+  background-color: #FFF5F5;
+}
+
+.form-error-text {
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  color: #DC2626;
+  margin-top: 0.35rem;
+  font-weight: 500;
+}
+
+.form-hint {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.3rem;
+  line-height: 1.4;
+}
+
+/* Shimmer Loading Skeleton */
+.skeleton-box {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: griprShimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+@keyframes griprShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Submission Confirmation Card */
+.confirmation-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+}
+
+.confirmation-card .conf-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.confirmation-card h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.2rem;
+  margin-bottom: 0.75rem;
+}
+
+.confirmation-card .conf-tracking-badge {
+  display: inline-block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  background: rgba(234, 88, 12, 0.1);
+  color: var(--accent);
+  margin: 1rem 0 1.5rem;
+  letter-spacing: 0.05em;
+}
+
+.confirmation-card .conf-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+/* Research Missions Grid */
+.mission-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 3rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .mission-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mission-card-package {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+  position: sticky;
+  top: 90px;
+}
+
+.mission-price {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.4rem;
+  color: var(--accent);
+  margin: 0.5rem 0 0.25rem;
+}
+
+.mission-feature-list {
+  list-style: none;
+  margin: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.mission-feature-list li {
+  font-size: 0.9rem;
+  color: var(--text-body);
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  line-height: 1.5;
+}
+
+.mission-feature-list li span.check {
+  color: #10B981;
+  font-weight: bold;
+}

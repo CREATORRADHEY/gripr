@@ -446,3 +446,479 @@
   .submit-hero { padding: 3rem 0 2.5rem; }
   .submit-body { padding: 2.5rem 0 4rem; }
 }
+
+
+/* ==========================================================================
+   PROBLEM EXPLORER, CASE FILE & ADMIN WORKSPACE EXTENSIONS
+   ========================================================================== */
+
+/* Search & Status Filters Bar */
+.explorer-controls {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.search-status-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 260px;
+}
+
+.search-input-wrap svg {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-light-muted);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 2.8rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: var(--text-light);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent);
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-light-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: none;
+}
+
+.status-filter-select {
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: var(--text-light);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.status-filter-select option {
+  background: #1E1E1E;
+  color: #fff;
+}
+
+/* Card Enhancements for Problem Intelligence */
+.signal-card .card-workaround {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0.75rem 0 1.25rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid rgba(234, 88, 12, 0.4);
+  line-height: 1.45;
+}
+
+.signal-card .card-workaround strong {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+.btn-inspect-case {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: rgba(234, 88, 12, 0.1);
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-inspect-case:hover {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+/* Empty State */
+.empty-feed {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 5rem 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+}
+
+.empty-feed-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.empty-feed h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.8rem;
+  color: var(--text-light);
+  margin-bottom: 0.5rem;
+}
+
+.empty-feed p {
+  color: var(--text-light-muted);
+  max-width: 480px;
+  margin: 0 auto 1.5rem;
+  font-size: 0.95rem;
+}
+
+.btn-reset-filters {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.6rem 1.4rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-reset-filters:hover {
+  background: var(--accent-hover);
+}
+
+/* ==========================================================================
+   PROBLEM CASE FILE STYLING (case-file.html)
+   ========================================================================== */
+
+.case-file-page {
+  background: var(--bg-dark);
+  min-height: 100vh;
+  color: var(--text-light);
+}
+
+.case-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-light-muted);
+  margin-bottom: 2rem;
+}
+
+.case-breadcrumb a {
+  color: var(--text-light-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.case-breadcrumb a:hover {
+  color: var(--accent);
+}
+
+.case-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.case-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 400;
+  line-height: 1.15;
+  color: #ffffff;
+  margin-bottom: 2rem;
+}
+
+.case-quote-box {
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 12px 12px 0;
+  padding: 2rem 2.5rem;
+  margin: 2.5rem 0 3.5rem;
+}
+
+.case-quote-verbatim {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-style: italic;
+  color: #ffffff;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.case-quote-translation {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.case-quote-author {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  color: var(--text-light-muted);
+  letter-spacing: 0.05em;
+}
+
+.case-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin: 3rem 0;
+}
+
+@media (max-width: 768px) {
+  .case-matrix-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.matrix-tile {
+  background: var(--bg-dark-card);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 1.75rem;
+}
+
+.matrix-tile-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+
+.matrix-tile-content {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.6;
+}
+
+.research-gaps-card {
+  background: rgba(245, 158, 11, 0.04);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 3.5rem 0;
+}
+
+.research-gaps-card h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #F59E0B;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.research-gaps-card ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.research-gaps-card li {
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.research-gaps-card li::before {
+  content: "•";
+  position: absolute;
+  left: 0.5rem;
+  color: #F59E0B;
+}
+
+.case-actions-bar {
+  display: flex;
+  gap: 1rem;
+  margin: 4rem 0 2rem;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   ADMIN REVIEW WORKSPACE (admin.html)
+   ========================================================================== */
+
+.admin-page {
+  background: #0F0F0F;
+  min-height: 100vh;
+  color: #F0F0F0;
+}
+
+.admin-header-strip {
+  padding: 3rem 0 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-badge-strip {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin-mode-pill {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: rgba(234, 88, 12, 0.15);
+  color: var(--accent);
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+}
+
+.admin-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin: 2rem 0 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .admin-metrics-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.admin-stat-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.admin-stat-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.8rem;
+  color: #fff;
+}
+
+.admin-stat-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-light-muted);
+}
+
+.admin-workbench-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 2rem;
+  padding: 2.5rem 0 5rem;
+}
+
+@media (max-width: 950px) {
+  .admin-workbench-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.queue-item-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.queue-item-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.queue-item-card.active-item {
+  border-color: var(--accent);
+  background: rgba(234, 88, 12, 0.06);
+}
+
+.queue-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  margin-bottom: 0.5rem;
+}
+
+.queue-item-verbatim-snip {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.admin-detail-panel {
+  background: #161616;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 2.5rem;
+}
+
+.candidate-match-box {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.admin-actions-bar {
+  display: flex;
+  gap: 0.85rem;
+  margin-top: 2.5rem;
+  flex-wrap: wrap;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}

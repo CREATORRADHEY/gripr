@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GRIPR Missions — Scoped Problem Investigations</title>
+  <meta name="description" content="Buyer-funded problem research for product teams entering unfamiliar India workflows. 5 screened operator interviews, evidence brief, and decision workshop.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/feed.css">
+</head>
+<body>
+
+  <!-- NAV -->
+  <div class="nav-wrapper">
+    <nav>
+      <a href="index.html" class="nav-logo" aria-label="GRIPR Home">
+        GRIPR <span class="beta-badge">BETA</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="feed.html" class="nav-link">Problem Explorer</a>
+        <a href="submit.html" class="nav-link">Report a Problem</a>
+        <a href="missions.html" class="nav-link active-nav-link">Research Missions</a>
+        <a href="admin.html" class="nav-admin-pill">Admin Desk</a>
+      </div>
+
+      <div>
+        <a href="feed.html" class="btn-nav">Explore Signals →</a>
+      </div>
+    </nav>
+  </div>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero container" style="padding-top:4rem; padding-bottom:3rem;">
+      <div class="live-bar fade-in">
+        <span class="live-dot"></span>
+        BUYER-FUNDED DISCOVERY · COMMERCIAL PILOT OFFER
+      </div>
+
+      <h1 class="fade-in">
+        Commission a focused<br>
+        <span class="accent-italic">GRIPR Research Mission.</span>
+      </h1>
+
+      <p class="hero-desc fade-in">
+        Entering an unfamiliar sector or building for non-English workflows? Don't build on guesswork
+        or shallow surveys. Commission a scoped problem investigation delivered directly by screened field operators.
+      </p>
+    </section>
+
+    <!-- CONTENT BODY -->
+    <section class="section-light" style="padding-top:2rem; padding-bottom:6rem;">
+      <div class="container">
+        <div class="mission-grid" id="missionLayoutContainer">
+
+          <!-- LEFT: SCOPING FORM -->
+          <div id="missionFormCol">
+            <div style="background:var(--bg-white); border:1px solid var(--border); border-radius:16px; padding:2.5rem; box-shadow:0 10px 30px rgba(0,0,0,0.02);">
+              <h2 style="font-family:'DM Serif Display',serif; font-size:2rem; margin-bottom:0.5rem;">
+                Scope Your Investigation
+              </h2>
+              <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:2rem;">
+                Complete this brief. Our research desk will review feasibility within 24 business hours.
+              </p>
+
+              <form id="griprMissionForm" novalidate>
+
+                <!-- STEP 1: ORGANIZATION INFO -->
+                <div class="two-col">
+                  <div class="form-group" id="group-orgName">
+                    <label class="form-label" for="orgName">Organization / Team Name *</label>
+                    <input 
+                      class="submit-input" 
+                      type="text" 
+                      id="orgName" 
+                      name="orgName" 
+                      placeholder="e.g. Acme Health Labs" 
+                      required
+                    >
+                    <span class="form-error-text" id="orgNameError" style="display:none;"></span>
+                  </div>
+
+                  <div class="form-group" id="group-contactEmail">
+                    <label class="form-label" for="contactEmail">Work Email *</label>
+                    <input 
+                      class="submit-input" 
+                      type="email" 
+                      id="contactEmail" 
+                      name="contactEmail" 
+                      placeholder="founder@company.com" 
+                      required
+                    >
+                    <span class="form-error-text" id="contactEmailError" style="display:none;"></span>
+                  </div>
+                </div>
+
+                <div class="two-col">
+                  <div class="form-group">
+                    <label class="form-label" for="buyerRole">Your Role</label>
+                    <select class="submit-select" id="buyerRole" name="buyerRole">
+                      <option value="Founder / CEO">Founder / CEO</option>
+                      <option value="VP / Head of Product">VP / Head of Product</option>
+                      <option value="Design / UX Lead">Design / UX Lead</option>
+                      <option value="Venture Investor">Venture Investor</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="sectorSelect">Sector of Interest</label>
+                    <select class="submit-select" id="sectorSelect" name="sectorSelect">
+                      <option value="agriculture">Agriculture</option>
+                      <option value="healthcare">Healthcare & Diagnostics</option>
+                      <option value="logistics">Logistics & Freight</option>
+                      <option value="commerce">Local Commerce & Retail</option>
+                      <option value="education">Education & Skill Training</option>
+                      <option value="compliance">Government Compliance & Customs</option>
+                      <option value="other">Other Unserved Workflow</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- STEP 2: PROBLEM TO INVESTIGATE -->
+                <div class="form-group" id="group-problemToInvestigate">
+                  <label class="form-label" for="problemToInvestigate">
+                    The Problem / Workflow to Investigate *
+                  </label>
+                  <textarea 
+                    class="submit-textarea" 
+                    id="problemToInvestigate" 
+                    name="problemToInvestigate" 
+                    rows="4" 
+                    placeholder="Describe the workflow inefficiency, broken handoff, or reference an existing Signal ID (e.g. SIG-019 fertilizer price manipulation)."
+                    required
+                  ></textarea>
+                  <div class="form-hint">Be specific about what you believe is broken. Min 20 characters.</div>
+                  <span class="form-error-text" id="problemToInvestigateError" style="display:none;"></span>
+                </div>
+
+                <!-- STEP 3: TARGET AUDIENCE -->
+                <div class="form-group" id="group-targetAudience">
+                  <label class="form-label" for="targetAudience">
+                    Target Operator / Audience Profile *
+                  </label>
+                  <input 
+                    class="submit-input" 
+                    type="text" 
+                    id="targetAudience" 
+                    name="targetAudience" 
+                    placeholder="e.g. Standalone pathology center owners in Tier-2 UP; Kirana owners with >50 lakh turnover"
+                    required
+                  >
+                  <div class="form-hint">Who do you need us to interview and observe?</div>
+                  <span class="form-error-text" id="targetAudienceError" style="display:none;"></span>
+                </div>
+
+                <!-- STEP 4: PRIMARY DECISION -->
+                <div class="form-group">
+                  <label class="form-label" for="primaryDecision">
+                    Primary Decision at Stake
+                  </label>
+                  <input 
+                    class="submit-input" 
+                    type="text" 
+                    id="primaryDecision" 
+                    name="primaryDecision" 
+                    placeholder="e.g. Deciding whether to build a WhatsApp voice-bot vs standalone mobile app."
+                  >
+                  <div class="form-hint">What concrete product or go-to-market decision will this research inform?</div>
+                </div>
+
+                <!-- STEP 5: PROPOSED DELIVERABLES -->
+                <div class="form-group">
+                  <label class="form-label">Deliverables Required</label>
+                  <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:0.4rem;">
+                    <label class="notify-row">
+                      <input type="checkbox" id="delivBrief" checked disabled>
+                      <span class="notify-label" style="font-size:0.85rem;">Synthesized Decision Brief (Core Deliverable)</span>
+                    </label>
+                    <label class="notify-row">
+                      <input type="checkbox" id="delivFriction" checked disabled>
+                      <span class="notify-label" style="font-size:0.85rem;">Workflow Friction Map & Breakdown Points</span>
+                    </label>
+                    <label class="notify-row">
+                      <input type="checkbox" id="delivTranscripts" checked>
+                      <span class="notify-label" style="font-size:0.85rem;">5 Screened Operator Verbatim Transcripts (Anonymized)</span>
+                    </label>
+                    <label class="notify-row">
+                      <input type="checkbox" id="delivWorkshop" checked>
+                      <span class="notify-label" style="font-size:0.85rem;">60-minute Research Findings Strategy Workshop</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- SUBMIT BUTTON -->
+                <button class="btn-cta-full" id="missionSubmitBtn" type="submit" style="margin-top:1.5rem;">
+                  Submit Scoping Request (₹49,000 Pilot) →
+                </button>
+
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:1rem; text-align:center;">
+                  No upfront payment required to submit scope. Scoping review & mutual NDA completed first.
+                </p>
+
+              </form>
+            </div>
+          </div>
+
+          <!-- RIGHT: MISSION PACKAGE & DETAILS -->
+          <div class="mission-sidebar">
+            <div class="mission-card-package">
+              <div class="section-label"><span class="dot"></span> PROPOSED FIRST OFFER</div>
+              <h3 style="font-family:'DM Serif Display',serif; font-size:1.8rem; margin:0.25rem 0;">GRIPR Mission</h3>
+              <div class="mission-price">₹49,000</div>
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:0.8rem; color:var(--text-secondary); margin-bottom:1.5rem;">
+                Target Delivery: <strong>10 Business Days</strong>
+              </div>
+
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dark); margin-bottom:0.75rem;">
+                WHAT YOUR TEAM RECEIVES:
+              </div>
+
+              <ul class="mission-feature-list">
+                <li>
+                  <span class="check">✓</span>
+                  <span><strong>5 Screened Operator Interviews:</strong> Screened for authentic domain experience, not professional survey takers.</span>
+                </li>
+                <li>
+                  <span class="check">✓</span>
+                  <span><strong>Workflow Friction Map:</strong> Visual step-by-step documentation of handoffs, errors, and manual workarounds.</span>
+                </li>
+                <li>
+                  <span class="check">✓</span>
+                  <span><strong>Unfiltered Audio & Quotes:</strong> Vernacular recordings translated and indexed without PR sanitization.</span>
+                </li>
+                <li>
+                  <span class="check">✓</span>
+                  <span><strong>Decision Workshop:</strong> 60-min interactive debrief with our research lead to align on product implications.</span>
+                </li>
+              </ul>
+
+              <div style="background:var(--bg-light); border-radius:8px; padding:1.25rem; font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-top:1.5rem;">
+                <strong>Ethical Research Protocol:</strong><br>
+                We do not scrape or sell raw complaint databases. Every operator is interviewed with formal informed consent and paid an equitable honorarium for their domain time.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="container">
+    <div class="footer-left">
+      <div class="footer-logo" style="color:var(--text-dark);">GRIPR <span class="beta-badge" style="font-size:0.55rem; padding:0.15rem 0.4rem;">BETA</span></div>
+      <div class="footer-tagline" style="color:var(--text-secondary);">Evidence-first Problem Intelligence Platform.</div>
+      <p class="copyright" style="color:var(--text-muted);">© 2026 GRIPR.STUDIO. Built for the India Ground Economy 🇮🇳</p>
+    </div>
+    <div class="footer-right">
+      <div class="footer-links">
+        <a href="index.html" style="color:var(--text-secondary);">Home</a>
+        <a href="feed.html" style="color:var(--text-secondary);">Problem Explorer</a>
+        <a href="submit.html" style="color:var(--text-secondary);">Report a Problem</a>
+        <a href="missions.html" style="color:var(--text-secondary);">Research Missions</a>
+        <a href="admin.html" style="color:var(--text-secondary);">Admin Desk</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/fixtures.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const signalRef = urlParams.get('signal');
+      const problemInput = document.getElementById('problemToInvestigate');
+
+      if (signalRef && problemInput) {
+        problemInput.value = `[Inquiry regarding Case File ${signalRef}]: We want to investigate whether this friction is recurring and whether operators will pay for a streamlined solution.`;
+      }
+
+      const form = document.getElementById('griprMissionForm');
+      const btn = document.getElementById('missionSubmitBtn');
+
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          // Reset errors
+          document.querySelectorAll('.form-group').forEach(el => el.classList.remove('has-error'));
+          document.querySelectorAll('.form-error-text').forEach(el => { el.style.display = 'none'; el.textContent = ''; });
+
+          const orgName = document.getElementById('orgName').value.trim();
+          const contactEmail = document.getElementById('contactEmail').value.trim();
+          const buyerRole = document.getElementById('buyerRole').value;
+          const sector = document.getElementById('sectorSelect').value;
+          const problemToInvestigate = problemInput.value.trim();
+          const targetAudience = document.getElementById('targetAudience').value.trim();
+          const primaryDecision = document.getElementById('primaryDecision').value.trim();
+
+          let hasError = false;
+
+          if (orgName.length < 2) {
+            showError('orgName', 'Please provide your organization or project name.');
+            hasError = true;
+          }
+
+          if (!contactEmail || !contactEmail.includes('@')) {
+            showError('contactEmail', 'Please provide a valid work email.');
+            hasError = true;
+          }
+
+          if (problemToInvestigate.length < 20) {
+            showError('problemToInvestigate', 'Please describe the problem or workflow in at least 20 characters.');
+            hasError = true;
+          }
+
+          if (targetAudience.length < 5) {
+            showError('targetAudience', 'Please specify the target operator profile you wish to study.');
+            hasError = true;
+          }
+
+          if (hasError) {
+            window.GriprUI.showToast('Please correct the highlighted fields.', 'error');
+            return;
+          }
+
+          btn.disabled = true;
+          btn.textContent = 'Submitting Mission Scope...';
+
+          try {
+            const res = await window.GriprAPI.createMission({
+              orgName,
+              contactEmail,
+              role: buyerRole,
+              sector,
+              problemToInvestigate,
+              targetAudience,
+              primaryDecision,
+              deliverables: [
+                'Decision Brief',
+                'Workflow Friction Map',
+                '5 Screened Operator Transcripts',
+                'Strategy Workshop'
+              ]
+            });
+
+            if (res.success) {
+              const col = document.getElementById('missionFormCol');
+              col.innerHTML = `
+                <div class="confirmation-card fade-in">
+                  <div class="conf-icon">✦</div>
+                  <h2>Mission Scope Logged</h2>
+                  <p style="color:var(--text-secondary); max-width:540px; margin:0 auto 1.5rem; line-height:1.6;">
+                    Thank you, <strong>${orgName}</strong>. Your research investigation scope has been recorded under reference code:
+                  </p>
+                  <div class="conf-tracking-badge">${res.missionRef}</div>
+                  
+                  <div style="background:var(--bg-light); border-radius:10px; padding:1.5rem; text-align:left; max-width:540px; margin:1.5rem auto; font-size:0.85rem; color:var(--text-body); line-height:1.6;">
+                    <strong style="color:var(--text-dark); display:block; margin-bottom:0.4rem;">Next Steps & Timeline:</strong>
+                    • Our research director will review operator screening feasibility for <em>${targetAudience}</em> within 24 business hours.<br>
+                    • We will send a formal Mission Proposal containing sample interview scripts, milestone schedule, and mutual NDA.<br>
+                    • Confirmation dispatched to: <strong>${contactEmail}</strong>
+                  </div>
+
+                  <div class="conf-actions">
+                    <a href="feed.html" class="btn-cta-solid">Explore Live Signals →</a>
+                    <a href="index.html" class="btn-cta-ghost">Return to Homepage</a>
+                  </div>
+                </div>
+              `;
+              window.GriprUI.showToast(`Mission Scope registered: ${res.missionRef}`, 'success');
+              window.scrollTo({ top: 100, behavior: 'smooth' });
+            } else {
+              window.GriprUI.showToast(res.error || 'Failed to submit mission.', 'error');
+              btn.disabled = false;
+              btn.textContent = 'Submit Scoping Request (₹49,000 Pilot) →';
+            }
+          } catch (err) {
+            window.GriprUI.showToast('Unexpected error submitting mission.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Submit Scoping Request (₹49,000 Pilot) →';
+          }
+        });
+      }
+
+      function showError(fieldId, msg) {
+        const group = document.getElementById(`group-${fieldId}`);
+        if (group) group.classList.add('has-error');
+        const err = document.getElementById(`${fieldId}Error`);
+        if (err) {
+          err.textContent = msg;
+          err.style.display = 'block';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
