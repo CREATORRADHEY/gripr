@@ -1,7 +1,10 @@
 import Fastify, { FastifyInstance } from 'fastify';
+import fs from 'node:fs';
+import path from 'node:path';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
+import fastifyStatic from '@fastify/static';
 import { env } from './config/env.js';
 import { errorHandler } from './middleware/errors.js';
 import {
@@ -18,6 +21,8 @@ import {
 import {
   FirestoreStorageEngine,
   FirestoreMissionInquiryRepository,
+  CloudFirestoreMissionInquiryRepository,
+  DemoOnlyMissionInquiryRepository,
   FirestoreMissionRepository,
   FirestoreInvitationRepository,
   FirestoreResearchResponseRepository,
@@ -102,7 +107,23 @@ export function buildApp(options: AppOptions = {}): FastifyInstance {
   const useMemory = options.useMemoryRepo ?? (env.isTest ? true : false);
 
   const missionRepo = useMemory ? memoryMissionRepo : new FirestoreMissionRepository(globalFirestoreStorage);
-  const inquiryRepo = useMemory ? new MemoryMissionInquiryRepository() : new FirestoreMissionInquiryRepository(globalFirestoreStorage);
+  
+  let inquiryRepo: any;
+  if (useMemory) {
+    inquiryRepo = new MemoryMissionInquiryRepository();
+  } else if (env.PERSISTENCE_MODE === 'demo_only') {
+    inquiryRepo = new DemoOnlyMissionInquiryRepository();
+  } else if (env.PERSISTENCE_MODE === 'cloud_firestore') {
+    try {
+      inquiryRepo = new CloudFirestoreMissionInquiryRepository();
+    } catch (err) {
+      console.warn('⚠️ Cloud Firestore could not be initialized, falling back to DEMO_ONLY mode:', err);
+      inquiryRepo = new DemoOnlyMissionInquiryRepository();
+    }
+  } else {
+    inquiryRepo = new FirestoreMissionInquiryRepository(globalFirestoreStorage);
+  }
+
   const invitationRepo = useMemory ? memoryInvitationRepo : new FirestoreInvitationRepository(globalFirestoreStorage);
   const sessionRepo = useMemory ? memorySessionRepo : new FirestoreResearchResponseRepository(globalFirestoreStorage);
   const evidenceRepo = useMemory ? memoryEvidenceRepo : new FirestoreEvidenceRepository(globalFirestoreStorage);
@@ -143,6 +164,67 @@ export function buildApp(options: AppOptions = {}): FastifyInstance {
     });
     await demoRoutes(api, { geminiService: activeGeminiService });
   }, { prefix: '/api' });
+
+  // Serve public frontend through restrictive static-file allowlist (Section 2)
+  const candidatePublicDirs = [
+    path.resolve(process.cwd(), '../public'),
+    path.resolve(process.cwd(), 'public'),
+    path.resolve(process.cwd(), '..'),
+    process.cwd()
+  ];
+  const staticRoot = candidatePublicDirs.find(d => fs.existsSync(path.join(d, 'index.html')));
+
+  if (staticRoot && env.SERVE_STATIC) {
+    app.register(fastifyStatic, {
+      root: staticRoot,
+      prefix: '/',
+      index: ['index.html'],
+      wildcard: false,
+      allowedPath(pathname) {
+        const normalized = path.normalize(pathname).replace(/\\/g, '/');
+
+        // Disallow hidden files or dotfiles (.env, .git, .vscode, etc.)
+        if (/(^|\/)\.[^\/]/.test(normalized)) return false;
+
+        // Disallow internal and sensitive directories/files
+        const forbiddenPatterns = [
+          'api/',
+          '/api/',
+          'data/',
+          '/data/',
+          'dist/',
+          'src/',
+          'tests/',
+          'node_modules',
+          'package.json',
+          'package-lock.json',
+          'pnpm-lock.yaml',
+          'tsconfig.json',
+          '.env',
+          'Dockerfile'
+        ];
+        for (const pattern of forbiddenPatterns) {
+          if (normalized.includes(pattern)) return false;
+        }
+
+        const allowedExtensions = [
+          '.html', '.css', '.js', '.png', '.jpg', '.jpeg', '.gif',
+          '.svg', '.ico', '.woff', '.woff2', '.ttf', '.txt'
+        ];
+        const ext = path.extname(normalized).toLowerCase();
+        return !ext || allowedExtensions.includes(ext);
+      }
+    });
+
+    // Semantic HTML shortcuts
+    app.get('/missions', async (_, reply) => reply.sendFile('missions.html'));
+    app.get('/demo', async (_, reply) => reply.sendFile('demo.html'));
+    app.get('/brief', async (_, reply) => reply.sendFile('brief.html'));
+    app.get('/terms', async (_, reply) => reply.sendFile('terms.html'));
+    app.get('/privacy', async (_, reply) => reply.sendFile('privacy.html'));
+    app.get('/thankyou', async (_, reply) => reply.sendFile('thankyou.html'));
+    app.get('/research-operations-demo', async (_, reply) => reply.sendFile('research-operations-demo.html'));
+  }
 
   return app;
 }

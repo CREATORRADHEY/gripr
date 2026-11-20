@@ -374,7 +374,8 @@ export class GeminiService {
       relationshipType = 'RELATED_DIFFERENT_MECHANISM';
     }
 
-    const isContradiction = (isCreditA && (textB.includes('check') || textB.includes('inspect') || textB.includes('tractor') || textB.includes('return'))) ||
+    const isContradiction = (isCreditA !== isCreditB) ||
+      (isCreditA && (textB.includes('check') || textB.includes('inspect') || textB.includes('tractor') || textB.includes('return') || textB.includes('tempo'))) ||
       (textA.includes('cash') && textB.includes('credit'));
 
     return {

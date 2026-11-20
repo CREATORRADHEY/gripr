@@ -1,0 +1,12 @@
+.git
+.github
+.vscode
+.env*
+api/.env*
+api/data
+api/tests
+docs
+*.mov
+*.pdf
+node_modules
+api/node_modules

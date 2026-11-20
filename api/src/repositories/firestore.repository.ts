@@ -1,6 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { initializeApp, getApps } from 'firebase-admin/app';
+import { getFirestore, Firestore as FirebaseFirestoreInstance } from 'firebase-admin/firestore';
+import { env } from '../config/env.js';
 import {
   IMissionInquiryRepository,
   IMissionRepository,
@@ -147,6 +150,115 @@ export class FirestoreMissionInquiryRepository implements IMissionInquiryReposit
     if (convertedMissionId) inquiry.convertedMissionId = convertedMissionId;
 
     return this.storage.writeDoc('mission_inquiries', id, inquiry);
+  }
+}
+
+// 1B. REAL GOOGLE CLOUD FIRESTORE MISSION INQUIRIES (Production Backend)
+export class CloudFirestoreMissionInquiryRepository implements IMissionInquiryRepository {
+  private firestore: FirebaseFirestoreInstance;
+
+  constructor(customFirestore?: FirebaseFirestoreInstance) {
+    if (customFirestore) {
+      this.firestore = customFirestore;
+    } else {
+      if (!getApps().length) {
+        initializeApp({ projectId: env.FIREBASE_PROJECT_ID });
+      }
+      this.firestore = getFirestore();
+    }
+  }
+
+  async create(input: CreateMissionInquiryInput): Promise<MissionInquiry> {
+    const fifteenSecondsAgo = new Date(Date.now() - 15000).toISOString();
+    try {
+      const snapshot = await this.firestore.collection('mission_inquiries')
+        .where('contactEmail', '==', input.contactEmail)
+        .where('orgName', '==', input.orgName)
+        .get();
+
+      for (const doc of snapshot.docs) {
+        const item = doc.data() as MissionInquiry;
+        if (item.decisionAtStake === input.decisionAtStake && item.createdAt >= fifteenSecondsAgo) {
+          return item;
+        }
+      }
+    } catch {
+      // In case of indexing delays, continue to document insertion
+    }
+
+    const id = `INQ-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+    const inquiry: MissionInquiry = {
+      ...input,
+      id,
+      status: 'AWAITING_SCOPE_REVIEW',
+      pricingNotice: 'Experimental pilot pricing. Unvalidated research model.',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    await this.firestore.collection('mission_inquiries').doc(id).set(inquiry);
+    return inquiry;
+  }
+
+  async findById(id: string): Promise<MissionInquiry | null> {
+    const doc = await this.firestore.collection('mission_inquiries').doc(id).get();
+    if (!doc.exists) return null;
+    return doc.data() as MissionInquiry;
+  }
+
+  async findAll(): Promise<MissionInquiry[]> {
+    const snap = await this.firestore.collection('mission_inquiries').get();
+    const list = snap.docs.map(doc => doc.data() as MissionInquiry);
+    return list.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  async updateStatus(
+    id: string,
+    status: MissionInquiryStatus,
+    reviewer?: string,
+    notes?: string,
+    convertedMissionId?: string
+  ): Promise<MissionInquiry | null> {
+    const docRef = this.firestore.collection('mission_inquiries').doc(id);
+    const doc = await docRef.get();
+    if (!doc.exists) return null;
+
+    const existing = doc.data() as MissionInquiry;
+    const updated: MissionInquiry = {
+      ...existing,
+      status,
+      updatedAt: new Date().toISOString(),
+      ...(reviewer && { reviewedBy: reviewer }),
+      ...(notes && { reviewNotes: notes }),
+      ...(convertedMissionId && { convertedMissionId })
+    };
+
+    await docRef.set(updated);
+    return updated;
+  }
+}
+
+// 1C. DEMO-ONLY MISSION INQUIRIES (Fallback Mode when Cloud Storage is unconfigured)
+export class DemoOnlyMissionInquiryRepository implements IMissionInquiryRepository {
+  async create(): Promise<MissionInquiry> {
+    const err: any = new Error(
+      'Real mission inquiry intake is disabled in DEMO_ONLY mode. Synthetic guided simulation and precomputed briefs remain fully operational.'
+    );
+    err.statusCode = 503;
+    err.code = 'DEMO_ONLY_MODE';
+    throw err;
+  }
+
+  async findById(): Promise<MissionInquiry | null> {
+    return null;
+  }
+
+  async findAll(): Promise<MissionInquiry[]> {
+    return [];
+  }
+
+  async updateStatus(): Promise<MissionInquiry | null> {
+    return null;
   }
 }
 

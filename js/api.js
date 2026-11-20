@@ -17,7 +17,8 @@
  */
 
 (function () {
-  const BACKEND_URL = 'http://127.0.0.1:3000/api';
+  // Relative API routing for same-origin Cloud Run or unified server deployment (Section 3)
+  const BACKEND_URL = '/api';
 
   const STORAGE_KEY_MISSIONS = 'gripr_b2b_missions_v2';
   const STORAGE_KEY_SESSIONS = 'gripr_b2b_sessions_v2';
@@ -134,7 +135,7 @@
       pill.style.background = '#064E3B';
       pill.style.color = '#ECFDF5';
       pill.style.border = '1px solid #059669';
-      pill.innerHTML = `<span style="width:7px; height:7px; border-radius:50%; background:#10B981; display:inline-block;"></span> LIVE API (Fastify:3000)${hasToken ? ' 🔑' : ''}`;
+      pill.innerHTML = `<span style="width:7px; height:7px; border-radius:50%; background:#10B981; display:inline-block;"></span> LIVE API (Fastify)${hasToken ? ' 🔑' : ''}`;
     } else {
       pill.style.background = '#1E1E1E';
       pill.style.color = '#FEF3C7';
@@ -273,7 +274,7 @@
             networkError: true,
             status: 0,
             errors: {
-              general: `Backend connection error: ${err.message}. Ensure Fastify API is running on ${BACKEND_URL}. Real inquiries require a live connection.`
+              general: `Backend connection error: ${err.message}. Ensure Fastify API is reachable at ${BACKEND_URL}. Real inquiries require a live connection.`
             }
           };
         }
@@ -770,7 +771,7 @@
         return {
           success: false,
           error: `Live Gemini endpoint unreachable (${err.message}).`,
-          suggestion: 'Ensure Fastify backend is running on http://127.0.0.1:3000, or use Precomputed Demo Analysis.'
+          suggestion: 'Ensure Fastify backend is reachable at /api, or use Precomputed Demo Analysis.'
         };
       }
     },

@@ -1154,6 +1154,10 @@
     // Prevents Live Server's injected websocket from automatically reloading when backend writes persistence data
     (function installLiveReloadShield() {
       if (typeof window === 'undefined' || !window.WebSocket) return;
+      // TASK 3: Remove development-only Live Server WebSocket shield behavior from production execution.
+      const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      if (!isLocalDev) return;
+
       const OriginalWS = window.WebSocket;
       function ShieldedWebSocket(url, protocols) {
         const ws = protocols ? new OriginalWS(url, protocols) : new OriginalWS(url);
