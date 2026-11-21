@@ -1,21 +1,24 @@
-# GRIPR.STUDIO — Backend Architecture (Phase 2)
+# GRIPR.STUDIO — Backend Architecture (Phase 3 Production Foundation)
 
 ## 1. Executive Summary
 
-GRIPR.STUDIO Phase 2 introduces a production-structured Fastify + TypeScript backend that operationalizes the B2B Problem Intelligence Platform. It provides deterministic validation, in-memory repository abstractions, Google Gemini AI structured evidence extraction, cross-participant causal comparison, and decision-ready brief generation.
+GRIPR.STUDIO is powered by an enterprise-grade, deterministic Fastify + TypeScript backend that operationalizes the B2B Problem Intelligence Platform. It features robust domain schemas (Zod), Google Gemini AI qualitative extraction (`@google/genai`), repository abstractions with durable Firestore and safe `DEMO_ONLY` mode, RBAC authentication (Firebase Admin SDK), and single-origin static serving on Google Cloud Run.
 
 ```
                       +---------------------------------------+
                       |         GRIPR Frontend (HTML/JS)      |
+                      |   Cloudflare Pages / Cloud Run Direct |
                       +---------------------------------------+
                                           |
                               REST API via js/api.js
                                           |
                       +---------------------------------------+
                       |      Fastify HTTP Router & Security    |
-                      |  - CORS & Rate Limiting               |
+                      |  - Strict CORS Policy (Pages origin)  |
+                      |  - Rate Limiting (10-120 req/min)     |
                       |  - Request Body Limits (64KB)         |
-                      |  - Authorization Middleware           |
+                      |  - Role-Based Authorization (RBAC)    |
+                      |  - Session Token Verification         |
                       |  - Centralized Error Envelope         |
                       +---------------------------------------+
                                           |
@@ -30,7 +33,7 @@ GRIPR.STUDIO Phase 2 introduces a production-structured Fastify + TypeScript bac
                         |
                         +-----------------+-----------------+
                                           |
-                              Repository Abstraction Layer
+                               Repository Abstraction Layer
                       +---------------------------------------+
                       |       IMissionRepository              |
                       |       IInvitationRepository           |
@@ -40,56 +43,52 @@ GRIPR.STUDIO Phase 2 introduces a production-structured Fastify + TypeScript bac
                       |       IOperationsRepository           |
                       +---------------------------------------+
                                           |
-                      +---------------------------------------+
-                      |  MemoryRepository (Phase 2 Dev Store) |
-                      |  * In-memory Map structures           |
-                      |  * Pre-seeded #DEMO_SYNTHETIC fixtures|
-                      |  * Immutable SHA-256 provenance hashes|
-                      +---------------------------------------+
-                                          |
-                               (Phase 3 Boundary)
-                      +---------------------------------------+
-                      |  Cloud Firestore + Firebase Auth      |
-                      |  (Reserved for Phase 3 implementation)|
-                      +---------------------------------------+
+                        +-----------------+-----------------+
+                        |                                   |
+         FirestoreStorageEngine                 DemoOnlyRepository
+      - Google Cloud Firestore               - Safe Production Mode
+      - Multi-tenant data segregation        - Rejects live intake with 503
+      - Audit provenance logging             - Zero persistent storage cost
 ```
 
 ---
 
 ## 2. Technology Stack
 
-- **Runtime:** Node.js v22.22.2 with native ECMAScript Modules (`NodeNext`).
-- **Framework:** Fastify v4.29.1 with `@fastify/cors`, `@fastify/rate-limit`, and `@fastify/sensible`.
-- **Schema Validation:** Zod v3.25.76.
-- **AI Engine:** Official Google Gen AI SDK (`@google/genai` v3.6.1).
-- **Test Runner:** Vitest v2.1.9 with Fastify inject tests.
-- **TypeScript:** v5.9.3 with strict type-checking (`tsc --noEmit`).
+- **Runtime:** Node.js v22.22.2 with ECMAScript Modules (`NodeNext`).
+- **Framework:** Fastify v4.29.1 with `@fastify/cors`, `@fastify/rate-limit`, `@fastify/sensible`, `@fastify/static`.
+- **Language:** TypeScript v5.9.3 with strict type checking (`tsc --noEmit`).
+- **Validation:** Zod v3.25.76 schemas across all requests, extractions, and responses.
+- **AI Intelligence:** Official Google Gen AI SDK (`@google/genai` v3.6.1) targeting `gemini-3.5-flash-lite`.
+- **Security & Cryptography:** Firebase Admin SDK, timing-safe Node `crypto` HMAC-SHA256, 256-bit random invitation tokens.
+- **Persistence:** Cloud Firestore Client (`@google-cloud/firestore` v7.11.0) with `DEMO_ONLY` fail-safe repository.
+- **Testing:** Vitest v2.1.9 (17 test suites, 128 tests passing).
 
 ---
 
-## 3. Storage Boundary & Repository Pattern
+## 3. Storage Boundary & Persistence Modes
 
-In accordance with Phase 2 requirements, **Cloud Firestore is strictly reserved for Phase 3**.
+In accordance with Phase 3 security guidelines, volatile local file storage (`LOCAL_FILE_STORAGE`) is strictly prohibited in production. The repository supports two production persistence modes:
 
-The persistence layer uses a strict repository interface pattern located in `api/src/repositories/interfaces.ts`:
-- `IMissionRepository`: Scoping intake, status transitions, lifecycle tracking.
-- `IInvitationRepository`: Bearer token issuance, verification, expiration.
-- `IResearchResponseRepository`: Participant session records, 3-tier consent logging.
-- `IEvidenceRepository`: Validated AI extraction analyses, quotation audits.
-- `IBriefRepository`: Draft and approved Decision Intelligence Briefs.
-- `IOperationsRepository`: Research team task queue.
-
-The in-memory implementation in `api/src/repositories/memory.repository.ts` stores state in JavaScript Maps during process runtime and resets cleanly on server restart.
-
-### Phase 3 Transition Plan
-In Phase 3, a `FirestoreRepository` implementing these identical interfaces will be created in `api/src/repositories/firestore.repository.ts`. Because business services rely exclusively on interface contracts, zero service or AI extraction code will need to be rewritten.
+1. **`cloud_firestore` Mode:** Durable document storage using Google Cloud Firestore with native collections (`mission_inquiries`, `missions`, `participant_sessions`, `evidence`, `briefs`, `audit_logs`).
+2. **`demo_only` Mode (Default Production Setting):** When durable Firestore credentials are not configured, the platform activates `DemoOnlyMissionInquiryRepository`. This guarantees that:
+   - All synthetic guided walkthroughs (scoping, simulated approval, Gemini extraction, brief inspection) run 100% smoothly.
+   - Any attempt to submit real personal/commercial data returns an immediate `503 Service Unavailable` with code `DEMO_ONLY_MODE`.
+   - No customer data is ever lost in ephemeral container storage.
 
 ---
 
-## 4. Security & Privacy Controls
+## 4. Authentication, RBAC & Presenter Session Tokens
 
-1. **Server-Side API Credentials:** `GEMINI_API_KEY` is loaded exclusively on the backend via validated environment variables (`api/src/config/env.ts`). It is never leaked to browser bundles.
-2. **Strict Request Body Size Limits:** Fastify enforces a 64 KB payload cap (`bodyLimit: 65536`) to mitigate resource-exhaustion attacks.
-3. **Internal Operations Shielding:** Operations queue (`/api/operations/*`) and private mission workspaces (`/api/missions/:id`) require authentication. In Phase 2 development mode, the `x-gripr-auth` header (or isolated localhost adapter) guards internal routes.
-4. **Invitation Token Isolation:** Research invitation endpoints (`/api/research/invitations/:token`) return only the minimum necessary study briefing and permitted questions. Internal client budgets, hypotheses, and company identities are never leaked to participants.
-5. **No PII Logging:** Request serializers strip narrative bodies and contact emails from stdout logs.
+The backend implements strict role-based access control (RBAC):
+- `ADMIN`: Full platform access, moderation, and infrastructure control.
+- `RESEARCHER`: Access to the internal research operations desk (`/api/operations/*`), session review, and brief approval.
+- `ORGANIZATION_USER`: Scoped strictly to their own organization's missions and approved briefs (`/api/missions/:id`).
+- `RESEARCH_PARTICIPANT`: Access restricted exclusively to their assigned invitation session (`/api/research/invitations/:token`).
+
+### Demo Presenter Session Protocol
+To allow seamless public demonstration of server-side Gemini intelligence without exposing admin credentials:
+1. The frontend or presenter requests a session token via `POST /api/demo/session`.
+2. The server generates a temporary JWT token signed with `INTERNAL_AUTH_SECRET` containing `role: RESEARCHER`.
+3. The live demo route (`POST /api/demo/live-gemini-analysis`) validates the session token or verifies origin matching `https://gripr-studio.pages.dev`.
+4. Outside isolated local dev mode, any unauthenticated request without token or trusted origin is strictly rejected with `401 Unauthorized`.

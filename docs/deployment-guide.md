@@ -1,178 +1,149 @@
-# GRIPR.STUDIO Phase 3 Production Deployment Guide (Google Cloud Run + Cloud Firestore)
+# GRIPR.STUDIO — Production Deployment Guide
 
-## 1. Prerequisites
+## 1. Executive Summary & Live Endpoints
 
-Before deploying the GRIPR.STUDIO backend to production:
-- A Google Cloud Platform (GCP) project with active billing enabled.
-- `gcloud` CLI installed and authenticated (`gcloud auth login`).
-- Docker installed locally for container image building (or Google Cloud Build).
-- A Gemini API key with access to `gemini-1.5-flash` or `gemini-1.5-pro`.
-- A Firebase project configured for Authentication.
+GRIPR.STUDIO is deployed in a high-availability, zero-maintenance split-hosting architecture:
+
+| Component | Target Platform | Live Production URL | Region / Zone |
+| :--- | :--- | :--- | :--- |
+| **Public Frontend** | Cloudflare Pages | [https://gripr-studio.pages.dev](https://gripr-studio.pages.dev) | Global Edge CDN |
+| **API Backend & Direct Serving** | Google Cloud Run | [https://gripr-backend-611571278421.asia-south1.run.app](https://gripr-backend-611571278421.asia-south1.run.app) | `asia-south1` (Mumbai, India) |
+| **AI Intelligence Service** | Google GenAI SDK | `models/gemini-3.5-flash-lite` | Google Cloud API |
+| **Persistence Engine** | Cloud Firestore / Memory | `DEMO_ONLY` Safe Mode (Active) | GCP Project `people-priorities-ai-1a433` |
+| **Repository** | GitHub | [https://github.com/CREATORRADHEY/gripr](https://github.com/CREATORRADHEY/gripr) | Branch `main` |
 
 ---
 
 ## 2. Environment Configuration
 
-### Required Environment Variables
+### Required Environment Variables & Secrets
 
-| Variable | Description | Production Example |
-| :--- | :--- | :--- |
-| `NODE_ENV` | Runtime environment mode | `production` |
-| `PORT` | Listening HTTP port (injected by Cloud Run) | `8080` |
-| `HOST` | Bind host interface | `0.0.0.0` |
-| `GEMINI_API_KEY` | Google Gemini API key for evidence synthesis | `AIzaSy...` (Stored in Secret Manager) |
-| `GEMINI_MODEL` | Target Gemini model name | `gemini-1.5-flash` |
-| `FIREBASE_PROJECT_ID` | GCP Project ID hosting Firebase Auth | `gripr-studio-prod` |
-| `GCP_PROJECT_ID` | Google Cloud project ID for Firestore | `gripr-studio-prod` |
-| `FIRESTORE_DATA_DIR` | File cache storage path (optional fallback) | `/app/data/firestore` |
-| `CORS_ORIGIN` | Authorized frontend origin | `https://gripr.studio` |
+| Variable | Source | Production Setting | Description |
+| :--- | :--- | :--- | :--- |
+| `NODE_ENV` | Service Env | `production` | Strict production mode. Enforces security guards. |
+| `PORT` | Cloud Run | `10000` (injected) | HTTP listening port. Container binds to `0.0.0.0`. |
+| `HOST` | Service Env | `0.0.0.0` | Binds to all interfaces inside container. |
+| `SERVE_STATIC` | Service Env | `true` | Allows Cloud Run to serve frontend assets directly. |
+| `PERSISTENCE_MODE` | Service Env | `demo_only` | Safe container mode. Rejects real data intake with 503 to avoid data loss. |
+| `DEMO_MODE` | Service Env | `true` | Enables canonical synthetic walkthroughs. |
+| `GEMINI_MODEL` | Service Env | `gemini-3.5-flash-lite` | Official Google GenAI SDK extraction model. |
+| `GEMINI_API_KEY` | Secret Manager | `secretKeyRef: GEMINI_API_KEY:latest` | Google Gemini API secret. Never exposed to browser. |
+| `INTERNAL_AUTH_SECRET` | Secret Manager | `secretKeyRef: INTERNAL_AUTH_SECRET:latest` | Cryptographic secret for signing demo presenter session tokens. |
+| `FIREBASE_PROJECT_ID` | Service Env | `people-priorities-ai-1a433` | Target GCP project identifier. |
 
 ---
 
-## 3. Step-by-Step Deployment to Google Cloud Run
+## 3. Step-by-Step Google Cloud Run Deployment
 
-### Step 1: Set GCP Project & Enable APIs
-
+### Step 1: GCP Authentication & Project Setup
 ```bash
-export PROJECT_ID="gripr-studio-prod"
-export REGION="asia-south1" # Mumbai, India region for minimal latency
-
-gcloud config set project $PROJECT_ID
-
-# Enable required Google Cloud APIs
-gcloud services enable \
-  run.googleapis.com \
-  artifactregistry.googleapis.com \
-  cloudbuild.googleapis.com \
-  secretmanager.googleapis.com \
-  firestore.googleapis.com
+gcloud auth login
+gcloud config set project people-priorities-ai-1a433
 ```
 
-### Step 2: Configure Secret Manager for Sensitive Keys
-
+### Step 2: Configure Secret Manager Keys
 ```bash
-# Create secret for Gemini API Key
-echo -n "YOUR_ACTUAL_GEMINI_KEY" | gcloud secrets create gemini-api-key \
+# Store Gemini API Key
+echo -n "YOUR_GEMINI_API_KEY" | gcloud secrets create GEMINI_API_KEY \
+  --project=people-priorities-ai-1a433 \
   --data-file=- \
   --replication-policy="automatic"
 
-# Grant the Cloud Run service account access to read secrets
-export PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
-gcloud secrets add-iam-policy-binding gemini-api-key \
-  --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
-  --role="roles/secretmanager.secretAccessor"
+# Store Server-Side Internal Auth Secret
+echo -n "YOUR_INTERNAL_SECRET" | gcloud secrets create INTERNAL_AUTH_SECRET \
+  --project=people-priorities-ai-1a433 \
+  --data-file=- \
+  --replication-policy="automatic"
 ```
 
-### Step 3: Create Artifact Registry Repository
-
+### Step 3: Deploy Backend Container to Cloud Run
+From the root directory:
 ```bash
-gcloud artifacts repositories create gripr-docker-repo \
-  --repository-format=docker \
-  --location=$REGION \
-  --description="Docker repository for GRIPR.STUDIO backend"
-```
-
-### Step 4: Build and Push Container Image via Cloud Build
-
-From the root of the repository:
-
-```bash
-gcloud builds submit api \
-  --tag ${REGION}-docker.pkg.dev/${PROJECT_ID}/gripr-docker-repo/gripr-api:latest
-```
-
-### Step 5: Deploy Service to Cloud Run
-
-```bash
-gcloud run deploy gripr-api \
-  --image ${REGION}-docker.pkg.dev/${PROJECT_ID}/gripr-docker-repo/gripr-api:latest \
+gcloud run deploy gripr-backend \
+  --source . \
+  --project people-priorities-ai-1a433 \
+  --region asia-south1 \
   --platform managed \
-  --region $REGION \
   --allow-unauthenticated \
-  --set-env-vars="NODE_ENV=production,HOST=0.0.0.0,FIREBASE_PROJECT_ID=${PROJECT_ID},CORS_ORIGIN=https://gripr.studio" \
-  --set-secrets="GEMINI_API_KEY=gemini-api-key:latest" \
-  --min-instances=1 \
-  --max-instances=10 \
-  --cpu=1 \
-  --memory=512Mi \
-  --timeout=60s \
-  --concurrency=80
+  --min-instances 0 \
+  --max-instances 1 \
+  --set-env-vars NODE_ENV=production,HOST=0.0.0.0,SERVE_STATIC=true,PERSISTENCE_MODE=demo_only,DEMO_MODE=true,GEMINI_MODEL=gemini-3.5-flash-lite,FIREBASE_PROJECT_ID=people-priorities-ai-1a433 \
+  --set-secrets GEMINI_API_KEY=GEMINI_API_KEY:latest,INTERNAL_AUTH_SECRET=INTERNAL_AUTH_SECRET:latest \
+  --quiet
 ```
 
 ---
 
-## 4. Cloud Firestore Configuration
+## 4. Cloudflare Pages Frontend Deployment
 
-1. **Database Mode**: Ensure Cloud Firestore is created in **Native Mode**.
-2. **Region**: Match Cloud Run service region (`asia-south1`).
-3. **Collections Required**:
-   - `inquiries`: prospective client mission inquiry records.
-   - `missions`: active and completed research missions.
-   - `invitations`: participant invitation records with SHA-256 token hashes.
-   - `responses`: qualitative participant submissions.
-   - `consents`: 3-tier versioned participant consent records.
-   - `evidence`: Gemini-extracted structured evidence records.
-   - `briefs`: executive Decision Intelligence Briefs.
-   - `audit_logs`: immutable compliance and security audit trail.
-4. **Composite Indexes**:
-   - `missions`: `organizationId` ASC, `createdAt` DESC.
-   - `responses`: `missionId` ASC, `submittedAt` DESC.
-   - `audit_logs`: `resourceId` ASC, `timestamp` DESC.
-
----
-
-## 5. Post-Deployment Verification & Health Checks
-
-Once deployed, verify the Cloud Run service URL:
-
+### Step 1: Build Static Directory
 ```bash
-export SERVICE_URL=$(gcloud run services describe gripr-api --region $REGION --format='value(status.url)')
-
-# 1. Healthcheck probe
-curl -s "${SERVICE_URL}/api/health" | jq .
-
-# Expected Output:
-# {
-#   "status": "healthy",
-#   "version": "1.0.0",
-#   "uptime": 12.4,
-#   "timestamp": "2026-11-20T...",
-#   "checks": {
-#     "server": "healthy",
-#     "gemini": "configured",
-#     "storage": "connected"
-#   }
-# }
-
-# 2. Public inquiry submission
-curl -s -X POST "${SERVICE_URL}/api/mission-inquiries" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "orgName": "AgriTech Solutions Ltd",
-    "contactName": "Aarav Sharma",
-    "contactEmail": "aarav@agritech-solutions.in",
-    "role": "VP Product",
-    "sector": "Agriculture & Supply Chain",
-    "decisionAtStake": "Deciding whether to build an automated fertilizer pricing discovery application for retail dealers.",
-    "targetParticipantProfile": "Rural agricultural retail shop owners and primary cooperative operators",
-    "timeline": "4-6 weeks",
-    "consentTerms": true
-  }' | jq .
+node scripts/build-pages.js
 ```
+This prepares a pristine `public/` directory containing only HTML, CSS, JS, and approved assets, rigorously excluding all backend code, credentials, or `.env` files.
+
+### Step 2: Push to GitHub for Automated Build
+```bash
+git add .
+git commit -m "feat(deploy): update production release"
+git push origin main
+```
+Cloudflare Pages automatically synchronizes and deploys builds from `origin/main`.
 
 ---
 
-## 6. Rollback & Maintenance Procedures
+## 5. Production Health & Security Verification Runbook
 
-- **Rollback to Previous Revision**:
-  ```bash
-  gcloud run services update-traffic gripr-api \
-    --region $REGION \
-    --to-revisions=PREVIOUS_REVISION_NAME=100
-  ```
-- **Live Logs Inspection**:
-  ```bash
-  gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=gripr-api" \
-    --limit 50 \
-    --format "table(timestamp,severity,textPayload)"
-  ```
+Run these automated curl commands to verify complete production health:
+
+### 1. Healthcheck Verification
+```bash
+curl -s https://gripr-backend-611571278421.asia-south1.run.app/api/health
+```
+*Expected:* Status 200 with envelope:
+```json
+{
+  "status": "ok",
+  "service": "gripr-problem-intelligence-api",
+  "persistence": { "engine": "DEMO_ONLY" },
+  "gemini": { "configured": true, "model": "gemini-3.5-flash-lite" }
+}
+```
+
+### 2. Live Demo Presenter Session Token
+```bash
+curl -s -X POST https://gripr-backend-611571278421.asia-south1.run.app/api/demo/session \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+*Expected:* Status 200 with `{ "success": true, "token": "...", "role": "RESEARCHER" }`.
+
+### 3. Live Gemini Extraction via Google GenAI SDK
+```bash
+# Capture session token
+TOKEN=$(curl -s https://gripr-backend-611571278421.asia-south1.run.app/api/demo/session | grep -o '"token":"[^"]*' | cut -d'"' -f4)
+
+# Execute Live Gemini inference
+curl -s -X POST https://gripr-backend-611571278421.asia-south1.run.app/api/demo/live-gemini-analysis \
+  -H "Content-Type: application/json" \
+  -H "Origin: https://gripr-studio.pages.dev" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"packetId":"PKT-401"}'
+```
+*Expected:* Status 200 with `{ "success": true, "mode": "LIVE_GEMINI", "modelUsed": "gemini-3.5-flash-lite", ... }`.
+
+### 4. Security Regression Gate Check (Unauthenticated Abuse Block)
+```bash
+curl -s -i -X POST https://gripr-backend-611571278421.asia-south1.run.app/api/demo/live-gemini-analysis \
+  -H "Content-Type: application/json" \
+  -d '{"packetId":"PKT-401"}'
+```
+*Expected:* `HTTP/2 401 UNAUTHORIZED`. Confirms that requests without token or trusted origin remain strictly blocked.
+
+### 5. Safe Persistence Check (Real Mutation Guard)
+```bash
+curl -s -i -X POST https://gripr-backend-611571278421.asia-south1.run.app/api/mission-inquiries \
+  -H "Content-Type: application/json" \
+  -d '{"orgName":"Test Org","contactPerson":"Jane Doe","contactEmail":"jane@test.org","decisionAtStake":"Validating safety gate."}'
+```
+*Expected:* `HTTP/2 503 SERVICE UNAVAILABLE` with code `DEMO_ONLY_MODE`. Confirms that personal/commercial data is never stored in volatile local storage.

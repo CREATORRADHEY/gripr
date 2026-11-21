@@ -9,9 +9,10 @@
 ## 2. Model Selection & Integration
 
 - **SDK:** Official Google Gen AI SDK (`@google/genai` v3.6.1).
-- **Default Production Model:** `gemini-2.5-flash` (configurable via `GEMINI_MODEL` environment variable).
-- **Output Mode:** Native Structured JSON generation configured with Zod schema parity.
-- **Resilience:** Exponential backoff retry logic (3 attempts with 1s, 2s, 4s delays for transient 429/503 errors) and a 15-second execution timeout.
+- **Production Model:** `gemini-3.5-flash-lite` (configurable via `GEMINI_MODEL` environment variable).
+- **Output Mode:** Native Structured JSON generation configured with strict Zod schema validation.
+- **Fail-Closed Resilience:** Exponential backoff retry logic (3 attempts with 1s, 2s, 4s delays for transient 429/503 errors).
+- **Zero Mock Degradation in Live Mode:** When live inference is requested on `/api/demo/live-gemini-analysis`, mock fallback is prohibited (`forceLive: true, allowMockFallback: false`). If the Gemini API is unreachable, the system fails closed with HTTP 502/503. Mock outputs are never labeled as `LIVE_GEMINI`.
 
 ---
 
@@ -48,10 +49,10 @@ Every piece of information parsed by Gemini must belong to one of three non-nego
 
 ## 5. Deterministic Verification Layer
 
-In `api/src/services/evidence.service.ts`, Gemini output is subjected to deterministic algorithmic verification before saving:
+In `api/src/services/evidence.service.ts`, Gemini output is subjected to deterministic algorithmic verification before saving or rendering:
 
 1. **Verbatim Substring Audit:**
-   The validator normalizes whitespace and searches for every quote in `supportingQuotations` and individual fact `sourceQuote` fields inside the raw participant narrative. If any quote does not exist verbatim, the validation fails and flags the analysis with `Quotation mismatch`.
+   The validator normalizes whitespace and searches for every quote in `supportingQuotations` and individual fact `sourceQuote` fields inside the raw participant narrative. If any quote does not exist verbatim, the validation flags the analysis with `Quotation mismatch`.
 2. **Financial Hallucination Guard:**
    If `financialImpact` is marked `REPORTED`, the source text is checked for explicit currency symbols (`₹`, `Rs`, `INR`, `Rupees`) or cost indicators. If absent, the claim is rejected as an invalid hallucination.
 3. **Frequency Hallucination Guard:**
@@ -61,27 +62,12 @@ In `api/src/services/evidence.service.ts`, Gemini output is subjected to determi
 
 ---
 
-## 6. Cross-Participant Causal Matching
+## 6. Canonical Synthetic Demonstration Packets
 
-When comparing multiple participant sessions within a mission:
+For public evaluations, demonstrations, and hackathon judging, the platform provides 5 canonical synthetic demonstration packets (`PKT-401` to `PKT-405`) covering neighborhood kirana store operators in Jaipur, Rajasthan:
 
-- **`RELATED_SAME_MECHANISM`:** Both operators experience the exact same causal breakdown in the same workflow.
-- **`RELATED_DIFFERENT_MECHANISM`:** Same industry, but root causes diverge (e.g. inventory lost to foot-traffic weather fluctuations vs client contract cancellation). **Never automatically merged!**
-- **`INSUFFICIENT_EVIDENCE`:** Information gaps prevent robust comparison.
-- **`UNRELATED`:** Different workflows and operational contexts.
-
-### Anti-Representativeness Rule
-Every synthesized cluster enforces `isRepresentative: false` to ensure small qualitative discovery cohorts (N=5) are never portrayed as statistically representative market prevalence.
-
----
-
-## 7. Decision Intelligence Brief Generation
-
-Briefs conclude with an executive recommendation:
-1. **`REJECT_OR_REFRAME`:** The operational realities (credit lock-in, unwritten workarounds, return logistics) falsified the commercial hypothesis.
-2. **`INVESTIGATE_FURTHER`:** Signal exists, but critical contradictions or unknown regulatory barriers require investigation.
-3. **`CONSIDER_PILOT`:** Unambiguous severe pain with viable entry point identified.
-
-Every newly generated brief is stamped:
-`DRAFT — REQUIRES HUMAN REVIEW`
-Client release requires explicit researcher sign-off recorded in the audit trail.
+- **`PKT-401` (Ramesh Kumar):** Kirana store owner for 18 years in Raja Park; weekly customer udhaar tracking in physical notebook.
+- **`PKT-402` (Sita Devi Sharma):** Provision store owner in Malviya Nagar; customer credit verification with SMS banking delays.
+- **`PKT-403` (Abdul Kareem):** Grain & pulse merchant in Sanganer; seasonal credit settlement during agricultural harvest.
+- **`PKT-404` (Vikram Singh Shekhawat):** Milk & grocery booth in Mansarovar; domestic errand runners and carbon-copy paper slips.
+- **`PKT-405` (Mukesh Choudhary):** Corner general store owner in Vaishali Nagar; digital khata app uninstalled due to customer cash flow liquidity mismatch.
