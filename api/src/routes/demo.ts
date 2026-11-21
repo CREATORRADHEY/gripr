@@ -71,14 +71,7 @@ export async function demoRoutes(
    * Acquire a temporary signed demo session token for the interactive synthetic walkthrough.
    * Scoped strictly to researcher role and canonical synthetic demo analysis.
    */
-  fastify.post('/demo/session', {
-    config: {
-      rateLimit: {
-        max: 20,
-        timeWindow: '1 minute'
-      }
-    }
-  }, async (_request, reply) => {
+  const handleDemoSession = async (_request: any, reply: any) => {
     const token = FirebaseAuthService.createDemoSessionToken(3600);
     return reply.status(200).send({
       success: true,
@@ -87,7 +80,25 @@ export async function demoRoutes(
       role: 'RESEARCHER',
       message: 'Demo session token issued for interactive synthetic research demonstration.'
     });
-  });
+  };
+
+  fastify.get('/demo/session', {
+    config: {
+      rateLimit: {
+        max: 20,
+        timeWindow: '1 minute'
+      }
+    }
+  }, handleDemoSession);
+
+  fastify.post('/demo/session', {
+    config: {
+      rateLimit: {
+        max: 20,
+        timeWindow: '1 minute'
+      }
+    }
+  }, handleDemoSession);
 
   fastify.post('/demo/live-gemini-analysis', {
     schema: {

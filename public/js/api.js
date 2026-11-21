@@ -870,7 +870,8 @@
       try {
         const res = await fetch(`${BACKEND_URL}/demo/session`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          body: '{}'
         });
         if (res.ok) {
           const json = await res.json();
