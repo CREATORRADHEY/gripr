@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GRIPR.STUDIO — Video Demonstration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-dark: #060913;
+  --bg-surface: #0c1122;
+  --cyan: #00f0ff;
+  --amber: #ffb800;
+  --indigo: #4f46e5;
+  --text-main: #f0f4ff;
+  --text-dim: #8b9bb4;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-cyan: rgba(0, 240, 255, 0.35);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: var(--bg-dark);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  overflow: hidden;
+  background: radial-gradient(1400px 900px at 50% 20%, #0d1633 0%, #060913 80%);
+}
+
+/* Ambient glow & grid */
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.6;
+}
+
+/* Browser mock card */
+.browser-card {
+  position: absolute;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--bg-surface);
+  box-shadow: 0 40px 100px rgba(0, 5, 25, 0.8), 0 0 0 1px rgba(0, 240, 255, 0.2);
+}
+.browser-bar {
+  height: 48px;
+  background: #090e1d;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.b-dot { width: 13px; height: 13px; border-radius: 50%; background: #232b40; }
+.b-url {
+  margin-left: 20px;
+  flex: 0 0 480px;
+  height: 30px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #a4b4d4;
+  font: 500 14px 'JetBrains Mono', monospace;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+}
+.b-url svg { width: 13px; height: 13px; fill: var(--cyan); }
+
+/* Typography */
+.k-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.cyan-text { color: var(--cyan); text-shadow: 0 0 35px rgba(0, 240, 255, 0.4); }
+.amber-text { color: var(--amber); text-shadow: 0 0 35px rgba(255, 184, 0, 0.4); }
+
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid var(--border-cyan);
+  font: 600 18px 'JetBrains Mono', monospace;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Step Rail */
+#stepRail {
+  position: absolute;
+  left: 50%;
+  top: 995px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(12, 17, 34, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  z-index: 50;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+}
+.rail-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 18px;
+  border-radius: 999px;
+  font-size: 17px;
+  font-weight: 500;
+  color: #72829d;
+}
+.rail-step b {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.rail-step.active {
+  background: rgba(0, 240, 255, 0.15);
+  border: 1px solid var(--border-cyan);
+  color: #fff;
+  font-weight: 600;
+}
+.rail-step.active b { background: var(--cyan); color: #000; font-weight: 700; }
+.rail-step.done b { background: #10b981; color: #fff; }
+
+/* Floating Highlights */
+.glow-ring {
+  position: absolute;
+  border: 3px solid var(--cyan);
+  border-radius: 14px;
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.5), inset 0 0 15px rgba(0, 240, 255, 0.2);
+  pointer-events: none;
+  opacity: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- Progress Step Rail -->
+<div id="stepRail">
+  <div class="rail-step" id="r_scoping"><b>1</b> Mission Scoping</div>
+  <div class="rail-step" id="r_evidence"><b>2</b> Field Evidence</div>
+  <div class="rail-step" id="r_gemini"><b>3</b> Gemini AI</div>
+  <div class="rail-step" id="r_brief"><b>4</b> Decision Brief</div>
+</div>
+
+<!-- ================= SCENE 1: THE HOOK ================= -->
+<div class="scene" id="s1">
+  <div class="grid-bg"></div>
+  <div style="position:absolute;left:50%;top:180px;transform:translateX(-50%);">
+    <div class="pill-badge" id="s1_pill">B2B Product & Venture Validation</div>
+  </div>
+  <div class="k-title" id="s1_t1" style="position:absolute;left:0;right:0;top:310px;text-align:center;font-size:84px;color:#a3b4d4;">
+    Most startups don't fail from bad code.
+  </div>
+  <div class="k-title" id="s1_t2" style="position:absolute;left:0;right:0;top:440px;text-align:center;font-size:108px;">
+    They fail from solving <span class="cyan-text">problems that don't exist.</span>
+  </div>
+  <div id="s1_line" style="position:absolute;left:50%;top:600px;width:1100px;height:6px;margin-left:-550px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--cyan),var(--amber),transparent);transform:scaleX(0);"></div>
+  <div class="k-title" id="s1_sub" style="position:absolute;left:0;right:0;top:650px;text-align:center;font-size:38px;color:#cbd7ee;font-weight:500;">
+    Stop assuming. Ground product strategy in audited qualitative evidence.
+  </div>
+</div>
+
+<!-- ================= SCENE 2: PLATFORM HERO ================= -->
+<div class="scene" id="s2">
+  <div class="grid-bg"></div>
+  <div style="position:absolute;left:180px;top:54px;">
+    <div class="pill-badge">First-Party Problem Intelligence Platform</div>
+  </div>
+  <div class="k-title" style="position:absolute;left:180px;top:110px;font-size:62px;">
+    GRIPR.STUDIO <span style="font-weight:400;color:var(--text-dim);font-size:36px;margin-left:20px;">· Enterprise Qualitative Engine</span>
+  </div>
+
+  <div class="browser-card" id="s2_card" style="left:180px;top:190px;width:1560px;height:760px;">
+    <div class="browser-bar">
+      <span class="b-dot"></span><span class="b-dot"></span><span class="b-dot"></span>
+      <div class="b-url">
+        <svg viewBox="0 0 24 24"><path d="M12 2C9.243 2 7 4.243 7 7v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7c0-2.757-2.243-5-5-5zm-3 5c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9V7z"/></svg>
+        https://gripr.studio
+      </div>
+    </div>
+    <div style="position:relative;width:1560px;height:712px;overflow:hidden;">
+      <img src="shots/01_home_hero.png" id="s2_img" style="position:absolute;left:0;top:0;width:1560px;">
+      <!-- Glowing highlight on 48h SLA & Pricing -->
+      <div class="glow-ring" id="s2_ring" style="left:380px;top:380px;width:800px;height:120px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SCENE 3: MISSION SCOPING WIZARD ================= -->
+<div class="scene" id="s3">
+  <div class="grid-bg"></div>
+  <div style="position:absolute;left:180px;top:54px;">
+    <div class="pill-badge" style="color:var(--amber);border-color:rgba(255,184,0,0.35);">Stage 1: Precision Scoping</div>
+  </div>
+  <div class="k-title" style="position:absolute;left:180px;top:110px;font-size:56px;">
+    Frame the Hypothesis. Set Strict Falsification Criteria.
+  </div>
+
+  <div class="browser-card" id="s3_card" style="left:180px;top:185px;width:1560px;height:765px;">
+    <div class="browser-bar">
+      <span class="b-dot"></span><span class="b-dot"></span><span class="b-dot"></span>
+      <div class="b-url">https://gripr.studio/missions</div>
+    </div>
+    <div style="position:relative;width:1560px;height:717px;overflow:hidden;">
+      <img src="shots/04_missions_filled.png" id="s3_img" style="position:absolute;left:0;top:0;width:1560px;">
+      <!-- Highlight box on Jaipur Kirana Retail hypothesis -->
+      <div class="glow-ring" id="s3_ring" style="left:120px;top:160px;width:860px;height:240px;border-color:var(--amber);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SCENE 4: FIELD EVIDENCE & CONSENT ================= -->
+<div class="scene" id="s4">
+  <div class="grid-bg"></div>
+  <div style="position:absolute;left:180px;top:54px;">
+    <div class="pill-badge">Stage 2: First-Party Qualitative Evidence</div>
+  </div>
+  <div class="k-title" style="position:absolute;left:180px;top:110px;font-size:56px;">
+    Five Verified Operators · Three-Tier Informed Consent
+  </div>
+
+  <div class="browser-card" id="s4_card" style="left:180px;top:185px;width:1560px;height:765px;">
+    <div class="browser-bar">
+      <span class="b-dot"></span><span class="b-dot"></span><span class="b-dot"></span>
+      <div class="b-url">https://gripr.studio/demo#evidence</div>
+    </div>
+    <div style="position:relative;width:1560px;height:717px;overflow:hidden;">
+      <img src="shots/06_demo_participants.png" id="s4_img" style="position:absolute;left:0;top:0;width:1560px;">
+      <div class="glow-ring" id="s4_ring" style="left:80px;top:120px;width:1400px;height:380px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SCENE 5: GEMINI AI EXTRACTION & VERACITY ================= -->
+<div class="scene" id="s5">
+  <div class="grid-bg"></div>
+  <div style="position:absolute;left:180px;top:54px;">
+    <div class="pill-badge" style="color:var(--cyan);">Stage 3: Gemini 3.5 Flash Lite Intelligence</div>
+  </div>
+  <div class="k-title" style="position:absolute;left:180px;top:110px;font-size:56px;">
+    Server-Side AI Extraction with Verbatim Citation Auditing
+  </div>
+
+  <div class="browser-card" id="s5_card" style="left:180px;top:185px;width:1560px;height:765px;">
+    <div class="browser-bar">
+      <span class="b-dot"></span><span class="b-dot"></span><span class="b-dot"></span>
+      <div class="b-url">https://gripr.studio/demo#gemini</div>
+    </div>
+    <div style="position:relative;width:1560px;height:717px;overflow:hidden;">
+      <img src="shots/07_demo_gemini.png" id="s5_img" style="position:absolute;left:0;top:-20px;width:1560px;">
+      <!-- Highlight verbatim quote & unknown financial claim -->
+      <div class="glow-ring" id="s5_ring1" style="left:140px;top:130px;width:680px;height:240px;border-color:var(--cyan);"></div>
+      <div class="glow-ring" id="s5_ring2" style="left:860px;top:130px;width:580px;height:240px;border-color:var(--amber);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SCENE 6: DECISION INTELLIGENCE BRIEF ================= -->
+<div class="scene" id="s6">
+  <div class="grid-bg"></div>
+  <div style="position:absolute;left:180px;top:54px;">
+    <div class="pill-badge" style="color:var(--amber);">Stage 4: Executive Deliverable</div>
+  </div>
+  <div class="k-title" style="position:absolute;left:180px;top:110px;font-size:56px;">
+    Decision Intelligence Brief: Clear Go / No-Go Conviction
+  </div>
+
+  <div class="browser-card" id="s6_card" style="left:180px;top:185px;width:1560px;height:765px;">
+    <div class="browser-bar">
+      <span class="b-dot"></span><span class="b-dot"></span><span class="b-dot"></span>
+      <div class="b-url">https://gripr.studio/brief</div>
+    </div>
+    <div style="position:relative;width:1560px;height:717px;overflow:hidden;">
+      <img src="shots/08_brief_exec.png" id="s6_img" style="position:absolute;left:0;top:0;width:1560px;">
+      <div class="glow-ring" id="s6_ring" style="left:100px;top:180px;width:1360px;height:320px;border-color:var(--cyan);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SCENE 7: OUTRO & CTA ================= -->
+<div class="scene" id="s7">
+  <div class="grid-bg"></div>
+  <div style="position:absolute;left:50%;top:180px;transform:translateX(-50%);">
+    <div class="pill-badge" id="s7_pill">Enterprise Problem Intelligence</div>
+  </div>
+  <div class="k-title" id="s7_t1" style="position:absolute;left:0;right:0;top:290px;text-align:center;font-size:94px;">
+    GRIPR.STUDIO
+  </div>
+  <div class="k-title" id="s7_t2" style="position:absolute;left:0;right:0;top:410px;text-align:center;font-size:68px;color:#a3b4d4;">
+    Know the ground truth <span class="cyan-text">before you build.</span>
+  </div>
+
+  <!-- Animated CTA Button -->
+  <div id="s7_btn" style="position:absolute;left:50%;top:570px;width:580px;margin-left:-290px;height:94px;border-radius:18px;background:linear-gradient(135deg,var(--cyan),#00aaff);color:#060913;font:700 32px 'Space Grotesk',sans-serif;display:flex;align-items:center;justify-content:center;gap:18px;box-shadow:0 20px 60px rgba(0,240,255,0.4);">
+    Commission a Research Mission <span>→</span>
+  </div>
+
+  <div id="s7_sub" style="position:absolute;left:0;right:0;top:720px;text-align:center;font-size:26px;color:#8ba0c8;font-family:'JetBrains Mono',monospace;">
+    Hosted on Google Cloud Run & Cloudflare Pages · https://gripr.studio
+  </div>
+</div>
+
+<script>
+// Scene bounds: [startTime, endTime]
+const S = [
+  [0.00, 5.80],   // S1: Hook
+  [5.80, 12.80],  // S2: Hero
+  [12.80, 20.80], // S3: Scoping
+  [20.80, 28.30], // S4: Field Evidence
+  [28.30, 36.60], // S5: Gemini AI
+  [36.60, 43.00], // S6: Decision Brief
+  [43.00, 47.50]  // S7: Outro
+];
+
+const cl = x => Math.max(0, Math.min(1, x));
+const eo = x => 1 - Math.pow(1 - cl(x), 3);
+const eb = x => {
+  x = cl(x);
+  const c = 1.35;
+  return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2);
+};
+const $ = id => document.getElementById(id);
+
+// Pure time-deterministic frame render function
+window.render = function(t) {
+  // 1. Scene opacity & crossfade transitions
+  S.forEach(([start, end], i) => {
+    const isLast = i === S.length - 1;
+    const inside = t >= start && (isLast || t < end);
+    const sceneEl = $('s' + (i + 1));
+    if (!sceneEl) return;
+
+    if (!inside) {
+      sceneEl.style.opacity = '0';
+      return;
+    }
+
+    // In-out transition curve
+    const fadeIn = cl((t - start) / 0.35);
+    const fadeOut = isLast ? 1 : cl((end - t) / 0.3);
+    sceneEl.style.opacity = String(fadeIn * fadeOut);
+  });
+
+  // 2. Step Rail state
+  const rail = $('stepRail');
+  if (t < 5.80 || t >= 43.00) {
+    rail.style.opacity = '0';
+  } else {
+    rail.style.opacity = '1';
+    $('r_scoping').className = 'rail-step' + (t >= 12.80 && t < 20.80 ? ' active' : (t >= 20.80 ? ' done' : ''));
+    $('r_evidence').className = 'rail-step' + (t >= 20.80 && t < 28.30 ? ' active' : (t >= 28.30 ? ' done' : ''));
+    $('r_gemini').className = 'rail-step' + (t >= 28.30 && t < 36.60 ? ' active' : (t >= 36.60 ? ' done' : ''));
+    $('r_brief').className = 'rail-step' + (t >= 36.60 && t < 43.00 ? ' active' : (t >= 43.00 ? ' done' : ''));
+  }
+
+  // 3. Scene 1 animations (Hook)
+  if (t >= 0.00 && t < 5.80) {
+    const p1 = cl(t / 0.8);
+    const p2 = cl((t - 1.2) / 0.9);
+    const p3 = cl((t - 2.5) / 0.8);
+
+    $('s1_t1').style.transform = `translateY(${(1 - eo(p1)) * 30}px)`;
+    $('s1_t1').style.opacity = String(eo(p1));
+
+    $('s1_t2').style.transform = `translateY(${(1 - eb(p2)) * 40}px) scale(${0.9 + 0.1 * eo(p2)})`;
+    $('s1_t2').style.opacity = String(eo(p2));
+
+    $('s1_line').style.transform = `scaleX(${eo(p3)})`;
+    $('s1_sub').style.opacity = String(eo(p3));
+  }
+
+  // 4. Scene 2 animations (Hero)
+  if (t >= 5.80 && t < 12.80) {
+    const dt = t - 5.80;
+    const pCard = cl(dt / 0.9);
+    $('s2_card').style.transform = `translateY(${(1 - eb(pCard)) * 60}px)`;
+
+    // Camera pan & zoom into live metrics
+    if (dt > 2.5) {
+      const pZoom = cl((dt - 2.5) / 1.5);
+      $('s2_img').style.transform = `scale(${1 + 0.08 * eo(pZoom)}) translateY(${-40 * eo(pZoom)}px)`;
+      $('s2_ring').style.opacity = String(cl((dt - 3.2) / 0.6));
+    }
+  }
+
+  // 5. Scene 3 animations (Scoping)
+  if (t >= 12.80 && t < 20.80) {
+    const dt = t - 12.80;
+    const pCard = cl(dt / 0.8);
+    $('s3_card').style.transform = `translateY(${(1 - eb(pCard)) * 50}px)`;
+
+    // Pan into Jaipur Kirana parameter box
+    if (dt > 2.0) {
+      const pZoom = cl((dt - 2.0) / 1.2);
+      $('s3_img').style.transform = `scale(${1 + 0.06 * eo(pZoom)})`;
+      $('s3_ring').style.opacity = String(cl((dt - 2.5) / 0.6));
+    }
+  }
+
+  // 6. Scene 4 animations (Evidence & Participants)
+  if (t >= 20.80 && t < 28.30) {
+    const dt = t - 20.80;
+    const pCard = cl(dt / 0.8);
+    $('s4_card').style.transform = `translateY(${(1 - eb(pCard)) * 50}px)`;
+
+    if (dt > 1.8) {
+      const pZoom = cl((dt - 1.8) / 1.5);
+      $('s4_img').style.transform = `scale(${1 + 0.06 * eo(pZoom)}) translateY(${-30 * eo(pZoom)}px)`;
+      $('s4_ring').style.opacity = String(cl((dt - 2.2) / 0.6));
+    }
+  }
+
+  // 7. Scene 5 animations (Gemini AI Extraction)
+  if (t >= 28.30 && t < 36.60) {
+    const dt = t - 28.30;
+    const pCard = cl(dt / 0.8);
+    $('s5_card').style.transform = `translateY(${(1 - eb(pCard)) * 50}px)`;
+
+    if (dt > 2.0) {
+      const pZoom = cl((dt - 2.0) / 1.4);
+      $('s5_img').style.transform = `scale(${1 + 0.07 * eo(pZoom)})`;
+      $('s5_ring1').style.opacity = String(cl((dt - 2.4) / 0.5));
+      $('s5_ring2').style.opacity = String(cl((dt - 3.4) / 0.5));
+    }
+  }
+
+  // 8. Scene 6 animations (Decision Brief)
+  if (t >= 36.60 && t < 43.00) {
+    const dt = t - 36.60;
+    const pCard = cl(dt / 0.8);
+    $('s6_card').style.transform = `translateY(${(1 - eb(pCard)) * 50}px)`;
+
+    if (dt > 1.8) {
+      $('s6_ring').style.opacity = String(cl((dt - 2.0) / 0.6));
+    }
+  }
+
+  // 9. Scene 7 animations (Outro CTA)
+  if (t >= 43.00) {
+    const dt = t - 43.00;
+    const pBtn = cl((dt - 0.8) / 0.8);
+    $('s7_btn').style.transform = `scale(${0.85 + 0.15 * eb(pBtn)})`;
+    $('s7_btn').style.opacity = String(eo(pBtn));
+  }
+};
+
+window.ready = true;
+</script>
+</body>
+</html>
