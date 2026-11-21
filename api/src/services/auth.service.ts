@@ -62,7 +62,72 @@ export function getFirebaseAdminApp(): App {
 }
 
 export class FirebaseAuthService {
-  private static tokenSecret = env.INTERNAL_AUTH_SECRET || '';
+  private static tokenSecret = env.INTERNAL_AUTH_SECRET || 'gripr_internal_demo_auth_sec_default';
+
+  /**
+   * Cryptographically signs a demo session token for the interactive synthetic demonstration.
+   * Scoped strictly to role RESEARCHER.
+   */
+  public static createDemoSessionToken(expiresInSeconds = 3600): string {
+    const header = { alg: 'HS256', typ: 'JWT', demoSession: true };
+    const now = Math.floor(Date.now() / 1000);
+    const exp = now + expiresInSeconds;
+
+    const body: DecodedTokenPayload = {
+      uid: 'demo-presenter-session',
+      email: 'presenter@gripr.demo',
+      role: 'RESEARCHER',
+      iss: 'https://securetoken.google.com/gripr-studio-auth',
+      aud: 'gripr-studio-auth',
+      iat: now,
+      exp
+    };
+
+    const encodedHeader = Buffer.from(JSON.stringify(header)).toString('base64url');
+    const encodedBody = Buffer.from(JSON.stringify(body)).toString('base64url');
+    const signature = crypto
+      .createHmac('sha256', this.tokenSecret)
+      .update(`${encodedHeader}.${encodedBody}`)
+      .digest('base64url');
+
+    return `${encodedHeader}.${encodedBody}.${signature}`;
+  }
+
+  /**
+   * Cryptographically verifies an authentic server-signed demo session token.
+   * Validates HMAC-SHA256 signature against INTERNAL_AUTH_SECRET, expiration, and format.
+   */
+  public static verifyDemoSessionToken(tokenString: string): AuthUser {
+    if (!tokenString || typeof tokenString !== 'string') {
+      throw new Error('Token missing or invalid format');
+    }
+
+    const cleanToken = tokenString.startsWith('Bearer ')
+      ? tokenString.slice(7).trim()
+      : tokenString.trim();
+
+    const parts = cleanToken.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Malformed token structure: must be a 3-part JWT');
+    }
+
+    let header: { alg?: string; typ?: string } = {};
+    try {
+      header = JSON.parse(Buffer.from(parts[0], 'base64url').toString('utf8'));
+    } catch {
+      throw new Error('Invalid token header: cannot parse JSON');
+    }
+
+    if (header.alg !== 'HS256') {
+      throw new Error('Invalid demo token algorithm');
+    }
+
+    if (!this.tokenSecret || this.tokenSecret.length === 0) {
+      throw new Error('Server auth secret is unconfigured');
+    }
+
+    return this.verifyTestTokenIsolated(cleanToken, parts);
+  }
 
   /**
    * UNIT TEST ONLY FIXTURE

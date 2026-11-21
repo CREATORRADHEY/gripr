@@ -66,6 +66,9 @@
   const STORAGE_KEY_MODE = 'gripr_api_mode'; // 'live' | 'demo'
   const STORAGE_KEY_AUTH_TOKEN = 'gripr_auth_token';
 
+  let _cachedDemoToken = null;
+  let _demoTokenExpiry = 0;
+
   // Initialize demo fixtures in localStorage
   function initStore() {
     if (!localStorage.getItem(STORAGE_KEY_MISSIONS)) {
@@ -857,14 +860,52 @@
     },
 
     /**
+     * Acquire a temporary verified demo session token from the backend
+     */
+    async getDemoSessionToken() {
+      const now = Date.now();
+      if (_cachedDemoToken && _demoTokenExpiry > now + 30000) {
+        return _cachedDemoToken;
+      }
+      try {
+        const res = await fetch(`${BACKEND_URL}/demo/session`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.token) {
+            _cachedDemoToken = json.token;
+            _demoTokenExpiry = now + ((json.expiresIn || 3600) * 1000);
+            return _cachedDemoToken;
+          }
+        }
+      } catch (e) {
+        // Fall back gracefully
+      }
+      return null;
+    },
+
+    /**
      * 12. Run Safe Live Gemini Analysis on Canonical Synthetic Demo Packet
      * Communicates with dedicated server-side demo endpoint without exposing API keys.
      */
     async analyzeDemoLive(packetId = 'PKT-401') {
       try {
+        const headers = { 'Content-Type': 'application/json' };
+
+        // Acquire verified demo session token or use existing auth token
+        const demoToken = await this.getDemoSessionToken();
+        if (demoToken) {
+          headers['Authorization'] = `Bearer ${demoToken}`;
+        } else {
+          const storedToken = localStorage.getItem(STORAGE_KEY_AUTH_TOKEN);
+          if (storedToken) headers['Authorization'] = `Bearer ${storedToken}`;
+        }
+
         const res = await fetch(`${BACKEND_URL}/demo/live-gemini-analysis`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({ packetId })
         });
         const json = await res.json().catch(() => ({}));

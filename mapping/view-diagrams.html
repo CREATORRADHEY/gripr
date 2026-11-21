@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRIPR.STUDIO — Interactive Architecture & Flowchart Viewer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root {
+  --bg-dark: #060913;
+  --bg-card: #0d1224;
+  --bg-card-hover: #121933;
+  --cyan: #00f0ff;
+  --amber: #ffb800;
+  --border: rgba(0, 240, 255, 0.2);
+  --text-main: #f0f4ff;
+  --text-dim: #8b9bb4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg-dark);
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  line-height: 1.6;
+  padding: 40px 20px 80px;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+header {
+  margin-bottom: 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 24px;
+}
+.badge {
+  display: inline-block;
+  font: 600 13px 'JetBrains Mono', monospace;
+  color: var(--cyan);
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 38px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #fff, #a3b4d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+p.subtitle {
+  color: var(--text-dim);
+  font-size: 16px;
+}
+.diagram-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 32px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+.diagram-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 12px;
+}
+.diagram-source {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--amber);
+}
+.mermaid {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+}
+</style>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'dark',
+  themeVariables: {
+    darkMode: true,
+    background: '#060913',
+    primaryColor: '#0c1633',
+    primaryTextColor: '#f0f4ff',
+    primaryBorderColor: '#00f0ff',
+    lineColor: '#00f0ff',
+    secondaryColor: '#1a1f38',
+    tertiaryColor: '#060913'
+  }
+});
+</script>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="badge">Visual Architecture Viewer</div>
+    <h1>GRIPR.STUDIO — System Flowcharts & Diagrams</h1>
+    <p class="subtitle">Interactive, high-resolution rendering of all system architectures, 4-stage research pipelines, and data models.</p>
+  </header>
+
+  <!-- Diagram 1 -->
+  <div class="diagram-card">
+    <div class="diagram-title">
+      <span>1. Core Innovation Architecture</span>
+      <span class="diagram-source">mapping/06_INNOVATION_AND_DIFFERENTIATION.md</span>
+    </div>
+    <div class="mermaid">
+graph TD
+    subgraph Innovations["GRIPR Core Innovations"]
+        I1["1. Three-Tier Consent Architecture<br/>(Study · Quotation · Re-Contact)"]
+        I2["2. Cryptographic PII Segregation<br/>(Client briefs never see participant contact data)"]
+        I3["3. Verbatim Quote Auditing<br/>(Algorithmic citation matching against transcripts)"]
+        I4["4. Anti-Hallucination Financial Guard<br/>(Unverified losses forced to UNKNOWN)"]
+        I5["5. Falsification-First Scoping<br/>(Built to disprove assumptions in 48 hours)"]
+        I6["6. Zero-Idle Split Cloud Architecture<br/>(Edge Cloudflare Pages + Google Cloud Run)"]
+    end
+    </div>
+  </div>
+
+  <!-- Diagram 2 -->
+  <div class="diagram-card">
+    <div class="diagram-title">
+      <span>2. Global Cloud Topology (Split-Hosting)</span>
+      <span class="diagram-source">mapping/01_TECHNICAL_ARCHITECTURE.md</span>
+    </div>
+    <div class="mermaid">
+flowchart TD
+    subgraph ClientLayer["Edge & Presentation Layer (Cloudflare Pages)"]
+        UserBrowser["Enterprise Client Browser / Founder Device"]
+        CFEdge["Cloudflare Global Anycast Edge CDN<br/><b>gripr-studio.pages.dev</b>"]
+        StaticAssets["Static SPAs & Asset Bundles<br/>HTML5 / CSS3 / ES6 / Assets"]
+        UserBrowser -->|"HTTPS / HTTP2"| CFEdge
+        CFEdge --> StaticAssets
+    end
+
+    subgraph ApiLayer["Compute & Container Runtime (Google Cloud Run)"]
+        CloudRun["Google Cloud Run (asia-south1)<br/><b>gripr-backend-611571278421.asia-south1.run.app</b>"]
+        FastifyApp["Node.js 22 / Fastify TypeScript App<br/>Port 8080 · 0.0.0.0"]
+        CloudRun --> FastifyApp
+    end
+
+    subgraph GoogleCloudServices["Google Cloud Platform (people-priorities-ai-1a433)"]
+        SecretMgr["Secret Manager (GEMINI_API_KEY)"]
+        FirestoreDB["Cloud Firestore (B2B Records)"]
+        GeminiAPI["Google Gemini 3.5 Flash Lite"]
+    end
+
+    UserBrowser -->|"XHR / Fetch / REST API"| CloudRun
+    FastifyApp -->|"Secrets"| SecretMgr
+    FastifyApp -->|"Data"| FirestoreDB
+    FastifyApp -->|"AI Extraction"| GeminiAPI
+    </div>
+  </div>
+
+  <!-- Diagram 3 -->
+  <div class="diagram-card">
+    <div class="diagram-title">
+      <span>3. 4-Stage Research Lifecycle Sequence</span>
+      <span class="diagram-source">mapping/02_FUNCTIONAL_IMPLEMENTATION.md</span>
+    </div>
+    <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Client as Enterprise Founder / PM
+    participant Portal as Scoping Wizard (missions.html)
+    participant API as GRIPR API Gateway
+    actor Operator as Screened Field Participant
+    participant Gemini as Google Gemini AI Engine
+    participant BriefView as Decision Brief (brief.html)
+
+    Client->>Portal: 1. Define hypothesis, falsification criteria, participant profile
+    Portal->>API: POST /api/mission-inquiries
+    API->>Operator: 2. Issue invitation token with 3-Tier Consent options
+    Operator->>API: Submit Transcript + Granular Consent
+    API->>Gemini: 3. Extract problem, frequency, workaround & verbatim quotes
+    Gemini-->>API: Structured JSON Output (Citations Audited)
+    API-->>BriefView: 4. Published Executive Brief (Go / No-Go Decision)
+    Client->>BriefView: Authenticated Tenant Accesses Published Brief
+    </div>
+  </div>
+
+  <!-- Diagram 4 -->
+  <div class="diagram-card">
+    <div class="diagram-title">
+      <span>4. Veracity Engine & Quotation Auditing</span>
+      <span class="diagram-source">mapping/03_GOOGLE_AI_INTEGRATION.md</span>
+    </div>
+    <div class="mermaid">
+flowchart TD
+    Transcript["Raw Participant Transcript"] --> SystemPrompt["System Instructions & Veracity Guardrails"]
+    Workaround["Observed Physical Workaround"] --> SystemPrompt
+    Metadata["Operator Profile"] --> SystemPrompt
+
+    SystemPrompt --> SDKCall["@google/genai client.models.generateContent()<br/>Model: gemini-3.5-flash-lite"]
+    SDKCall --> QuoteVerify["Verbatim Substring Quotation Verification"]
+    QuoteVerify --> FinancialCheck["Financial Claim Sanity Audit<br/>(Unverified loss -> UNKNOWN)"]
+    FinancialCheck --> AuditRecord["Verified Qualitative Extraction Record"]
+    </div>
+  </div>
+
+  <!-- Diagram 5 -->
+  <div class="diagram-card">
+    <div class="diagram-title">
+      <span>5. The Startup Failure Problem vs GRIPR</span>
+      <span class="diagram-source">mapping/04_PROBLEM_AND_SOLUTION.md</span>
+    </div>
+    <div class="mermaid">
+flowchart LR
+    subgraph OldWay["The Conventional Assumption Trap"]
+        O1["Founder Assumption / Pitch Deck"] --> O2["Shallow Surveys & Biased Calls"]
+        O2 --> O3["6 Months of Full-Stack Engineering"]
+        O3 --> O4["Zero Retention / Capital Exhausted"]
+    end
+
+    subgraph GriprWay["The GRIPR Evidence Engine"]
+        G1["Precise Hypothesis & Falsification Criteria"] --> G2["In-Person Qualitative Field Sessions (5 Operators)"]
+        G2 --> G3["Server-Side Gemini 3.5 Veracity Auditing"]
+        G3 --> G4["Audited Decision Brief (Go / No-Go in 48h)"]
+    end
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

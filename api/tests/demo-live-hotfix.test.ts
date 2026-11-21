@@ -152,6 +152,34 @@ describe('Security Regression & Fail-Closed Tests: Live Gemini Demo Hotfix', () 
     expect(body.mode).toBe('LIVE_GEMINI');
   });
 
+  it('6b. Server-issued demo session token allows external peer to execute live Gemini demo', async () => {
+    process.env.TEST_ENV_OVERRIDE = 'development';
+    const sessionRes = await app.inject({
+      method: 'POST',
+      url: '/api/demo/session',
+      remoteAddress: '203.0.113.195'
+    });
+    expect(sessionRes.statusCode).toBe(200);
+    const sessionBody = sessionRes.json();
+    expect(sessionBody.success).toBe(true);
+    expect(sessionBody.token).toBeDefined();
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/demo/live-gemini-analysis',
+      remoteAddress: '203.0.113.195',
+      headers: {
+        authorization: `Bearer ${sessionBody.token}`
+      },
+      payload: { packetId: 'PKT-401' }
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.success).toBe(true);
+    expect(body.mode).toBe('LIVE_GEMINI');
+  });
+
   it('7. Genuine loopback development call succeeds without token', async () => {
     process.env.TEST_ENV_OVERRIDE = 'development';
     const res = await app.inject({
