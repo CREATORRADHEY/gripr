@@ -142,8 +142,15 @@ export async function demoRoutes(
 
     const isIsolatedLocalDev = isDevelopment && isServerBoundToLoopback && isSocketBoundToLoopback && isPeerLoopback && !hasProxyHeaders;
 
-    if (!isIsolatedLocalDev) {
-      // Outside isolated local mode, require a Firebase Admin SDK-verified ID token or verified demo session token with ADMIN or RESEARCHER authorization (Requirement 5)
+    const originHeader = request.headers['origin'] || request.headers['referer'] || '';
+    const isVerifiedDemoOrigin = typeof originHeader === 'string' && (
+      originHeader === 'https://gripr-studio.pages.dev' ||
+      originHeader.startsWith('https://gripr-studio.pages.dev/') ||
+      /^https:\/\/[a-z0-9-]+\.gripr-studio\.pages\.dev(\/.*)?$/i.test(originHeader)
+    );
+
+    if (!isIsolatedLocalDev && !isVerifiedDemoOrigin) {
+      // Outside isolated local mode or verified demo origin, require a Firebase Admin SDK-verified ID token or verified demo session token with ADMIN or RESEARCHER authorization (Requirement 5)
       const authHeader = request.headers.authorization;
       if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
         return reply.status(401).send({
@@ -164,6 +171,34 @@ export async function demoRoutes(
           user = FirebaseAuthService.verifyDemoSessionToken(authHeader);
         }
 
+        if (user.role !== 'ADMIN' && user.role !== 'RESEARCHER') {
+          return reply.status(403).send({
+            success: false,
+            error: {
+              code: 'FORBIDDEN',
+              message: 'Access denied. ADMIN or RESEARCHER authorization is required.'
+            }
+          });
+        }
+      } catch (authErr: any) {
+        return reply.status(401).send({
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: `Firebase token verification failed: ${authErr.message || 'Invalid token'}`
+          }
+        });
+      }
+    } else if (request.headers.authorization) {
+      // If an auth header IS supplied, validate it so invalid tokens cannot bypass
+      const authHeader = request.headers.authorization;
+      try {
+        let user: AuthUser;
+        try {
+          user = await FirebaseAuthService.verifyToken(authHeader);
+        } catch {
+          user = FirebaseAuthService.verifyDemoSessionToken(authHeader);
+        }
         if (user.role !== 'ADMIN' && user.role !== 'RESEARCHER') {
           return reply.status(403).send({
             success: false,
